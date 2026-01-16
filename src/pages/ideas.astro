@@ -1,0 +1,107 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
+---
+<Layout>
+  <Breadcrumb items={[
+    { text: "Inicio", href: "/" },
+    { text: "Galería de ideas" }
+  ]} />
+
+  <section class="galeria">
+    <h1>Galería de ideas</h1>
+    <p class="sub">Tocá una imagen para verla en grande. Usá flechas o deslizá para avanzar.</p>
+
+    <div class="grid" data-galeria="true">
+      <!-- Las imágenes se cargarán dinámicamente aquí -->
+    </div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+    <button class="close" aria-label="Cerrar (ESC)" title="Cerrar (ESC)">×</button>
+
+    <button class="nav nav-left" aria-label="Anterior" title="Anterior">
+      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="nav nav-right" aria-label="Siguiente" title="Siguiente">
+      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <img id="lightbox-img" alt="" />
+
+    <!-- Tira de miniaturas -->
+    <div class="thumbstrip" id="thumbstrip" role="listbox" aria-label="Miniaturas">
+      <!-- Las miniaturas se cargarán dinámicamente aquí -->
+    </div>
+  </div>
+
+  <style is:global>
+    .galeria { padding: 2rem 1rem; }
+    .galeria h1 { text-align:center; margin:0 0 .5rem; font-size:clamp(1.6rem,2.8vw,2.2rem); }
+    .sub { text-align:center; color:#666; margin-bottom:1.25rem; font-size:.95rem; }
+
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+      gap:.75rem; max-width:1100px; margin:0 auto;
+    }
+    @media (min-width:480px){ .grid{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); } }
+    @media (min-width:900px){ .galeria{ padding:3rem 1rem; } .grid{ gap:1rem; } }
+
+    .card{ margin:0; position:relative; overflow:hidden; border-radius:14px; background:#f4f4f4; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .thumb{ width:100%; height:100%; aspect-ratio:4/5; object-fit:cover; display:block; transition:transform .25s ease, filter .25s ease; cursor:zoom-in; }
+    .card:hover .thumb{ transform:scale(1.03); filter:brightness(.98); }
+
+    /* Lightbox */
+    .lightbox{
+      position:fixed; inset:0; display:grid; place-items:center;
+      padding:1rem; background:rgba(0,0,0,.94); z-index:1000; cursor:zoom-out;
+      grid-template-rows: 1fr auto; /* imagen + tira */
+    }
+    .lightbox.hidden{ display:none; }
+    #lightbox-img{
+      max-width:90vw; max-height:calc(90dvh - 120px); width:auto; height:auto;
+      border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.4); cursor:default;
+    }
+    .close{
+      position:fixed; top:.75rem; right:.75rem; width:40px; height:40px; border:none;
+      border-radius:999px; background:rgba(255,255,255,.12); color:#fff; font-size:24px;
+      display:grid; place-items:center; cursor:pointer; backdrop-filter:blur(6px);
+    }
+    .close:hover{ background:rgba(255,255,255,.18); }
+
+    .nav{
+      position:fixed; top:50%; transform:translateY(-50%); width:46px; height:46px; border:none;
+      border-radius:999px; background:rgba(255,255,255,.12); color:#fff; display:grid; place-items:center;
+      cursor:pointer; backdrop-filter:blur(6px);
+    }
+    .nav:hover{ background:rgba(255,255,255,.18); }
+    .nav-left{ left:.75rem; }
+    .nav-right{ right:.75rem; }
+
+    /* Tira de miniaturas */
+    .thumbstrip{
+      align-self:end;
+      width:100%; max-width:1100px;
+      display:flex; gap:.5rem; padding:.5rem;
+      overflow:auto; scrollbar-width:thin;
+      cursor:default; /* no cerrar al click */
+    }
+    .strip-item{
+      flex:0 0 auto; border:none; padding:0; background:transparent; border-radius:10px;
+      overflow:hidden; outline:2px solid transparent; transition:outline-color .2s ease, transform .2s ease;
+    }
+    .strip-item img{
+      width:72px; height:72px; object-fit:cover; display:block;
+      filter:brightness(.8);
+    }
+    .strip-item.active{ outline-color:#fff; transform:scale(1.02); }
+    .strip-item.active img{ filter:none; }
+    @media (min-width:600px){
+      .strip-item img { width:84px; height:84px; }
+    }
+  </style>
+
+  <script src="/js/galeria-loader.js" is:inline></script>
+</Layout>

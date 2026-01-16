@@ -1,0 +1,55 @@
+{
+  "name": "lume-velas-artesanales",
+  "type": "module",
+  "version": "2.1.0-2025-09-03T22-17-43",
+  "description": "Sitio web optimizado de Lume - Velas Artesanales de Corrientes",
+  "keywords": [
+    "velas",
+    "artesanales",
+    "corrientes",
+    "argentina",
+    "pwa",
+    "astro"
+  ],
+  "author": "Lume Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "build:analyze": "astro build --analyze",
+    "build:production": "NODE_ENV=production astro build",
+    "build:versioned": "node scripts/build-with-version.js",
+    "deploy:prepare": "node scripts/deploy-to-hostinger.js",
+    "lighthouse": "lighthouse http://localhost:4321 --output html --output-path ./lighthouse-report.html",
+    "test:performance": "npm run build && npm run lighthouse",
+    "optimize:images": "node scripts/optimize-images.js",
+    "lint": "eslint . --ext .js,.ts,.astro",
+    "format": "prettier --write .",
+    "type-check": "astro check",
+    "generate:categories": "php scripts/generate-categories-json.php"
+  },
+  "dependencies": {
+    "@shikijs/engine-javascript": "^3.12.2",
+    "@splidejs/splide": "^4.1.4",
+    "astro": "^5.6.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.5.0",
+    "@astrojs/node": "^9.5.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-astro": "^0.32.0",
+    "prettier": "^3.2.0",
+    "sharp": "^0.33.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

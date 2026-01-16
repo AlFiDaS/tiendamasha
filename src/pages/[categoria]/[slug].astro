@@ -1,0 +1,141 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import InfoVelas from '../../components/InfoVelas.astro';
+
+// No usar prerender=false porque Hostinger no soporta SSR
+// En su lugar, generar un placeholder estático que funciona para todos los productos
+// El JavaScript carga todo dinámicamente desde la API PHP
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Generar un placeholder que funcione para todas las rutas de productos dinámicos
+  // El .htaccess redirige todas las rutas /categoria/slug a /[categoria]/[slug]/index.html
+  // y el JavaScript detecta la categoría y slug desde la URL y carga los datos desde la API
+  return [{ params: { categoria: 'placeholder', slug: 'placeholder' } }];
+}
+
+const { categoria, slug } = Astro.params;
+---
+
+<Layout>
+  <div class="pagina-producto">
+    <div id="breadcrumb-container"></div>
+
+    <section class="producto-grid">
+      <div class="container">
+        <div id="product-detail-container" class="product-detail-container">
+          <!-- El producto se cargará dinámicamente aquí -->
+        </div>
+      </div>
+    </section>
+
+    <InfoVelas />
+  </div>
+
+  <script is:inline>
+    // Extraer slug y categoría directamente de la URL (funciona en modo estático)
+    function getSlugAndCategoria() {
+      const pathname = window.location.pathname;
+      // Formato: /categoria/slug
+      const match = pathname.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
+      if (match && match[1] && match[2]) {
+        return {
+          categoria: decodeURIComponent(match[1]),
+          slug: decodeURIComponent(match[2])
+        };
+      }
+      return null;
+    }
+    
+    (function() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDetail);
+      } else {
+        initDetail();
+      }
+      
+      function initDetail() {
+        const result = getSlugAndCategoria();
+        
+        if (!result || !result.slug) {
+          console.error('No se pudo obtener el slug del producto');
+          return;
+        }
+        
+        if (window.initProductDetail) {
+          window.initProductDetail(result.slug, {
+            containerSelector: '#product-detail-container',
+            autoLoad: true
+          }).then(() => {
+            updateBreadcrumb(result.categoria);
+          });
+        } else {
+          setTimeout(initDetail, 100);
+        }
+      }
+      
+      function updateBreadcrumb(categoriaSlug) {
+        const container = document.getElementById('breadcrumb-container');
+        const productContainer = document.getElementById('product-detail-container');
+        
+        if (container && productContainer) {
+          const h1 = productContainer.querySelector('h1');
+          const productName = h1 ? h1.textContent : 'Producto';
+          
+          // Cargar nombre de categoría desde la API
+          fetch('/api/categories.php')
+            .then(res => res.json())
+            .then(data => {
+              if (data.success && data.categories) {
+                const category = data.categories.find(cat => cat.slug === categoriaSlug);
+                const categoryName = category ? category.name : categoriaSlug;
+                
+                container.innerHTML = `
+                  <div class="breadcrumb">
+                    <div class="container">
+                      <a href="/">Inicio</a>
+                      <span class="separator">/</span>
+                      <a href="/${categoriaSlug}">${categoryName}</a>
+                      <span class="separator">/</span>
+                      <span class="current">${productName}</span>
+                    </div>
+                  </div>
+                `;
+              } else {
+                // Fallback si no se puede cargar la categoría
+                const categoriaName = categoriaSlug.charAt(0).toUpperCase() + categoriaSlug.slice(1);
+                container.innerHTML = `
+                  <div class="breadcrumb">
+                    <div class="container">
+                      <a href="/">Inicio</a>
+                      <span class="separator">/</span>
+                      <a href="/${categoriaSlug}">${categoriaName}</a>
+                      <span class="separator">/</span>
+                      <span class="current">${productName}</span>
+                    </div>
+                  </div>
+                `;
+              }
+            })
+            .catch(() => {
+              // Fallback en caso de error
+              const categoriaName = categoriaSlug.charAt(0).toUpperCase() + categoriaSlug.slice(1);
+              container.innerHTML = `
+                <div class="breadcrumb">
+                  <div class="container">
+                    <a href="/">Inicio</a>
+                    <span class="separator">/</span>
+                    <a href="/${categoriaSlug}">${categoriaName}</a>
+                    <span class="separator">/</span>
+                    <span class="current">${productName}</span>
+                  </div>
+                </div>
+              `;
+            });
+        }
+      }
+    })();
+  </script>
+</Layout>
+
+

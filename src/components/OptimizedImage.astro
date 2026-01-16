@@ -1,0 +1,203 @@
+---
+export interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  className?: string;
+  priority?: boolean;
+  sizes?: string;
+  placeholder?: string;
+}
+
+const { 
+  src, 
+  alt, 
+  width = 400, 
+  height = 400, 
+  className = '',
+  priority = false,
+  sizes = '(max-width: 600px) 300px, (max-width: 1200px) 600px, 1200px',
+  placeholder = '/images/placeholder.webp'
+} = Astro.props;
+
+// 🖼️ ANÁLISIS DE LA IMAGEN
+const isExternal = src.startsWith('http');
+const imagePath = isExternal ? src : src.replace('/images/', '');
+const imageDir = imagePath.split('/')[0];
+const imageName = imagePath.split('/')[1]?.split('.')[0] || 'image';
+const hasWebP = src.includes('.webp');
+const hasAvif = src.includes('.avif');
+
+// 🎯 GENERAR SRCEST RESPONSIVE
+const generateSrcSet = (format: string) => {
+  const sizes = [150, 300, 600, 900, 1200, 1600];
+  return sizes
+    .map(size => `/images/${imageDir}/${imageName}-${size}.${format} ${size}w`)
+    .join(', ');
+};
+
+// 📱 TAMAÑOS RESPONSIVE
+const responsiveSizes = {
+  xs: '150px',
+  sm: '300px', 
+  md: '600px',
+  lg: '900px',
+  xl: '1200px',
+  xxl: '1600px'
+};
+---
+
+<picture class={`optimized-image ${className}`}>
+  <!-- 🚀 AVIF - Mejor compresión, navegadores modernos -->
+  {!isExternal && (
+    <source 
+      type="image/avif"
+      srcset={generateSrcSet('avif')}
+      sizes={sizes}
+    />
+  )}
+  
+  <!-- 🌐 WebP - Amplio soporte, buena compresión -->
+  {!isExternal && hasWebP && (
+    <source 
+      type="image/webp"
+      srcset={generateSrcSet('webp')}
+      sizes={sizes}
+    />
+  )}
+  
+  <!-- 📱 IMAGEN PRINCIPAL CON FALLBACK -->
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding="async"
+    class="image-element"
+    sizes={sizes}
+    onerror={`this.onerror=null; this.src='${placeholder}';`}
+    style={`
+      aspect-ratio: ${width}/${height};
+      object-fit: cover;
+      width: 100%;
+      height: auto;
+    `}
+  />
+</picture>
+
+<style>
+  .optimized-image {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md, 8px);
+  }
+
+  .image-element {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: all 0.3s ease;
+    
+    /* 🚀 OPTIMIZACIONES DE RENDERING */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    will-change: transform;
+    
+    /* 📱 RESPONSIVE */
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 🎨 EFECTOS HOVER */
+  .optimized-image:hover .image-element {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+  }
+
+  /* 🔄 LOADING STATES */
+  .image-element:not([src]) {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* 📱 RESPONSIVE BREAKPOINTS */
+  @media (max-width: 480px) {
+    .optimized-image {
+      border-radius: var(--radius-sm, 6px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .image-element {
+      image-rendering: auto; /* Mejor performance en móviles */
+    }
+  }
+
+  /* 🎯 FOCUS STATES PARA ACCESIBILIDAD */
+  .optimized-image:focus-within {
+    outline: 2px solid var(--primary, #e0a4ce);
+    outline-offset: 2px;
+  }
+</style>
+
+<script is:inline>
+  // 🚀 INTERSECTION OBSERVER PARA LAZY LOADING AVANZADO
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const sources = img.parentElement?.querySelectorAll('source');
+          
+          // Cargar sources cuando la imagen sea visible
+          sources?.forEach(source => {
+            if (source.dataset.srcset) {
+              source.srcset = source.dataset.srcset;
+              delete source.dataset.srcset;
+            }
+          });
+          
+          observer.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: '50px 0px', // Precargar 50px antes
+      threshold: 0.1
+    });
+
+    // Observar todas las imágenes optimizadas
+    document.querySelectorAll('.optimized-image img').forEach((img) => {
+      imageObserver.observe(img);
+    });
+  }
+
+  // 📊 MÉTRICAS DE PERFORMANCE
+  document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('.optimized-image img');
+    
+    images.forEach(img => {
+      img.addEventListener('load', () => {
+        // Registrar métricas de carga
+        if ('performance' in window) {
+          const perfEntry = performance.getEntriesByName(img.src)[0];
+          if (perfEntry) {
+            console.log(`🖼️ Imagen cargada: ${img.src} en ${perfEntry.duration.toFixed(2)}ms`);
+          }
+        }
+      });
+      
+      img.addEventListener('error', () => {
+        console.warn(`⚠️ Error cargando imagen: ${img.src}`);
+      });
+    });
+  });
+</script>

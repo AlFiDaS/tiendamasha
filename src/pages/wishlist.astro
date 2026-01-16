@@ -1,0 +1,267 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+---
+
+<Layout>
+  <Breadcrumb items={[
+    { text: "Inicio", href: "/" },
+    { text: "Mis Favoritos" }
+  ]} />
+
+  <section class="wishlist-section">
+    <div class="container">
+      <div class="section-header">
+        <h1>❤️ Mis Favoritos</h1>
+        <p>Productos que guardaste para más tarde</p>
+      </div>
+      
+      <div id="wishlist-container" class="wishlist-grid">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Cargando tus favoritos...</p>
+        </div>
+      </div>
+      
+      <div id="empty-wishlist" class="empty-wishlist" style="display: none;">
+        <div class="empty-icon">❤️</div>
+        <h2>Tu lista de favoritos está vacía</h2>
+        <p>Agrega productos a tus favoritos para verlos aquí</p>
+        <a href="/productos" class="btn-browse">Explorar Productos</a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+(function() {
+  // Obtener session ID (usar localStorage o generar uno)
+  function getSessionId() {
+    let sessionId = localStorage.getItem('wishlist_session_id');
+    if (!sessionId) {
+      sessionId = 'wishlist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('wishlist_session_id', sessionId);
+    }
+    return sessionId;
+  }
+
+  async function loadWishlist() {
+    const container = document.getElementById('wishlist-container');
+    const emptyState = document.getElementById('empty-wishlist');
+    const sessionId = getSessionId();
+
+    try {
+      const response = await fetch(`/api/wishlist.php?session_id=${encodeURIComponent(sessionId)}`);
+      const data = await response.json();
+
+      if (data.success && data.items && data.items.length > 0) {
+        // Renderizar cards idénticas a las de productos
+        container.innerHTML = data.items.map(product => {
+            // Verificar stock (null = ilimitado, >0 = disponible, 0 = sin stock)
+            const hasStock = product.stock === null || product.stock > 0;
+            const stockDisabled = !hasStock ? 'disabled' : '';
+            const stockText = hasStock ? 'Agregar al carrito' : 'Sin stock';
+            
+            // Escapar HTML para prevenir XSS
+            function escapeHtml(text) {
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            }
+            
+            // Calcular precios (similar a products-loader.js)
+            function extractPriceValue(priceString) {
+              if (!priceString) return 0;
+              const cleaned = priceString.replace(/[^0-9]/g, '');
+              return parseInt(cleaned, 10) || 0;
+            }
+            
+            function calculateCardPrice(priceString) {
+              const transferPrice = extractPriceValue(priceString);
+              if (transferPrice === 0) return '';
+              const cardPrice = Math.round((transferPrice * 1.25) / 100) * 100;
+              return '$' + cardPrice.toLocaleString('es-AR');
+            }
+            
+            // Calcular precios correctamente
+            const placeholderPath = '/images/placeholder.svg';
+            const hasValidImage = product.image && product.image.trim() !== '';
+            const imageSrc = hasValidImage ? product.image : placeholderPath;
+            const hasValidHover = product.hoverImage && product.hoverImage.trim() !== '';
+            const hoverImage = hasValidHover ? product.hoverImage : imageSrc;
+            const hoverAttr = (hasValidHover && hasValidImage) ? 
+              `onmouseover="this.src='${escapeHtml(hoverImage)}'" onmouseout="this.src='${escapeHtml(imageSrc)}'"` : '';
+            
+            // El precio que viene de la BD es de transferencia
+            // Calcular precio de tarjeta (25% más, redondeado al 100 más cercano)
+            let cardPriceFormatted = null;
+            let transferPriceFormatted = null;
+            
+            if (product.price) {
+              const transferPriceValue = extractPriceValue(product.price);
+              if (transferPriceValue > 0) {
+                // Precio de tarjeta = transferencia * 1.25, redondeado al 100
+                const cardPrice = Math.round((transferPriceValue * 1.25) / 100) * 100;
+                cardPriceFormatted = '$' + cardPrice.toLocaleString('es-AR');
+                transferPriceFormatted = '$' + transferPriceValue.toLocaleString('es-AR');
+              }
+            }
+            
+            const priceHtml = product.price && cardPriceFormatted ? `
+              <div class="price-container">
+                <p class="price">${escapeHtml(cardPriceFormatted)}</p>
+                <p class="price-card-text">hasta en 3 cuotas</p>
+                ${transferPriceFormatted ? `
+                  <p class="price-card">
+                    <span class="price-label">Transferencia (-25%):</span> ${escapeHtml(transferPriceFormatted)}
+                  </p>
+                ` : ''}
+              </div>
+            ` : product.price ? `<p class="price">${escapeHtml(product.price)}</p>` : '<p class="price">N/A</p>';
+            
+            return `
+              <div class="product-card">
+                <div class="image-container">
+                  <a href="/${escapeHtml(product.categoria)}/${escapeHtml(product.slug)}" class="card-link">
+                    <img
+                      src="${escapeHtml(imageSrc)}"
+                      alt="${escapeHtml(product.name)} - Lume Velas Artesanales"
+                      class="imagen-con-transicion"
+                      width="400"
+                      height="400"
+                      ${hoverAttr}
+                      loading="lazy"
+                      decoding="async"
+                      onerror="if(this.src!=='${placeholderPath}'){this.onerror=null;this.src='${placeholderPath}';}else{this.style.display='none';}"
+                    />
+                  </a>
+                  <button 
+                    class="remove-favorite" 
+                    onclick="event.preventDefault(); event.stopPropagation(); if(window.removeFromWishlistPage){window.removeFromWishlistPage('${escapeHtml(product.product_id)}');}else{window.removeFromWishlist('${escapeHtml(product.product_id)}');} return false;"
+                    title="Eliminar de favoritos">
+                    ❌
+                  </button>
+                  ${!hasStock ? '<div class="sin-stock">Sin stock</div>' : ''}
+                </div>
+                
+                <div class="info">
+                  <h3>${escapeHtml(product.name)}</h3>
+                  ${priceHtml}
+                  <button 
+                    class="btn-agregar" 
+                    onclick="agregarAlCarrito('${escapeHtml(product.name).replace(/'/g, "\\'")}', '${escapeHtml(product.price)}', '${escapeHtml(imageSrc)}', '${escapeHtml(product.slug)}', '${escapeHtml(product.categoria)}')"
+                    ${stockDisabled}
+                  >
+                    ${stockText}
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        emptyState.style.display = 'none';
+      } else {
+        container.innerHTML = '';
+        emptyState.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error al cargar wishlist:', error);
+      container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #dc3545;">Error al cargar tus favoritos</div>';
+    }
+  }
+
+  // Función para mostrar notificación simple
+  function showSimpleNotification(message, type = 'info') {
+    const isMobile = window.innerWidth <= 768;
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
+    
+    notification.style.cssText = `
+      position: fixed;
+      ${isMobile ? 'bottom: 20px; left: 50%; transform: translateX(-50%);' : 'top: 20px; right: 20px;'}
+      background: ${bgColor};
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      max-width: 90%;
+      text-align: center;
+      animation: ${isMobile ? 'slideInMobile' : 'slideIn'} 0.3s ease;
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = `${isMobile ? 'slideOutMobile' : 'slideOut'} 0.3s ease`;
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Función local para eliminar de favoritos (sobrescribe la global en esta página)
+  window.removeFromWishlistPage = async function(productId) {
+    const sessionId = getSessionId();
+    
+    try {
+      const response = await fetch('/api/wishlist.php', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          product_id: productId
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showSimpleNotification('Eliminado de favoritos', 'info');
+        
+        // Recargar lista inmediatamente
+        await loadWishlist();
+        
+        // Actualizar contador del navbar
+        if (typeof window.updateWishlistCount === 'function') {
+          window.updateWishlistCount();
+        }
+        
+        // Actualizar botones de wishlist en otras páginas si están visibles
+        if (typeof window.updateWishlistButtons === 'function') {
+          window.updateWishlistButtons(productId, false);
+        }
+      } else {
+        showSimpleNotification(data.error || 'Error al eliminar de favoritos', 'error');
+      }
+    } catch (error) {
+      console.error('Error al eliminar de favoritos:', error);
+      showSimpleNotification('Error al eliminar de favoritos', 'error');
+    }
+  };
+  
+  // Sobrescribir la función global cuando se carga la página
+  // Esperar a que wishlist.js se cargue primero
+  setTimeout(() => {
+    const originalRemove = window.removeFromWishlist;
+    window.removeFromWishlist = async function(productId, callback) {
+      // Si estamos en la página de wishlist, usar nuestra función
+      if (window.location.pathname === '/wishlist' || window.location.pathname === '/wishlist/') {
+        await window.removeFromWishlistPage(productId);
+        if (callback) callback(true, 'Eliminado');
+      } else {
+        // Si no, usar la función original
+        if (originalRemove) {
+          await originalRemove(productId, callback);
+        }
+      }
+    };
+  }, 200);
+
+  // Cargar wishlist al cargar la página
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadWishlist);
+  } else {
+    loadWishlist();
+  }
+})();
+</script>

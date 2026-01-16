@@ -1,0 +1,399 @@
+---
+// Links estáticos que siempre aparecen (en orden)
+const staticLinksBefore = [
+  { href: '/', text: 'Inicio' },
+];
+
+const staticLinksAfter = [
+  { href: '/ideas', text: 'Galeria de Ideas' },
+];
+---
+
+<nav>
+  <div class="nav-container">
+    <!-- Izquierda: logo -->
+    <a href="/" class="logo">
+      <img src="/images/lume-logo.png" alt="Lume Logo" width="120" height="60" loading="eager" decoding="async" />
+    </a>
+ <!-- Centro: menú hamburguesa (solo mobile) -->
+    <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+      ☰
+    </button>
+
+    <!-- Derecha: solo en desktop (links + carrito) -->
+    <div class="nav-desktop-right">
+      <ul class="nav-links desktop" id="nav-links-desktop">
+        {staticLinksBefore.map((link) => (
+          <li><a href={link.href}>{link.text}</a></li>
+        ))}
+        <!-- Las categorías se cargarán dinámicamente aquí -->
+        {staticLinksAfter.map((link) => (
+          <li><a href={link.href}>{link.text}</a></li>
+        ))}
+      </ul>
+
+      <a href="/wishlist" class="wishlist-icon desktop-wishlist" title="Mis Favoritos">
+        ❤️ <span id="wishlist-count">0</span>
+      </a>
+      <a href="/carrito" class="carrito-icon desktop-cart">
+        🛒 <span id="cart-count">0</span>
+      </a>
+    </div>
+
+    <!-- Wishlist y Carrito en mobile (separado) -->
+    <div class="mobile-icons">
+      <a href="/wishlist" class="wishlist-icon mobile-wishlist" title="Mis Favoritos">
+        ❤️ <span id="wishlist-count-mobile">0</span>
+      </a>
+      <a href="/carrito" class="carrito-icon mobile-cart">
+        🛒 <span id="cart-count-mobile">0</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Menú desplegable en mobile -->
+  <ul id="nav-links" class="nav-links mobile">
+    {staticLinksBefore.map((link) => (
+      <li><a href={link.href}>{link.text}</a></li>
+    ))}
+    <!-- Las categorías se cargarán dinámicamente aquí -->
+    {staticLinksAfter.map((link) => (
+      <li><a href={link.href}>{link.text}</a></li>
+    ))}
+  </ul>
+</nav>
+
+<script is:inline>
+  // Cargar categorías dinámicamente
+  (function() {
+    async function loadCategories() {
+      try {
+        const response = await fetch('/api/categories.php');
+        const data = await response.json();
+        
+        if (data.success && data.categories) {
+          // Crear links de categorías
+          const categoryLinks = data.categories.map(cat => ({
+            href: `/${cat.slug}`,
+            text: cat.name
+          }));
+          
+          // Insertar categorías en el menú desktop (después de "Inicio", antes de "Galería de Ideas")
+          const desktopLinks = document.getElementById('nav-links-desktop');
+          if (desktopLinks) {
+            // Encontrar todos los links estáticos
+            const allLinks = Array.from(desktopLinks.querySelectorAll('li'));
+            // El segundo link (índice 1) es "Galería de Ideas"
+            if (allLinks.length >= 2) {
+              const galeriaLink = allLinks[1];
+              // Insertar categorías antes de "Galería de Ideas" (en orden normal, no reverse)
+              categoryLinks.forEach(link => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = link.href;
+                a.textContent = link.text;
+                li.appendChild(a);
+                desktopLinks.insertBefore(li, galeriaLink);
+              });
+            } else {
+              // Fallback: agregar después del primer link
+              const firstLink = allLinks[0];
+              if (firstLink && firstLink.nextSibling) {
+                categoryLinks.forEach(link => {
+                  const li = document.createElement('li');
+                  const a = document.createElement('a');
+                  a.href = link.href;
+                  a.textContent = link.text;
+                  li.appendChild(a);
+                  desktopLinks.insertBefore(li, firstLink.nextSibling);
+                });
+              } else {
+                categoryLinks.forEach(link => {
+                  const li = document.createElement('li');
+                  const a = document.createElement('a');
+                  a.href = link.href;
+                  a.textContent = link.text;
+                  li.appendChild(a);
+                  desktopLinks.appendChild(li);
+                });
+              }
+            }
+          }
+          
+          // Insertar categorías en el menú mobile (después de "Inicio", antes de "Galería de Ideas")
+          const mobileLinks = document.getElementById('nav-links');
+          if (mobileLinks) {
+            // Encontrar todos los links estáticos
+            const allMobileLinks = Array.from(mobileLinks.querySelectorAll('li'));
+            // El segundo link (índice 1) es "Galería de Ideas"
+            if (allMobileLinks.length >= 2) {
+              const galeriaMobileLink = allMobileLinks[1];
+              // Insertar categorías antes de "Galería de Ideas"
+              categoryLinks.forEach(link => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = link.href;
+                a.textContent = link.text;
+                li.appendChild(a);
+                mobileLinks.insertBefore(li, galeriaMobileLink);
+              });
+            } else {
+              // Fallback: agregar después del primer link
+              const firstMobileLink = allMobileLinks[0];
+              if (firstMobileLink && firstMobileLink.nextSibling) {
+                categoryLinks.forEach(link => {
+                  const li = document.createElement('li');
+                  const a = document.createElement('a');
+                  a.href = link.href;
+                  a.textContent = link.text;
+                  li.appendChild(a);
+                  mobileLinks.insertBefore(li, firstMobileLink.nextSibling);
+                });
+              } else {
+                categoryLinks.forEach(link => {
+                  const li = document.createElement('li');
+                  const a = document.createElement('a');
+                  a.href = link.href;
+                  a.textContent = link.text;
+                  li.appendChild(a);
+                  mobileLinks.appendChild(li);
+                });
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error al cargar categorías:', error);
+      }
+    }
+    
+    // Cargar categorías cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        loadCategories();
+        
+        // Actualizar contador del carrito
+        if (typeof window.updateCartCount === 'function') {
+          window.updateCartCount();
+        }
+        
+        initMenuToggle();
+      });
+    } else {
+      loadCategories();
+      
+      // Actualizar contador del carrito
+      if (typeof window.updateCartCount === 'function') {
+        window.updateCartCount();
+      }
+      
+      initMenuToggle();
+    }
+    
+    function initMenuToggle() {
+      const toggle = document.getElementById('menu-toggle');
+      const navLinks = document.getElementById('nav-links');
+
+      if (toggle && navLinks) {
+        toggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navLinks.classList.toggle('open');
+        });
+
+        document.addEventListener('click', (e) => {
+          if (navLinks.classList.contains('open') && !navLinks.contains(e.target) && e.target.id !== 'menu-toggle') {
+            navLinks.classList.remove('open');
+          }
+        });
+      }
+    }
+  })();
+</script>
+<style is:global>
+  nav {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.6rem 2rem;
+    position: relative;
+  }
+
+  .logo img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .menu-toggle {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+
+  .carrito-icon,
+  .wishlist-icon {
+    position: relative;
+    font-size: 1.4rem;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .nav-desktop-right .wishlist-icon,
+  .nav-desktop-right .carrito-icon {
+    margin-left: 1rem;
+  }
+
+  .mobile-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+   #cart-count,
+  #cart-count-mobile,
+  #wishlist-count,
+  #wishlist-count-mobile {
+    background: #e0a4ce;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50%;
+    position: absolute;
+    top: -10px;
+    right: -12px;
+  }
+  ul.nav-links {
+    list-style: none;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  ul.nav-links li {
+    /* No necesita display: list-item cuando el padre es flex */
+    margin: 0;
+    padding: 0;
+  }
+
+  ul.nav-links li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.3s;
+    display: block;
+  }
+
+  ul.nav-links li a:hover {
+    color: #e0a4ce;
+  }
+
+  /* MOBILE */
+  @media (max-width: 767px) {
+    .menu-toggle {
+      display: block;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .nav-desktop-right {
+      display: none;
+    }
+
+    .desktop-cart {
+      display: none;
+    }
+
+    .mobile-cart,
+    .mobile-wishlist {
+      display: block;
+    }
+
+    .desktop-wishlist,
+    .desktop-cart {
+      display: none !important;
+    }
+
+    .nav-links.desktop {
+      display: none !important;
+    }
+
+    .nav-links.mobile {
+      display: none;
+      flex-direction: column;
+      padding: 1rem 2rem;
+      background: white;
+      border: 1px solid #eee;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      z-index: 1001;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .nav-links.mobile.open {
+      display: flex;
+    }
+
+    .nav-links.mobile li {
+      margin-bottom: 0.5rem;
+    }
+
+    ul.nav-links li {
+      width: 100%;
+    }
+
+    ul.nav-links li a {
+      display: block;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+  }
+
+  /* DESKTOP */
+  @media (min-width: 768px) {
+    .menu-toggle {
+      display: none;
+    }
+
+    .nav-container {
+      justify-content: space-between;
+    }
+
+    .nav-desktop-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-links.desktop {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links.mobile,
+    .mobile-cart,
+    .mobile-wishlist,
+    .mobile-icons {
+      display: none !important;
+    }
+  }
+</style>

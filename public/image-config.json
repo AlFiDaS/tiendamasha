@@ -1,0 +1,27 @@
+{
+  "formats": [
+    "webp",
+    "avif"
+  ],
+  "sizes": {
+    "xs": 150,
+    "sm": 300,
+    "md": 600,
+    "lg": 900,
+    "xl": 1200,
+    "xxl": 1600
+  },
+  "quality": {
+    "webp": 85,
+    "avif": 80
+  },
+  "lastUpdated": "2025-09-03T02:19:43.236Z",
+  "stats": {
+    "processed": 3,
+    "optimized": 36,
+    "errors": 0,
+    "totalSizeBefore": 947055,
+    "totalSizeAfter": 908686,
+    "timeSaved": 0
+  }
+}

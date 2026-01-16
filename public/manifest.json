@@ -1,0 +1,70 @@
+{
+  "name": "Lume - Velas Artesanales",
+  "short_name": "Lume",
+  "version": "2.1.0-2025-09-03T22-17-43",
+  "description": "Velas artesanales únicas, souvenirs personalizados y velas aromáticas desde Corrientes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e0a4ce",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es-AR",
+  "categories": ["shopping", "lifestyle", "home"],
+  "icons": [
+    {
+      "src": "/images/lume-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/lume-logo2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/hero.webp",
+      "sizes": "1280x720",
+      "type": "image/webp",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/images/hero2.webp",
+      "sizes": "750x1334",
+      "type": "image/webp",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Productos",
+      "short_name": "Productos",
+      "description": "Ver todos los productos",
+      "url": "/productos",
+      "icons": [
+        {
+          "src": "/images/lume-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Souvenirs",
+      "short_name": "Souvenirs",
+      "description": "Ver souvenirs",
+      "url": "/souvenirs",
+      "icons": [
+        {
+          "src": "/images/lume-logo.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

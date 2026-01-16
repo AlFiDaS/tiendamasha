@@ -1,0 +1,236 @@
+<div class="splide" id="hero-slider">
+  <!-- Texto superpuesto -->
+  <div class="slider-overlay">
+    <img src="/images/lume-logo-blanco.png" alt="Lume Logo" class="logo2" width="200" height="100" loading="eager" decoding="async" />
+    <div class="slider-buttons">
+      <a class="btn" href="/productos">
+        <span>Ver productos</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+      <a class="btn btn-secondary" href="/souvenirs">
+        <span>Ver souvenirs</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Imágenes del slider -->
+  <div class="splide__track">
+    <ul class="splide__list">
+      <li class="splide__slide">
+        <img src="/images/hero.webp" alt="Velas Lume" width="1920" height="1080" loading="eager" decoding="async" fetchpriority="high" />
+      </li>
+      <li class="splide__slide">
+        <img src="/images/hero2.webp" alt="Decoración con velas" width="1920" height="1080" loading="lazy" decoding="async" />
+      </li>
+      <li class="splide__slide">
+        <img src="/images/hero3.webp" alt="Velas personalizadas" width="1920" height="1080" loading="lazy" decoding="async" />
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- CSS y scripts -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js" is:inline></script>
+<script src="/js/slider.js" is:inline></script>
+
+<style>
+  .splide {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    overflow: hidden;
+    margin-bottom: var(--space-xl);
+  }
+
+  .splide__slide {
+    position: relative;
+  }
+
+  .splide__slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.1) 50%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+    z-index: 1;
+  }
+
+  .splide__slide img {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    object-fit: cover;
+    transition: transform var(--transition-normal);
+  }
+
+  .splide__slide:hover img {
+    transform: scale(1.02);
+  }
+
+  .slider-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 2;
+    padding: var(--space-lg);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 100%;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slider-overlay .logo2 {
+    width: 200px;
+    height: auto;
+    margin: 0 auto var(--space-lg) auto;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  .slider-buttons {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: nowrap;
+  }
+
+  .slider-overlay .btn {
+    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    padding: 0.3rem 0.6rem;
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: var(--font-size-xs);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .slider-overlay .btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .slider-overlay .btn:hover {
+    background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .slider-overlay .btn:hover::after {
+    left: 100%;
+  }
+
+  .slider-overlay .btn-secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+  }
+
+  .slider-overlay .btn-secondary:hover {
+    background: white;
+    color: var(--primary);
+  }
+
+  .slider-overlay .btn svg {
+    transition: transform var(--transition-normal);
+  }
+
+  .slider-overlay .btn:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* 💡 Responsive: móviles */
+  @media (max-width: 768px) {
+    .splide {
+      height: 50vh;
+    }
+
+    .slider-overlay {
+      padding: var(--space-md);
+      max-width: 90%;
+    }
+
+    .slider-overlay .logo2 {
+      width: 130px;
+      margin: 0 auto var(--space-md) auto;
+      display: block;
+    }
+
+    .slider-buttons {
+      gap: var(--space-sm);
+      flex-wrap: nowrap;
+    }
+
+    .slider-overlay .btn {
+      padding: 0.3rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .splide {
+      height: 40vh;
+    }
+
+    .slider-overlay {
+      padding: var(--space-sm);
+    }
+
+    .slider-overlay .logo2 {
+      width: 90px;
+      margin: 0 auto var(--space-sm) auto;
+      display: block;
+    }
+
+    .slider-buttons {
+      gap: var(--space-xs);
+      flex-wrap: nowrap;
+    }
+
+    .slider-overlay .btn {
+      padding: 0.3rem 0.4rem;
+      font-size: 0.7rem;
+    }
+  }
+</style>
+  

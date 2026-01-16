@@ -1,0 +1,166 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+
+// Obtener tipo de pago y order_id de la URL
+const tipoPago = Astro.url.searchParams.get('tipo') || 'mercadopago';
+const orderId = Astro.url.searchParams.get('order_id');
+---
+
+<Layout>
+  <div class="pagina-carrito">
+    <Breadcrumb items={[
+      { text: "Inicio", href: "/" },
+      { text: "Carrito", href: "/carrito" },
+      { text: tipoPago === 'transferencia_directa' ? "Pedido Creado" : "Pago Exitoso" }
+    ]} />
+
+    <section class="carrito">
+      <div class="container">
+        <div class="carrito-header" style="text-align: center;">
+          {tipoPago === 'transferencia_directa' ? (
+            <>
+              <h1 style="color: #ffc107; font-size: 2.5rem; margin-bottom: 1rem;">✅ Pago a Confirmar</h1>
+              {orderId && (
+                <p style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem;">
+                  Pedido #{orderId}
+                </p>
+              )}
+              <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+                ¡Gracias por tu pedido! Hemos recibido tu comprobante de pago y está <strong>pendiente de confirmación</strong>.
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 style="color: #28a745; font-size: 2.5rem; margin-bottom: 1rem;">✅ Pago Exitoso</h1>
+              {orderId ? (
+                <p style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem;">
+                  Pedido #{orderId}
+                </p>
+              ) : (
+                <p id="order-id-display" style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem; display: none;">
+                  Pedido #<span id="order-id-number"></span>
+                </p>
+              )}
+              <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+                ¡Gracias por tu compra! Tu pago ha sido procesado correctamente.
+              </p>
+            </>
+          )}
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 2rem; border-radius: 8px;">
+          <div data-order-id-placeholder>
+            {orderId && (
+              <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem;">📋 Información del Pedido</h3>
+                <p style="margin: 0; color: #333; font-size: 0.95rem;">
+                  <strong>ID del Pedido: #{orderId}</strong>
+                </p>
+                <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.85rem;">
+                  Guarda este número para consultas futuras por WhatsApp.
+                </p>
+              </div>
+            )}
+          </div>
+          <h2 style="margin-bottom: 1rem;">Próximos pasos:</h2>
+          {tipoPago === 'transferencia_directa' ? (
+            <ul style="line-height: 2; color: #333;">
+              <li>⏳ Revisaremos tu comprobante de pago.</li>
+              <li>📱 En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
+              <li>📦 Una vez confirmado, te contactaremos para coordinar el envío.</li>
+              <li>📞 Si tienes dudas, puedes contactarnos por WhatsApp.</li>
+            </ul>
+          ) : (
+            <ul style="line-height: 2; color: #333;">
+              <li>✅ Recibirás un email de confirmación de MercadoPago</li>
+              <li>📱 En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
+              <li>📦 Te contactaremos pronto para coordinar el envío</li>
+              <li>📞 Si tienes dudas, puedes contactarnos por WhatsApp</li>
+            </ul>
+          )}
+
+          <div style="margin-top: 2rem; text-align: center;">
+            <a href="/" class="btn btn-primary" style="display: inline-block; padding: 1rem 2rem; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              Volver al inicio
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+      <script is:inline>
+        // Limpiar carrito después de pago exitoso
+        if (typeof window.saveCarrito !== 'undefined') {
+          window.saveCarrito([]);
+          if (typeof window.updateCartCount !== 'undefined') {
+            window.updateCartCount();
+          }
+        } else {
+          // Si cart.js no está cargado, limpiar directamente
+          localStorage.removeItem('carrito');
+        }
+        
+        // Limpiar preference_id de sessionStorage (el pago fue exitoso)
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem('mp_preference_id');
+        }
+
+        // Función para mostrar el order_id en el header
+        function displayOrderIdInHeader(orderId) {
+          if (!orderId) return;
+          
+          const orderIdDisplay = document.getElementById('order-id-display');
+          const orderIdNumber = document.getElementById('order-id-number');
+          if (orderIdDisplay && orderIdNumber) {
+            orderIdNumber.textContent = orderId;
+            orderIdDisplay.style.display = 'block';
+          }
+        }
+
+        // Si no hay order_id en la URL pero hay preference_id, intentar obtenerlo
+        (function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          let currentOrderId = urlParams.get('order_id');
+          const preferenceId = urlParams.get('preference_id');
+          
+          // Si hay order_id en la URL, mostrarlo inmediatamente en el header
+          if (currentOrderId) {
+            displayOrderIdInHeader(currentOrderId);
+          }
+          
+          // Si no hay order_id pero hay preference_id, intentar obtenerlo
+          if (!currentOrderId && preferenceId) {
+            fetch(`/api/orders/get-order-id.php?preference_id=${encodeURIComponent(preferenceId)}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.success && data.order_id) {
+                  // Mostrar el order_id en el header
+                  displayOrderIdInHeader(data.order_id);
+                  
+                  // También mostrar el order_id en la página (cuadro azul)
+                  const orderInfoDiv = document.querySelector('[data-order-id-placeholder]');
+                  if (orderInfoDiv && !orderInfoDiv.querySelector('.order-id-info')) {
+                    orderInfoDiv.innerHTML = `
+                      <div class="order-id-info" style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                        <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem;">📋 Información del Pedido</h3>
+                        <p style="margin: 0; color: #333; font-size: 0.95rem;">
+                          <strong>ID del Pedido: #${data.order_id}</strong>
+                        </p>
+                        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.85rem;">
+                          Guarda este número para consultas futuras por WhatsApp.
+                        </p>
+                      </div>
+                    `;
+                  }
+                }
+              })
+              .catch(err => {
+                console.error('Error al obtener order_id:', err);
+              });
+          }
+        })();
+  </script>
+</Layout>
+

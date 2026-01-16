@@ -1,0 +1,87 @@
+===========================================
+COMANDOS PARA CONFIGURAR BD EN LOCAL
+===========================================
+
+OPCIÓN 1: Usando el Script PHP (Más fácil)
+===========================================
+1. Asegúrate que XAMPP esté corriendo (Apache + MySQL)
+2. Abre en el navegador:
+   http://localhost/tu-proyecto/setup-database-local.php
+
+   O desde la terminal (si tienes PHP en PATH):
+   php setup-database-local.php
+
+
+OPCIÓN 2: Usando phpMyAdmin (Interfaz gráfica)
+===========================================
+1. Abre: http://localhost/phpmyadmin
+2. Clic en "Nueva" (crear base de datos)
+3. Nombre: lume_catalogo
+4. Cotejamiento: utf8mb4_unicode_ci
+5. Clic en "Crear"
+6. Selecciona la base de datos
+7. Pestaña "Importar"
+8. Selecciona database.sql
+9. Clic en "Continuar"
+
+
+OPCIÓN 3: Desde Línea de Comandos MySQL
+===========================================
+
+Windows (CMD o PowerShell):
+---------------------------
+# Abre la terminal en la carpeta de tu proyecto
+cd C:\xampp\htdocs\tu-proyecto
+
+# Conecta a MySQL (si tienes MySQL en PATH)
+mysql -u root -p
+
+# O si no tienes contraseña:
+mysql -u root
+
+# Dentro de MySQL, ejecuta:
+CREATE DATABASE IF NOT EXISTS lume_catalogo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE lume_catalogo;
+SOURCE database.sql;
+EXIT;
+
+
+Linux/Mac:
+----------
+# Conecta a MySQL
+mysql -u root -p
+
+# Dentro de MySQL:
+CREATE DATABASE IF NOT EXISTS lume_catalogo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE lume_catalogo;
+SOURCE /ruta/completa/a/tu/proyecto/database.sql;
+EXIT;
+
+
+OPCIÓN 4: Importar SQL directamente (Windows)
+===========================================
+# Desde CMD en la carpeta del proyecto:
+cd C:\xampp\mysql\bin
+mysql.exe -u root < "C:\ruta\completa\a\tu\proyecto\database.sql"
+
+# O si quieres especificar la base de datos:
+mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS lume_catalogo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql.exe -u root lume_catalogo < "C:\ruta\completa\a\tu\proyecto\database.sql"
+
+
+VERIFICAR QUE FUNCIONÓ:
+=======================
+1. Abre phpMyAdmin: http://localhost/phpmyadmin
+2. Verifica que exista la base de datos "lume_catalogo"
+3. Entra a la base de datos
+4. Deberías ver las tablas:
+   - products
+   - admin_users
+
+
+NOTAS:
+======
+- El usuario por defecto de XAMPP es: root
+- La contraseña por defecto es: (vacía, sin contraseña)
+- Si cambiaste la contraseña de root, úsala en los comandos
+

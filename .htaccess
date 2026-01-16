@@ -1,0 +1,145 @@
+# ============================================
+# Configuración Apache para LUME
+# ============================================
+
+# Activar RewriteEngine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # Redirigir a HTTPS (opcional, descomenta si usas SSL)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # PRIORIDAD 1: Mapear /images/ a /public/images/ SOLO si no existe /images/ directamente
+    # En producción, las imágenes están en /images/ directamente, así que no redirigimos
+    # En desarrollo local, las imágenes están en /public/images/, así que sí redirigimos
+    RewriteCond %{REQUEST_URI} ^/images/
+    RewriteCond %{DOCUMENT_ROOT}/images !-d
+    RewriteRule ^images/(.*)$ public/images/$1 [L]
+    
+    # PRIORIDAD 2: Archivos y directorios existentes (no hacer nada)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # PRIORIDAD 3: Rutas de API y Admin (dejar que PHP las maneje)
+    RewriteCond %{REQUEST_URI} ^/(api|admin)/
+    RewriteRule ^ - [L]
+    
+    # PRIORIDAD 4: Archivos estáticos (js, css, etc.) - excluir /images/ porque ya se manejó arriba
+    RewriteCond %{REQUEST_URI} \.(css|js|woff|woff2|ttf|eot)$ [NC]
+    RewriteRule ^ - [L]
+    
+    # PRIORIDAD 5: Redirigir rutas dinámicas de productos a placeholder/placeholder/index.html
+    # Esto permite que las páginas dinámicas funcionen sin necesidad de build
+    # Ejemplo: /test3/producto-slug -> /placeholder/placeholder/index.html (JavaScript extrae la categoría y slug real)
+    # Excluir rutas especiales (api, admin, ideas, carrito, wishlist, mis-pedidos, etc.)
+    RewriteCond %{REQUEST_URI} !^/(api|admin|ideas|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
+    RewriteCond %{REQUEST_URI} ^/([^/]+)/([^/]+)/?$
+    RewriteCond %{REQUEST_URI} !^/([^/]+)/placeholder(/|$)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Redirigir a la página dinámica genérica
+    RewriteRule ^([^/]+)/([^/]+)/?$ /placeholder/placeholder/index.html [L]
+    
+    # PRIORIDAD 5.5: Redirigir rutas dinámicas de categorías a placeholder/index.html
+    # Esto permite que las páginas de categorías dinámicas funcionen sin necesidad de build
+    # Ejemplo: /test3 -> /placeholder/index.html (JavaScript detecta la categoría desde la URL)
+    # IMPORTANTE: Esta regla debe ir ANTES de PRIORIDAD 6 para tener prioridad
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} ^/([^/]+)/?$
+    RewriteCond %{REQUEST_URI} !^/(api|admin|ideas|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
+    RewriteCond %{REQUEST_URI} !^/placeholder
+    # Excluir categorías estáticas existentes (tienen sus propias páginas)
+    RewriteCond %{REQUEST_URI} !^/(productos|souvenirs|navidad)/?$
+    # Redirigir a la página dinámica genérica
+    RewriteRule ^([^/]+)/?$ /placeholder/index.html [L]
+    
+    # PRIORIDAD 6: Si la URL no es un archivo o directorio existente, servir index.html de la raíz
+    # IMPORTANTE: Esta regla debe ir DESPUÉS de PRIORIDAD 5.5
+    # Excluir rutas de una sola palabra (ya manejadas por PRIORIDAD 5.5)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} !^/(api|admin)/
+    RewriteCond %{REQUEST_URI} !^/[^/]+/?$
+    RewriteRule ^(.*)$ index.html [L]
+</IfModule>
+
+# Proteger archivos sensibles
+<FilesMatch "^(config|db|auth|upload|slugify|cache-bust|security)\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Proteger archivo de secretos CSRF
+<FilesMatch "^\..*secret$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Proteger carpeta helpers
+<IfModule mod_rewrite.c>
+    RewriteRule ^helpers/ - [F,L]
+</IfModule>
+
+# Headers de seguridad
+<IfModule mod_headers.c>
+    # Prevenir clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevenir MIME type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Configuración PHP (si está permitido)
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 5M
+    php_value post_max_size 5M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+</IfModule>
+
+# Compresión GZIP
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Cache para archivos estáticos (pero NO para archivos con query string v=)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Imágenes: 1 año (muy eficiente)
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
+    # CSS y JS: 1 año (pero versionados con ?v=)
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    # Fuentes: 1 año
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    # HTML: 1 hora (para permitir actualizaciones)
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# NO cachear archivos CSS/JS con query string v= (nuevas versiones)
+<IfModule mod_headers.c>
+    # Archivos con ?v= no deben cachearse
+    RewriteCond %{QUERY_STRING} v=
+    RewriteRule \.(css|js)$ - [E=NO_CACHE:1]
+    Header set Cache-Control "no-cache, no-store, must-revalidate" env=NO_CACHE
+    Header set Pragma "no-cache" env=NO_CACHE
+    Header set Expires "0" env=NO_CACHE
+</IfModule>
+

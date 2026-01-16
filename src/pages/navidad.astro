@@ -1,0 +1,414 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductSearch from '../components/ProductSearch.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import InfoVelas from '../components/InfoVelas.astro';
+---
+
+<Layout
+  title="Productos Navideños - Lume"
+  description="Descubrí nuestra colección especial navideña de velas artesanales. Productos únicos para decorar tu hogar en estas fiestas."
+>
+  <div style="position: relative; z-index: 100;">
+    <Breadcrumb items={[
+      { text: "Inicio", href: "/" },
+      { text: "Navidad" }
+    ]} />
+  </div>
+
+  <!-- Decoración navideña de fondo -->
+  <div class="christmas-decoration"></div>
+
+  <!-- Copos de nieve separados para estar por encima del fondo -->
+  <div class="snowflakes" aria-hidden="true">
+    <div class="snowflake">❄</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❄</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❄</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+    <div class="snowflake">❄</div>
+    <div class="snowflake">❅</div>
+    <div class="snowflake">❆</div>
+  </div>
+
+  <!-- Estrellas separadas para estar por encima del fondo -->
+  <div class="stars" aria-hidden="true">
+    <span class="star">⭐</span>
+    <span class="star">✨</span>
+    <span class="star">⭐</span>
+    <span class="star">✨</span>
+    <span class="star">⭐</span>
+  </div>
+
+  <section class="catalogo">
+    <div class="container">
+      <div class="section-header">
+        <h1>🎄 Colección Navideña 🎄</h1>
+        <p>Productos exclusivos para estas fiestas especiales ✨</p>
+      </div>
+      
+      <!-- Componente de búsqueda -->
+      <ProductSearch />
+      
+      <!-- Contenedor para productos dinámicos desde la BD -->
+      <div class="grid products-grid">
+        <!-- Los productos se cargarán aquí automáticamente desde la API -->
+      </div>
+    </div>
+  </section>
+
+  <div style="position: relative; z-index: 100;">
+    <InfoVelas />
+  </div>
+
+  <style>
+    /* Decoración navideña */
+    .christmas-decoration {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Copos de nieve - arriba de todo */
+    .snowflakes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 11 !important;
+      pointer-events: none;
+    }
+
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      font-size: 1.8rem;
+      color: rgba(60, 60, 60, 0.7);
+      animation: fall linear infinite;
+      user-select: none;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
+    }
+
+    .snowflake:nth-child(1) {
+      left: 10%;
+      animation-duration: 8s;
+      animation-delay: 0s;
+    }
+
+    .snowflake:nth-child(2) {
+      left: 20%;
+      animation-duration: 10s;
+      animation-delay: 2s;
+      font-size: 1.2rem;
+    }
+
+    .snowflake:nth-child(3) {
+      left: 30%;
+      animation-duration: 12s;
+      animation-delay: 4s;
+      font-size: 1.8rem;
+    }
+
+    .snowflake:nth-child(4) {
+      left: 40%;
+      animation-duration: 9s;
+      animation-delay: 1s;
+      font-size: 1.3rem;
+    }
+
+    .snowflake:nth-child(5) {
+      left: 50%;
+      animation-duration: 11s;
+      animation-delay: 3s;
+      font-size: 1.6rem;
+    }
+
+    .snowflake:nth-child(6) {
+      left: 60%;
+      animation-duration: 13s;
+      animation-delay: 5s;
+      font-size: 1.4rem;
+    }
+
+    .snowflake:nth-child(7) {
+      left: 70%;
+      animation-duration: 8.5s;
+      animation-delay: 0.5s;
+      font-size: 1.7rem;
+    }
+
+    .snowflake:nth-child(8) {
+      left: 80%;
+      animation-duration: 10.5s;
+      animation-delay: 2.5s;
+      font-size: 1.1rem;
+    }
+
+    .snowflake:nth-child(9) {
+      left: 90%;
+      animation-duration: 9.5s;
+      animation-delay: 1.5s;
+      font-size: 1.5rem;
+    }
+
+    .snowflake:nth-child(10) {
+      left: 15%;
+      animation-duration: 11.5s;
+      animation-delay: 3.5s;
+      font-size: 1.3rem;
+    }
+
+    .snowflake:nth-child(11) {
+      left: 75%;
+      animation-duration: 12.5s;
+      animation-delay: 4.5s;
+      font-size: 1.6rem;
+    }
+
+    .snowflake:nth-child(12) {
+      left: 35%;
+      animation-duration: 9.8s;
+      animation-delay: 0.8s;
+      font-size: 1.4rem;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100vh) translateX(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) translateX(100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Estrellas - encima del fondo, detrás del grid */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 2 !important;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 2.5rem;
+      color: rgba(255, 215, 0, 0.9);
+      animation: twinkle 3s ease-in-out infinite;
+      user-select: none;
+      filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
+    }
+
+    .star:nth-child(1) {
+      top: 15%;
+      left: 10%;
+      animation-delay: 0s;
+      font-size: 2.8rem;
+    }
+
+    .star:nth-child(2) {
+      top: 25%;
+      left: 88%;
+      animation-delay: 1s;
+      font-size: 2.2rem;
+    }
+
+    .star:nth-child(3) {
+      top: 65%;
+      left: 8%;
+      animation-delay: 0.5s;
+      font-size: 3rem;
+    }
+
+    .star:nth-child(4) {
+      top: 85%;
+      left: 78%;
+      animation-delay: 1.5s;
+      font-size: 2.5rem;
+    }
+
+    .star:nth-child(5) {
+      top: 45%;
+      left: 92%;
+      animation-delay: 2s;
+      font-size: 2.7rem;
+    }
+
+    @keyframes twinkle {
+      0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.3);
+      }
+    }
+
+    .catalogo {
+      padding: var(--space-lg) 0;
+      position: relative;
+      min-height: 100vh;
+      z-index: 0;
+    }
+
+    /* Fondo del catálogo usando ::before para controlar z-index */
+    .catalogo::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(135deg, #fff5f8 0%, #ffeef2 30%, #ffffff 60%, #fff5f8 100%),
+        radial-gradient(circle at 25% 35%, rgba(255, 182, 193, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 75% 65%, rgba(255, 192, 203, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+      background-attachment: fixed;
+    }
+
+
+
+    /* Contenido encima de las estrellas */
+    .catalogo .container,
+    .catalogo .grid,
+    .catalogo .section-header {
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-lg);
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #c41e3a, #228b22, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+      font-family: 'Playfair Display', serif;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 10;
+    }
+
+    .section-header p {
+      font-size: var(--font-size-lg);
+      color: #2c3e50;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-weight: 500;
+      position: relative;
+      z-index: 10;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .grid {
+      position: relative;
+      z-index: 10 !important;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+    }
+
+    .grid .product-card {
+      position: relative;
+      z-index: 10 !important;
+      background: linear-gradient(135deg, #fff 0%, #fefefe 100%);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--space-xl) var(--space-md);
+      color: var(--text-secondary);
+      font-size: var(--font-size-lg);
+    }
+
+    /* 📱 RESPONSIVE DESIGN */
+    @media (max-width: 1200px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 0;
+      }
+      
+      /* Estrellas más chicas en móvil */
+      .star {
+        font-size: 1.5rem !important;
+      }
+
+      .star:nth-child(1) {
+        font-size: 1.7rem !important;
+      }
+
+      .star:nth-child(2) {
+        font-size: 1.3rem !important;
+      }
+
+      .star:nth-child(3) {
+        font-size: 1.8rem !important;
+      }
+
+      .star:nth-child(4) {
+        font-size: 1.5rem !important;
+      }
+
+      .star:nth-child(5) {
+        font-size: 1.6rem !important;
+      }
+      
+      .section-header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</Layout>
+

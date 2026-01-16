@@ -1,0 +1,1290 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+---
+<Layout>
+  <div class="pagina-carrito">
+    <Breadcrumb items={[
+      { text: "Inicio", href: "/" },
+      { text: "Carrito" }
+    ]} />
+
+    <section class="carrito">
+      <div class="container">
+        <div class="carrito-header">
+          <h1>🛒 Tu Carrito</h1>
+        </div>
+
+        <div class="carrito-content">
+          <!-- Lista de Productos -->
+          <div class="carrito-productos">
+            <div id="carrito-lista"></div>
+            <button id="vaciar-carrito" class="btn-vaciar">Vaciar carrito</button>
+          </div>
+
+          <!-- Resumen y Formulario -->
+          <div class="carrito-sidebar">
+            <div class="carrito-resumen">
+              <h2>Resumen</h2>
+              
+              <!-- Campo de cupón -->
+              <div class="coupon-section">
+                <div class="coupon-input-group">
+                  <input 
+                    type="text" 
+                    id="coupon-code" 
+                    placeholder="Código de descuento"
+                    class="coupon-input"
+                  />
+                  <button type="button" id="btn-aplicar-cupon" class="btn-aplicar-cupon">
+                    Aplicar
+                  </button>
+                </div>
+                <div id="coupon-message" class="coupon-message"></div>
+                <div id="coupon-applied" class="coupon-applied" style="display: none;">
+                  <span id="coupon-code-display"></span>
+                  <button type="button" id="btn-remover-cupon" class="btn-remover-cupon">✕</button>
+                </div>
+              </div>
+              
+              <div class="resumen-item">
+                <span>Subtotal:</span>
+                <span id="carrito-total">$0</span>
+              </div>
+              
+              <div class="resumen-item" id="descuento-item" style="display: none;">
+                <span>Descuento:</span>
+                <span id="descuento-amount" style="color: #28a745;">-$0</span>
+              </div>
+       
+              <div class="resumen-item">
+                <span>Envío:</span>
+                <span id="envio-info">-</span>
+              </div>
+              <div class="resumen-total">
+                <span>Total:</span>
+                <span id="total">$0</span>
+              </div>
+            </div>
+
+            <div id="formulario-datos" class="formulario-carrito">
+              <h2>Datos del Pedido</h2>
+              <form id="form-datos">
+                <div class="form-group">
+                  <label for="nombre">Nombre completo *</label>
+                  <input type="text" id="nombre" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="telefono">Teléfono *</label>
+                  <input type="tel" id="telefono" required placeholder="Ej: 3794123456" />
+                  <small>Ingresa tu número de teléfono (sin guiones ni espacios)</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="aclaraciones">Aclaraciones (opcional)</label>
+                  <textarea id="aclaraciones" rows="2" placeholder="Ejemplo: perrito color negro"></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>Tipo de envío *</label>
+                  <div class="envio-options">
+                    <label class="envio-option">
+                      <input type="radio" name="envio" value="Corrientes Envio a Domicilio" required />
+                      <span class="envio-option-content">
+                        <span class="envio-option-text">Envío a domicilio - Corrientes, Capital</span>
+                      </span>
+                    </label>
+                    <label class="envio-option">
+                      <input type="radio" name="envio" value="Corrientes Retiro en Sucursal" required />
+                      <span class="envio-option-content">
+                        <span class="envio-option-text">Retiro por Pje. Alvarez 873 (Corrientes)</span>
+                        <span class="envio-gratis">- Gratis</span>
+                      </span>
+                    </label>
+                    <label class="envio-option">
+                      <input type="radio" name="envio" value="Correo Argentino - Sucursal" required />
+                      <span class="envio-option-content">
+                        <span class="envio-option-text">Correo Argentino - Envío a Sucursal</span>
+                        <span class="envio-precio" data-precio-transferencia="6500" data-precio-tarjeta="8100">($8.100)</span>
+                      </span>
+                    </label>
+                    <label class="envio-option">
+                      <input type="radio" name="envio" value="Correo Argentino - Domicilio" required />
+                      <span class="envio-option-content">
+                        <span class="envio-option-text">Correo Argentino - Envío a Domicilio</span>
+                        <span class="envio-precio" data-precio-transferencia="8500" data-precio-tarjeta="10600">($10.600)</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group" id="label-provincia" style="display: none;">
+                  <label for="provincia">Provincia</label>
+                  <input type="text" id="provincia" />
+                </div>
+
+                <div class="form-group" id="label-sucursal" style="display: none;">
+                  <label for="sucursal">Sucursal de destino</label>
+                  <input type="text" id="sucursal" />
+                </div>
+                
+                <div class="form-group" id="label-localidad" style="display: none;">
+                  <label for="localidad">Localidad</label>
+                  <input type="text" id="localidad" />
+                </div>
+                
+                <div class="form-group" id="label-direccion" style="display: none;">
+                  <label for="direccion">Dirección</label>
+                  <input type="text" id="direccion" />
+                </div>
+
+                <div class="form-group" id="label-cp" style="display: none;">
+                  <label for="cp">Código Postal</label>
+                  <input type="text" id="cp" />
+                </div>
+
+                <div class="form-group" id="label-email" style="display: none;">
+                  <label for="email">Email</label>
+                  <input type="email" id="email" />
+                </div>
+
+                <div class="form-group" id="label-observaciones" style="display: none;">
+                  <label for="observaciones">Observaciones</label>
+                  <textarea id="observaciones" rows="2"></textarea>
+                </div>
+
+                <div class="total-a-pagar">
+                  <strong>Total a pagar: <span id="total-a-pagar-display">$0</span></strong>
+                </div>
+                <button type="button" id="btn-ver-resumen" class="btn-ver-resumen">
+                  📊 Ver resumen
+                </button>
+
+                <div class="form-group">
+                  <label for="pago">Forma de pago</label>
+                  <select id="pago">
+                    <option value="transferencia_directa" selected>Transferencia</option>
+                    <option value="tarjeta">Mercadopago o tarjeta - Mismo precio hasta en 3 cuotas</option>
+                  </select>
+                </div>
+                
+                <!-- Datos bancarios (solo se muestra si es transferencia directa) -->
+                <div id="datos-bancarios" class="datos-bancarios" style="display: none;">
+                  <div class="form-group">
+                    <label>Datos para transferencia:</label>
+                    <div class="datos-transferencia">
+                      <p><strong>Alias:</strong> <span>lume.co.mp</span></p>
+                      <p><strong>Titular:</strong> <span>Gisela Gabriela Guerra</span></p>
+                      <p><strong>Total a transferir:</strong> <span id="total-transferir">$0</span></p>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="proof_image">Comprobante de pago *</label>
+                    <input type="file" id="proof_image" accept="image/jpeg,image/png,image/webp" style="display: none;" />
+                    <small>Sube una imagen del comprobante de transferencia (JPG, PNG o WEBP - máx. 5MB)</small>
+                    <button type="button" id="btn-subir-comprobante" class="btn-subir-comprobante">
+                      📎 Subir comprobante de pago
+                    </button>
+                    <div id="proof-preview" style="display: none; margin-top: 0.5rem;">
+                      <img id="proof-preview-img" src="" alt="Vista previa" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;" />
+                    </div>
+                  </div>
+                </div>
+
+                <button id="btn-finalizar" class="btn-finalizar" type="button">
+                  💳 Pagar con MercadoPago
+                </button>
+                <button id="btn-finalizar-directa" class="btn-finalizar-directa" type="button" style="display: none;">
+                  ✅ Confirmar pedido
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <style is:global>
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(-50%) translateY(100%);
+        opacity: 0;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    // Esperar a que cart.js se cargue y las funciones estén disponibles
+    function initCarrito() {
+      // Verificar que las funciones estén disponibles
+      if (typeof window.getCarrito === 'undefined' || typeof window.saveCarrito === 'undefined') {
+        console.log('Esperando a que cart.js se cargue...');
+        setTimeout(initCarrito, 100);
+        return;
+      }
+
+      console.log('cart.js cargado correctamente');
+      const getCarrito = window.getCarrito;
+      const saveCarrito = window.saveCarrito;
+      const updateCartCount = window.updateCartCount || (() => {});
+
+      const contenedor = document.querySelector("#carrito-lista");
+      const totalEl = document.querySelector("#total");
+      const envioInfoEl = document.querySelector("#envio-info");
+      const carritoTotalEl = document.querySelector("#carrito-total");
+      const finalizarBtn = document.querySelector("#btn-finalizar");
+      const vaciarBtn = document.getElementById("vaciar-carrito");
+      
+      // Asegurar que el botón sea un button, no un link
+      if (finalizarBtn && finalizarBtn.tagName === 'A') {
+        finalizarBtn.style.display = 'none';
+        console.error('El botón finalizar debe ser un <button>, no un <a>');
+      }
+
+      function actualizarFormularioEnvio() {
+      const envioRadio = document.querySelector('input[name="envio"]:checked');
+      const tipoEnvio = envioRadio ? envioRadio.value : '';
+      const mostrar = id => document.getElementById(id).style.display = 'block';
+      const ocultar = id => document.getElementById(id).style.display = 'none';
+
+      ['label-provincia', 'label-direccion', 'label-sucursal', 'label-localidad', 'label-cp', 'label-email', 'label-observaciones']
+        .forEach(ocultar);
+
+      if (tipoEnvio === 'Corrientes Envio a Domicilio') {
+        mostrar('label-direccion');
+      } else if (tipoEnvio === 'Correo Argentino - Sucursal') {
+        mostrar('label-provincia');
+        mostrar('label-sucursal');
+        mostrar('label-email');
+      } else if (tipoEnvio === 'Correo Argentino - Domicilio') {
+        ['label-provincia', 'label-localidad', 'label-cp', 'label-direccion', 'label-email', 'label-observaciones']
+          .forEach(mostrar);
+      }
+    }
+
+    // Función para actualizar precios de envío según método de pago
+    function actualizarPreciosEnvio() {
+      const pago = document.getElementById('pago')?.value || '';
+      const isTransferencia = (pago === 'transferencia_directa');
+      
+      const precioElements = document.querySelectorAll('.envio-precio');
+      precioElements.forEach(el => {
+        const precioTransferencia = el.getAttribute('data-precio-transferencia');
+        const precioTarjeta = el.getAttribute('data-precio-tarjeta');
+        
+        if (precioTransferencia && precioTarjeta) {
+          const precioMostrar = isTransferencia ? precioTransferencia : precioTarjeta;
+          const precioFormateado = '$' + parseInt(precioMostrar).toLocaleString('es-AR');
+          el.textContent = `(${precioFormateado})`;
+        }
+      });
+    }
+
+    // Función para extraer el valor numérico del precio (remueve $, puntos, comas, etc.)
+    function extractPriceValue(priceString) {
+      if (!priceString) return 0;
+      // Remover todos los caracteres no numéricos (incluyendo $, puntos, comas, espacios)
+      const cleaned = priceString.replace(/[^0-9]/g, '');
+      return parseInt(cleaned, 10) || 0;
+    }
+
+    // Función para calcular precio de tarjeta desde precio de transferencia (redondeado al 100)
+    function calculateCardPriceFromTransfer(transferPrice) {
+      return Math.round((transferPrice * 1.25) / 100) * 100;
+    }
+
+    // Función para validar la visibilidad de los productos del carrito
+    async function validarProductosCarrito(carrito) {
+      if (!carrito || carrito.length === 0) {
+        return carrito;
+      }
+
+      // Por ahora, desactivar la validación automática ya que está causando problemas
+      // La validación se puede activar después de corregir los problemas con la API
+      // TODO: Revisar y corregir la validación cuando la API responda correctamente
+      console.log('Validación de productos desactivada temporalmente');
+      return carrito;
+
+      /* CÓDIGO DESACTIVADO TEMPORALMENTE - VALIDACIÓN DE PRODUCTOS
+      // Primero, obtener todas las categorías visibles
+      let categoriasVisibles = new Set();
+      try {
+        const categoriasResponse = await fetch('/api/categories.php');
+        if (categoriasResponse.ok) {
+          const categoriasData = await categoriasResponse.json();
+          if (categoriasData.success && categoriasData.categories) {
+            categoriasData.categories.forEach(cat => {
+              if (cat.visible === 1 || cat.visible === true) {
+                categoriasVisibles.add(cat.slug);
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error al obtener categorías:', error);
+      }
+
+      const productosValidos = [];
+      const productosEliminados = [];
+
+      // Validar cada producto
+      for (const item of carrito) {
+        try {
+          // Primero verificar si la categoría es visible
+          if (categoriasVisibles.size > 0 && !categoriasVisibles.has(item.categoria)) {
+            productosEliminados.push(item.name);
+            continue;
+          }
+
+          // Consultar el producto por slug (sin categoría para evitar problemas con categorías invisibles)
+          const response = await fetch(`/api/products.php?slug=${encodeURIComponent(item.slug)}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Respuesta API para', item.slug, ':', data);
+            
+            // La API devuelve 'product' (singular) cuando se busca por slug
+            if (data.success && data.product) {
+              const producto = data.product;
+              // Verificar que el producto sea visible y coincida con la categoría
+              if (producto.visible === 1 && producto.categoria === item.categoria) {
+                // Verificar también que la categoría siga siendo visible
+                if (categoriasVisibles.size === 0 || categoriasVisibles.has(producto.categoria)) {
+                  productosValidos.push(item);
+                } else {
+                  productosEliminados.push(item.name);
+                }
+              } else {
+                productosEliminados.push(item.name);
+              }
+            } else {
+              // Producto no encontrado o respuesta inválida
+              productosEliminados.push(item.name);
+            }
+          } else if (response.status === 404) {
+            // Producto no encontrado (404) - realmente no existe
+            productosEliminados.push(item.name);
+          } else {
+            // Otro error HTTP - mantener el producto por seguridad
+            console.warn(`Error HTTP ${response.status} al validar producto ${item.slug}`);
+            productosValidos.push(item);
+          }
+        } catch (error) {
+          console.error(`Error al validar producto ${item.slug}:`, error);
+          // En caso de error, mantener el producto
+          productosValidos.push(item);
+        }
+      }
+
+      // Si se eliminaron productos, mostrar mensaje y actualizar el carrito
+      if (productosEliminados.length > 0) {
+        const mensaje = productosEliminados.length === 1
+          ? `El producto "${productosEliminados[0]}" ya no está disponible y fue eliminado del carrito.`
+          : `${productosEliminados.length} productos ya no están disponibles y fueron eliminados del carrito.`;
+        
+        mostrarNotificacionCarrito(mensaje, 'info');
+        saveCarrito(productosValidos);
+      }
+
+      return productosValidos;
+      */
+    }
+
+    // Función para mostrar notificación en el carrito
+    function mostrarNotificacionCarrito(mensaje, tipo = 'info') {
+      // Crear elemento de notificación si no existe
+      let notificacion = document.getElementById('carrito-notificacion');
+      if (!notificacion) {
+        notificacion = document.createElement('div');
+        notificacion.id = 'carrito-notificacion';
+        notificacion.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${tipo === 'info' ? '#17a2b8' : '#dc3545'};
+          color: white;
+          padding: 1rem 1.5rem;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          z-index: 10000;
+          max-width: 90%;
+          text-align: center;
+          font-size: 0.95rem;
+          animation: slideUp 0.3s ease-out;
+        `;
+        document.body.appendChild(notificacion);
+      }
+
+      notificacion.textContent = mensaje;
+      notificacion.style.display = 'block';
+
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        notificacion.style.animation = 'slideDown 0.3s ease-out';
+        setTimeout(() => {
+          notificacion.style.display = 'none';
+        }, 300);
+      }, 5000);
+    }
+
+    async function renderCarrito() {
+      let carrito = getCarrito();
+      
+      // Validar visibilidad de productos antes de renderizar
+      // VALIDACIÓN DESACTIVADA - No se valida automáticamente la visibilidad de productos
+      // Los productos se mantienen en el carrito aunque se vuelvan invisibles
+      
+      contenedor.innerHTML = "";
+      let totalCarrito = 0;
+
+      if (carrito.length === 0) {
+        contenedor.innerHTML = `
+          <div class="carrito-vacio">
+            <p>Tu carrito está vacío 🕯️</p>
+            <a href="/productos" class="btn-continuar">Ver productos</a>
+          </div>
+        `;
+        totalEl.textContent = "$0";
+        carritoTotalEl.textContent = "$0";
+        envioInfoEl.textContent = "-";
+        const totalAPagarDisplay = document.getElementById('total-a-pagar-display');
+        if (totalAPagarDisplay) {
+          totalAPagarDisplay.textContent = "$0";
+        }
+        if (finalizarBtn) finalizarBtn.style.display = "none";
+        if (vaciarBtn) vaciarBtn.style.display = "none";
+        return;
+      }
+
+      if (finalizarBtn) finalizarBtn.style.display = "inline-block";
+      if (vaciarBtn) vaciarBtn.style.display = "inline-block";
+
+      carrito.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "producto-carrito";
+
+        // El precio guardado es de transferencia, mostrarlo directamente
+        const transferPriceValue = extractPriceValue(item.price);
+        const transferPriceFormatted = '$' + transferPriceValue.toLocaleString('es-AR');
+        
+        // Calcular precio de tarjeta (25% más, redondeado al 100)
+        const cardPriceValue = calculateCardPriceFromTransfer(transferPriceValue);
+        const cardPriceFormatted = '$' + cardPriceValue.toLocaleString('es-AR');
+
+        card.innerHTML = `
+          <div class="producto-imagen" onclick="window.location.href='/${item.categoria}/${item.slug}'">
+            <img src="${item.image}" alt="${item.name}" />
+          </div>
+          <div class="producto-info">
+            <h3>${item.name}</h3>
+            <div class="producto-precio-lista">
+              <div class="precio-lista-wrapper">
+                <span class="precio-lista-label">Precio lista:</span>
+                <span class="precio-lista-value">${cardPriceFormatted}</span>
+              </div>
+            </div>
+            <div class="producto-precio-transferencia">
+              <span class="transferencia-label">Transferencia:</span>
+              <div class="transferencia-precio-cantidad">
+                <span class="transferencia-value">${transferPriceFormatted}</span>
+                <div class="cantidad-controles">
+                  <button class="btn-cantidad menos" data-slug="${item.slug}">−</button>
+                  <span class="cantidad">${item.cantidad}</span>
+                  <button class="btn-cantidad mas" data-slug="${item.slug}">+</button>
+                </div>
+              </div>
+            </div>
+            <button data-slug="${item.slug}" class="btn-remove">Eliminar</button>
+          </div>
+        `;
+
+        contenedor.appendChild(card);
+        // Sumar precio de transferencia por unidad
+        totalCarrito += transferPriceValue * item.cantidad;
+      });
+
+      const get = id => {
+        if (id === 'envio') {
+          const envioRadio = document.querySelector('input[name="envio"]:checked');
+          return envioRadio ? envioRadio.value : '';
+        }
+        return document.getElementById(id)?.value || '';
+      };
+      const nombre = get('nombre');
+      const pago = get('pago');
+      const envio = get('envio');
+
+      let envioCosto = 0;
+      let envioTexto = "";
+
+      switch (envio) {
+        case "Corrientes Retiro en Sucursal":
+          envioTexto = "Sin costo";
+          break;
+        case "Corrientes Envio a Domicilio":
+          envioTexto = "A coordinar precio";
+          break;
+        case "Correo Argentino - Sucursal":
+          envioCosto = 6500;
+          envioTexto = `$${envioCosto}`;
+          break;
+        case "Correo Argentino - Domicilio":
+          envioCosto = 8500;
+          envioTexto = `$${envioCosto}`;
+          break;
+        default:
+          envioTexto = "A coordinar precio";
+      }
+
+      // Calcular precios según método de pago
+      // totalCarrito ya contiene el precio de transferencia (base)
+      const isTarjeta = (pago === 'tarjeta');
+      const isTransferenciaDirecta = (pago === 'transferencia_directa');
+      
+      let subtotalCalculado = totalCarrito; // Precio de transferencia (base)
+      let envioCalculado = envioCosto;
+      
+      if (isTarjeta) {
+        // Si elige tarjeta, aplicar 25% más al subtotal (redondeado al 100)
+        subtotalCalculado = Math.round((totalCarrito * 1.25) / 100) * 100;
+        // También aplicar 25% más al envío (redondeado al 100)
+        envioCalculado = envioCosto > 0 ? Math.round((envioCosto * 1.25) / 100) * 100 : 0;
+      }
+      // Si es transferencia directa, el precio ya es el de transferencia (sin cambios)
+      
+      // Aplicar descuento de cupón si existe (revalidar primero)
+      let descuentoCupon = 0;
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      if (couponData && couponData.valid) {
+        // Revalidar el cupón con el carrito actual y obtener el nuevo descuento
+        const revalidationResult = await revalidarCupon(couponData.coupon.code, subtotalCalculado, carrito);
+        if (revalidationResult && revalidationResult.valid) {
+          // Usar el nuevo descuento calculado, no el antiguo
+          descuentoCupon = revalidationResult.discount || 0;
+          // Actualizar el localStorage con el nuevo descuento
+          couponData.discount = descuentoCupon;
+          localStorage.setItem('applied_coupon', JSON.stringify(couponData));
+        } else {
+          // Si el cupón ya no es válido, removerlo
+          localStorage.removeItem('applied_coupon');
+          ocultarCuponAplicado();
+          mostrarMensajeCupon('El cupón ya no es válido para los productos en tu carrito', 'error');
+        }
+      }
+      
+      let totalFinal = subtotalCalculado + envioCalculado - descuentoCupon;
+      
+      // El total no puede ser negativo
+      if (totalFinal < 0) {
+        totalFinal = 0;
+      }
+
+      // Formatear totales para visualización (con separadores de miles)
+      carritoTotalEl.textContent = `$${subtotalCalculado.toLocaleString('es-AR')}`;
+      // Mostrar el envío calculado (puede tener 25% adicional si es tarjeta)
+      envioInfoEl.textContent = envioCalculado > 0 ? `$${envioCalculado.toLocaleString('es-AR')}` : envioTexto;
+      
+      // Mostrar descuento si hay cupón aplicado
+      const descuentoItem = document.getElementById('descuento-item');
+      const descuentoAmount = document.getElementById('descuento-amount');
+      if (descuentoCupon > 0) {
+        if (descuentoItem) descuentoItem.style.display = 'flex';
+        if (descuentoAmount) descuentoAmount.textContent = `-$${descuentoCupon.toLocaleString('es-AR')}`;
+      } else {
+        if (descuentoItem) descuentoItem.style.display = 'none';
+      }
+      
+      totalEl.textContent = `$${totalFinal.toLocaleString('es-AR')}`;
+      
+      // Actualizar "Total a pagar" antes del botón
+      const totalAPagarDisplay = document.getElementById('total-a-pagar-display');
+      if (totalAPagarDisplay) {
+        totalAPagarDisplay.textContent = `$${totalFinal.toLocaleString('es-AR')}`;
+      }
+      
+      // Mostrar/ocultar datos bancarios y botones según método de pago
+      const datosBancarios = document.getElementById('datos-bancarios');
+      const totalTransferir = document.getElementById('total-transferir');
+      const btnFinalizar = document.getElementById('btn-finalizar');
+      const btnFinalizarDirecta = document.getElementById('btn-finalizar-directa');
+      const proofImageInput = document.getElementById('proof_image');
+      
+      if (isTransferenciaDirecta) {
+        if (datosBancarios) datosBancarios.style.display = 'block';
+        if (totalTransferir) totalTransferir.textContent = `$${totalFinal.toLocaleString('es-AR')}`;
+        if (btnFinalizar) btnFinalizar.style.display = 'none';
+        if (btnFinalizarDirecta) btnFinalizarDirecta.style.display = 'inline-block';
+        // NO resetear el input aquí, solo reconfigurar el handler si es necesario
+        // Configurar el handler después de un pequeño delay para asegurar que el DOM esté listo
+        setTimeout(() => {
+          if (typeof setupProofImageChangeHandler === 'function') {
+            setupProofImageChangeHandler();
+          }
+        }, 50);
+      } else {
+        if (datosBancarios) datosBancarios.style.display = 'none';
+        if (btnFinalizar) btnFinalizar.style.display = 'inline-block';
+        if (btnFinalizarDirecta) btnFinalizarDirecta.style.display = 'none';
+      }
+
+      let datosCliente = `*Datos del cliente:*\nNombre: ${nombre}\nTipo de envío: ${envio}`;
+
+      if (envio === "Corrientes Envio a Domicilio") {
+        datosCliente += `\nDirección: ${get('direccion')}`;
+      } else if (envio === "Correo Argentino - Sucursal") {
+        datosCliente += `\nProvincia: ${get('provincia')}\nSucursal: ${get('sucursal')}\nEmail: ${get('email')}`;
+      } else if (envio === "Correo Argentino - Domicilio") {
+        datosCliente += `\nProvincia: ${get('provincia')}\nLocalidad: ${get('localidad')}\nDirección: ${get('direccion')}\nCP: ${get('cp')}\nEmail: ${get('email')}\nObservaciones: ${get('observaciones')}`;
+      }
+
+      let metodoPagoTexto = 'Transferencia';
+      if (pago === 'tarjeta') {
+        metodoPagoTexto = 'Mercadopago o tarjeta - Mismo precio hasta en 3 cuotas';
+      }
+      
+      const texto = encodeURIComponent(`Hola *Lume*, me gustaría hacer un pedido de:
+${carrito.map(p => `• ${p.name} - ${p.price} x${p.cantidad}`).join("\n")}
+Forma de pago: ${metodoPagoTexto}
+Aclaraciones: ${get('aclaraciones') || 'Ninguna'}
+*Tu carrito: $${subtotalCalculado}*
+Envío: ${envioCalculado > 0 ? `$${envioCalculado.toLocaleString('es-AR')}` : envioTexto}
+*Total a pagar: $${totalFinal}*
+
+${datosCliente}
+
+Gracias!`);
+
+      // Actualizar link de WhatsApp (alternativa)
+      const whatsappBtn = document.querySelector('#btn-whatsapp');
+      if (whatsappBtn) {
+        whatsappBtn.href = `https://wa.me/5493795330156?text=${texto}`;
+      }
+      
+      updateCartCount();
+    }
+
+    // Función para crear preferencia de MercadoPago
+    async function crearPreferenciaMercadoPago() {
+      const carrito = getCarrito();
+      if (carrito.length === 0) {
+        alert('El carrito está vacío');
+        return;
+      }
+
+      const nombre = document.getElementById('nombre')?.value;
+      if (!nombre) {
+        alert('Por favor, completa tu nombre');
+        document.getElementById('nombre')?.focus();
+        return;
+      }
+
+      // Validar teléfono
+      const telefono = document.getElementById('telefono')?.value || '';
+      if (!telefono) {
+        alert('Por favor, completa tu número de teléfono');
+        document.getElementById('telefono')?.focus();
+        return;
+      }
+      
+      // Verificar método de pago
+      const pago = document.getElementById('pago')?.value || '';
+      if (pago === 'transferencia_directa') {
+        // No debería llegar aquí, pero por seguridad
+        alert('Para transferencia directa, usa el botón "Confirmar pedido"');
+        return;
+      }
+
+      // Preparar items
+      const items = carrito.map(item => ({
+        name: item.name,
+        price: item.price,
+        cantidad: item.cantidad
+      }));
+
+      // Preparar datos del pagador
+      const payer = {
+        name: nombre,
+        email: document.getElementById('email')?.value || '',
+        phone: telefono
+      };
+
+      // Preparar datos adicionales
+      const formData = {
+        items: items,
+        payer: payer,
+         shipping: {
+           type: (document.querySelector('input[name="envio"]:checked')?.value || ''),
+           address: document.getElementById('direccion')?.value || '',
+           province: document.getElementById('provincia')?.value || '',
+           locality: document.getElementById('localidad')?.value || '',
+           postal_code: document.getElementById('cp')?.value || ''
+         },
+        payment_method: document.getElementById('pago')?.value || 'transferencia',
+        notes: document.getElementById('aclaraciones')?.value || ''
+      };
+
+      // Deshabilitar botón mientras procesa
+      finalizarBtn.disabled = true;
+      finalizarBtn.textContent = 'Procesando...';
+
+      try {
+        const response = await fetch('/api/mercadopago/create-preference.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.checkout_url) {
+          // Guardar preference_id en sessionStorage para poder cancelar la orden si el usuario no completa el pago
+          if (data.preference_id) {
+            sessionStorage.setItem('mp_preference_id', data.preference_id);
+          }
+          // Redirigir a MercadoPago
+          window.location.href = data.checkout_url;
+        } else {
+          alert('Error al procesar el pago: ' + (data.error || 'Error desconocido'));
+          finalizarBtn.disabled = false;
+          finalizarBtn.textContent = '💳 Pagar con MercadoPago';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión. Por favor, intenta nuevamente.');
+        finalizarBtn.disabled = false;
+        finalizarBtn.textContent = '💳 Pagar con MercadoPago';
+      }
+    }
+
+    // Agregar evento al botón de MercadoPago
+    if (finalizarBtn) {
+      finalizarBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevenir submit del formulario
+        e.stopPropagation(); // Detener propagación
+        crearPreferenciaMercadoPago();
+      });
+    }
+    
+    // Inicializar event listeners del comprobante usando delegación de eventos
+    // Esto asegura que funcione incluso si los elementos se recrean
+    document.addEventListener('click', (e) => {
+      const btnSubirComprobante = e.target.closest('#btn-subir-comprobante');
+      if (!btnSubirComprobante) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const proofImageInput = document.getElementById('proof_image');
+      if (proofImageInput) {
+        proofImageInput.click();
+      }
+    });
+    
+    // Event listener para el cambio de archivo usando delegación de eventos
+    // Escuchar en el document porque el input puede recrearse
+    let proofImageChangeHandler = null;
+    function setupProofImageChangeHandler() {
+      const proofImageInput = document.getElementById('proof_image');
+      if (!proofImageInput) return;
+      
+      // Remover handler anterior si existe
+      if (proofImageChangeHandler) {
+        proofImageInput.removeEventListener('change', proofImageChangeHandler);
+      }
+      
+      // Crear nuevo handler
+      proofImageChangeHandler = (e) => {
+        const file = e.target.files[0];
+        const proofPreview = document.getElementById('proof-preview');
+        const proofPreviewImg = document.getElementById('proof-preview-img');
+        const btnSubirComprobante = document.getElementById('btn-subir-comprobante');
+        
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (loadEvent) => {
+            if (proofPreviewImg) {
+              proofPreviewImg.src = loadEvent.target.result;
+            }
+            if (proofPreview) {
+              proofPreview.style.display = 'block';
+            }
+            // Cambiar texto del botón de subir a indicar que ya hay archivo
+            if (btnSubirComprobante) {
+              btnSubirComprobante.textContent = '📎 Cambiar comprobante';
+            }
+          };
+          reader.onerror = () => {
+            console.error('Error al leer el archivo');
+            alert('Error al leer el archivo. Por favor, intenta con otra imagen.');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          if (proofPreview) {
+            proofPreview.style.display = 'none';
+          }
+          if (btnSubirComprobante) {
+            btnSubirComprobante.textContent = '📎 Subir comprobante de pago';
+          }
+        }
+      };
+      
+      // Agregar el handler
+      proofImageInput.addEventListener('change', proofImageChangeHandler);
+    }
+    
+    // Configurar el handler inicial y después de cada render
+    setupProofImageChangeHandler();
+    
+    // Agregar evento al botón de confirmar pedido (transferencia directa) usando delegación de eventos
+    document.addEventListener('click', async (e) => {
+      const btnFinalizarDirecta = e.target.closest('#btn-finalizar-directa');
+      if (!btnFinalizarDirecta) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const proofImageInput = document.getElementById('proof_image');
+      if (!proofImageInput) return;
+      
+      // Verificar que el método de pago sea transferencia directa
+      const pago = document.getElementById('pago')?.value || '';
+      if (pago !== 'transferencia_directa') return;
+      
+      const nombre = document.getElementById('nombre')?.value;
+      if (!nombre) {
+        alert('Por favor, completa tu nombre');
+        document.getElementById('nombre')?.focus();
+        return;
+      }
+      
+      const telefono = document.getElementById('telefono')?.value;
+      if (!telefono) {
+        alert('Por favor, completa tu número de teléfono');
+        document.getElementById('telefono')?.focus();
+        return;
+      }
+      
+      // Verificar si hay comprobante subido
+      const proofFile = proofImageInput.files[0];
+      if (!proofFile) {
+        alert('Para confirmar su pedido tiene que subir el comprobante de pago');
+        return;
+      }
+      
+      // Deshabilitar botón mientras procesa
+      btnFinalizarDirecta.disabled = true;
+      btnFinalizarDirecta.textContent = 'Procesando...';
+      
+      try {
+        // Obtener datos del carrito
+        const carrito = getCarrito();
+        
+        // Función para extraer el valor numérico del precio (remueve $, puntos, comas, etc.)
+        function extractPriceValueLocal(priceString) {
+          if (!priceString) return 0;
+          // Remover todos los caracteres no numéricos (incluyendo $, puntos, comas, espacios)
+          const cleaned = priceString.replace(/[^0-9]/g, '');
+          return parseInt(cleaned, 10) || 0;
+        }
+
+        // Calcular total desde precios de transferencia (ya que es transferencia directa)
+        let totalCarrito = 0;
+        carrito.forEach(item => {
+          // El precio guardado es de transferencia, usar directamente
+          totalCarrito += extractPriceValueLocal(item.price) * item.cantidad;
+        });
+        
+         const envioRadio = document.querySelector('input[name="envio"]:checked');
+         const envio = envioRadio ? envioRadio.value : '';
+         let envioCosto = 0;
+         if (envio.includes('Correo Argentino - Sucursal')) {
+           envioCosto = 6500;
+         } else if (envio.includes('Correo Argentino - Domicilio')) {
+           envioCosto = 8500;
+         }
+        
+        // Aplicar descuento de cupón si existe (revalidar primero para obtener el descuento actualizado)
+        const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+        let descuentoCupon = 0;
+        if (couponData && couponData.valid) {
+          // Revalidar para obtener el descuento actualizado con el carrito actual
+          const revalidationResult = await revalidarCupon(couponData.coupon.code, totalCarrito, carrito);
+          if (revalidationResult && revalidationResult.valid) {
+            descuentoCupon = revalidationResult.discount || 0;
+          } else {
+            // Si el cupón ya no es válido, no aplicar descuento
+            descuentoCupon = 0;
+          }
+        }
+        
+        const totalFinal = totalCarrito + envioCosto - descuentoCupon;
+        
+        // El total no puede ser negativo
+        if (totalFinal < 0) {
+          totalFinal = 0;
+        }
+        
+        // Preparar FormData
+        const formData = new FormData();
+        formData.append('proof_image', proofFile);
+        formData.append('nombre', nombre);
+        formData.append('telefono', telefono);
+        formData.append('email', document.getElementById('email')?.value || '');
+        formData.append('total_amount', totalFinal);
+        formData.append('items', JSON.stringify(carrito.map(item => ({
+          name: item.name,
+          price: item.price,
+          cantidad: item.cantidad
+        }))));
+        formData.append('shipping', JSON.stringify({
+          type: envio,
+          address: document.getElementById('direccion')?.value || '',
+          province: document.getElementById('provincia')?.value || '',
+          locality: document.getElementById('localidad')?.value || '',
+          postal_code: document.getElementById('cp')?.value || ''
+        }));
+        formData.append('notes', document.getElementById('aclaraciones')?.value || '');
+        
+        const response = await fetch('/api/orders/create-direct-transfer.php', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Limpiar carrito
+          saveCarrito([]);
+          // Redirigir a página de pendiente (transferencia directa requiere confirmación)
+          const orderId = data.order_id ? `?order_id=${data.order_id}` : '';
+          window.location.href = `/carrito/pendiente${orderId}`;
+        } else {
+          alert('Error al crear el pedido: ' + (data.error || 'Error desconocido'));
+          btnFinalizarDirecta.disabled = false;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error de conexión. Por favor, intenta nuevamente.');
+        btnFinalizarDirecta.disabled = false;
+      }
+    });
+    
+    // También prevenir submit del formulario si se presiona Enter
+    const formDatos = document.getElementById('form-datos');
+    if (formDatos) {
+      formDatos.addEventListener('submit', (e) => {
+        e.preventDefault();
+        crearPreferenciaMercadoPago();
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const slug = e.target.dataset.slug;
+      if (!slug) return;
+
+      let carrito = getCarrito();
+      const index = carrito.findIndex(p => p.slug === slug);
+      if (index === -1) return;
+
+      const item = carrito[index];
+
+      if (e.target.classList.contains("btn-remove")) {
+        carrito.splice(index, 1);
+      } else if (e.target.classList.contains("mas")) {
+        item.cantidad++;
+      } else if (e.target.classList.contains("menos")) {
+        // Usar min_quantity del item si existe, sino usar lógica antigua como fallback
+        const minCantidad = item.min_quantity || (item.categoria === "souvenirs" ? 10 : 1);
+
+        if (item.cantidad > minCantidad) {
+          item.cantidad--;
+        } else if (!item.min_quantity) {
+          // Solo eliminar si no tiene min_quantity (comportamiento antiguo)
+          carrito.splice(index, 1);
+        }
+        // Si tiene min_quantity, no se puede reducir por debajo ni eliminar
+      }
+
+      saveCarrito(carrito);
+      
+      // Revalidar cupón si existe antes de renderizar
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      if (couponData && couponData.valid) {
+        // Calcular total para revalidación (precio base de transferencia)
+        let totalCarrito = 0;
+        carrito.forEach((item) => {
+          const transferPriceValue = extractPriceValue(item.price);
+          totalCarrito += transferPriceValue * item.cantidad;
+        });
+        const pago = document.getElementById('pago')?.value || '';
+        // Si es tarjeta, aplicar 25% más para la validación del cupón
+        if (pago === 'tarjeta') {
+          totalCarrito = Math.round((totalCarrito * 1.25) / 100) * 100;
+        }
+        // Revalidar asíncronamente y actualizar descuento
+        revalidarCupon(couponData.coupon.code, totalCarrito, carrito).then(result => {
+          if (!result || !result.valid) {
+            localStorage.removeItem('applied_coupon');
+            ocultarCuponAplicado();
+            mostrarMensajeCupon('El cupón ya no es válido para los productos en tu carrito', 'error');
+          } else {
+            // Actualizar el descuento en localStorage con el nuevo valor
+            couponData.discount = result.discount || 0;
+            localStorage.setItem('applied_coupon', JSON.stringify(couponData));
+          }
+          renderCarrito();
+        });
+      } else {
+        renderCarrito();
+      }
+    });
+
+    vaciarBtn.addEventListener("click", () => {
+      if (confirm("¿Seguro que querés vaciar el carrito?")) {
+        saveCarrito([]);
+        // Remover cupón si se vacía el carrito
+        localStorage.removeItem('applied_coupon');
+        ocultarCuponAplicado();
+        mostrarMensajeCupon('', '');
+        renderCarrito();
+      }
+    });
+
+    // Función para aplicar cupón
+    async function aplicarCupon() {
+      const code = document.getElementById('coupon-code')?.value.trim().toUpperCase();
+      if (!code) {
+        mostrarMensajeCupon('Ingresa un código de cupón', 'error');
+        return;
+      }
+      
+      const carrito = getCarrito();
+      if (carrito.length === 0) {
+        mostrarMensajeCupon('El carrito está vacío', 'error');
+        return;
+      }
+      
+      // Calcular total del carrito (precio base de transferencia)
+      let totalCarrito = 0;
+      carrito.forEach((item) => {
+        const transferPriceValue = extractPriceValue(item.price);
+        totalCarrito += transferPriceValue * item.cantidad;
+      });
+      
+      const pago = document.getElementById('pago')?.value || '';
+      // Si es tarjeta, aplicar 25% más para la validación del cupón
+      if (pago === 'tarjeta') {
+        totalCarrito = Math.round((totalCarrito * 1.25) / 100) * 100;
+      }
+      
+      // Preparar items para validación
+      const items = carrito.map(item => ({
+        slug: item.slug,
+        categoria: item.categoria,
+        id: item.slug // Usar slug como ID para validación
+      }));
+      
+      try {
+        const response = await fetch('/api/coupons/validate.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code: code,
+            total_amount: totalCarrito,
+            items: items
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.valid) {
+          // Guardar cupón aplicado
+          localStorage.setItem('applied_coupon', JSON.stringify(data));
+          mostrarCuponAplicado(data.coupon.code, data.discount);
+          mostrarMensajeCupon(data.message, 'success');
+          renderCarrito(); // Recalcular totales
+        } else {
+          mostrarMensajeCupon(data.message || 'Código de cupón no válido', 'error');
+          localStorage.removeItem('applied_coupon');
+          ocultarCuponAplicado();
+        }
+      } catch (error) {
+        console.error('Error al validar cupón:', error);
+        mostrarMensajeCupon('Error al validar el cupón. Por favor, intenta nuevamente.', 'error');
+      }
+    }
+    
+    // Función para revalidar cupón con el carrito actual
+    async function revalidarCupon(code, totalAmount, carrito) {
+      if (!code || !carrito || carrito.length === 0) {
+        return { valid: false, discount: 0 };
+      }
+      
+      // Preparar items para validación
+      const items = carrito.map(item => ({
+        slug: item.slug,
+        categoria: item.categoria,
+        id: item.slug
+      }));
+      
+      try {
+        const response = await fetch('/api/coupons/validate.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            code: code,
+            total_amount: totalAmount,
+            items: items
+          })
+        });
+        
+        const data = await response.json();
+        if (data.success && data.valid) {
+          return { valid: true, discount: data.discount || 0 };
+        } else {
+          return { valid: false, discount: 0 };
+        }
+      } catch (error) {
+        console.error('Error al revalidar cupón:', error);
+        return { valid: false, discount: 0 };
+      }
+    }
+    
+    // Función para remover cupón
+    function removerCupon() {
+      localStorage.removeItem('applied_coupon');
+      ocultarCuponAplicado();
+      mostrarMensajeCupon('', '');
+      const couponInput = document.getElementById('coupon-code');
+      if (couponInput) couponInput.value = '';
+      renderCarrito(); // Recalcular totales
+    }
+    
+    // Función para mostrar mensaje de cupón
+    function mostrarMensajeCupon(message, type) {
+      const messageEl = document.getElementById('coupon-message');
+      if (!messageEl) return;
+      
+      if (!message) {
+        messageEl.textContent = '';
+        messageEl.className = 'coupon-message';
+        return;
+      }
+      
+      messageEl.textContent = message;
+      messageEl.className = `coupon-message ${type}`;
+    }
+    
+    // Función para mostrar cupón aplicado
+    function mostrarCuponAplicado(code, discount) {
+      const appliedEl = document.getElementById('coupon-applied');
+      const codeDisplay = document.getElementById('coupon-code-display');
+      if (appliedEl) appliedEl.style.display = 'flex';
+      if (codeDisplay) codeDisplay.textContent = `Cupón: ${code} (-$${discount.toLocaleString('es-AR')})`;
+    }
+    
+    // Función para ocultar cupón aplicado
+    function ocultarCuponAplicado() {
+      const appliedEl = document.getElementById('coupon-applied');
+      if (appliedEl) appliedEl.style.display = 'none';
+    }
+    
+    // Event listeners para cupón
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'btn-aplicar-cupon' || e.target.closest('#btn-aplicar-cupon')) {
+        e.preventDefault();
+        e.stopPropagation();
+        aplicarCupon();
+      }
+      if (e.target.id === 'btn-remover-cupon' || e.target.closest('#btn-remover-cupon')) {
+        e.preventDefault();
+        e.stopPropagation();
+        removerCupon();
+      }
+    });
+    
+    // Aplicar cupón con Enter (usar delegación de eventos para que funcione siempre)
+    document.addEventListener('keypress', (e) => {
+      if (e.target.id === 'coupon-code' && e.key === 'Enter') {
+        e.preventDefault();
+        aplicarCupon();
+      }
+    });
+    
+    // Cargar cupón aplicado al iniciar (después de que el DOM esté listo)
+    setTimeout(() => {
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      if (couponData && couponData.valid) {
+        mostrarCuponAplicado(couponData.coupon.code, couponData.discount);
+      }
+    }, 100);
+
+    document.getElementById("form-datos").addEventListener("input", renderCarrito);
+    
+    // Event listener para método de pago (actualizar precios de envío)
+    const pagoSelect = document.getElementById("pago");
+    if (pagoSelect) {
+      pagoSelect.addEventListener("change", () => {
+        actualizarPreciosEnvio();
+        renderCarrito();
+      });
+    }
+    
+    // Event listeners para radio buttons de envío
+    document.querySelectorAll('input[name="envio"]').forEach(radio => {
+      radio.addEventListener("change", () => {
+        actualizarFormularioEnvio();
+        renderCarrito();
+      });
+    });
+
+    // Botón "Ver resumen" - hacer scroll al resumen
+    const btnVerResumen = document.getElementById('btn-ver-resumen');
+    if (btnVerResumen) {
+      btnVerResumen.addEventListener('click', () => {
+        const resumen = document.querySelector('.carrito-resumen');
+        if (resumen) {
+          resumen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+
+      actualizarFormularioEnvio();
+      actualizarPreciosEnvio();
+      renderCarrito();
+    }
+
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCarrito);
+    } else {
+      initCarrito();
+    }
+  </script>
+
+
+</Layout>

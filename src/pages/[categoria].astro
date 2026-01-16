@@ -1,0 +1,225 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ProductSearch from '../components/ProductSearch.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import InfoVelas from '../components/InfoVelas.astro';
+
+// Usar prerender=true para generar archivos estáticos (Hostinger no soporta SSR)
+// El JavaScript carga todo dinámicamente desde la API PHP
+export const prerender = true;
+
+export async function getStaticPaths() {
+  // Generar un placeholder que funcione para todas las categorías dinámicas
+  // El .htaccess redirige todas las categorías a /[categoria]/index.html
+  // y el JavaScript detecta la categoría desde la URL y carga los datos desde la API
+  return [{ params: { categoria: 'placeholder' } }];
+}
+---
+
+<Layout>
+  <div id="category-page-container">
+    <div id="breadcrumb-container"></div>
+
+    <section class="catalogo">
+      <div class="container">
+        <div class="section-header">
+          <h1 id="category-title">Cargando...</h1>
+          <p id="category-description"></p>
+        </div>
+        
+        <!-- Componente de búsqueda -->
+        <ProductSearch />
+        
+        <!-- Contenedor para productos dinámicos desde la BD -->
+        <div class="grid products-grid">
+          <!-- Los productos se cargarán aquí automáticamente desde la API -->
+        </div>
+      </div>
+    </section>
+
+    <InfoVelas />
+  </div>
+
+  <style>
+    .catalogo {
+      padding: var(--space-lg) 0;
+      background: linear-gradient(135deg, var(--surface-light) 0%, #fff 100%);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: var(--space-lg);
+    }
+
+    .section-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--space-sm);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .section-header p {
+      font-size: var(--font-size-lg);
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+    }
+
+    /* 📱 RESPONSIVE DESIGN */
+    @media (max-width: 1200px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 0;
+      }
+      
+      .section-header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</Layout>
+
+<script is:inline>
+(function() {
+  // Obtener categoría desde la URL
+  function getCategoriaFromPath() {
+    const path = window.location.pathname;
+    const match = path.match(/^\/([^\/]+)\/?$/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return null;
+  }
+
+  // Cargar información de la categoría desde la API
+  async function loadCategoryInfo() {
+    const categoriaSlug = getCategoriaFromPath();
+    if (!categoriaSlug) return;
+
+    try {
+      const response = await fetch('/api/categories.php');
+      const data = await response.json();
+      
+      if (data.success && data.categories) {
+        const category = data.categories.find(cat => cat.slug === categoriaSlug);
+        
+        if (category) {
+          // Actualizar título
+          const titleEl = document.getElementById('category-title');
+          if (titleEl) {
+            // Usar catalog_title si existe, sino usar formato por defecto
+            if (category.catalog_title) {
+              titleEl.textContent = category.catalog_title;
+            } else {
+              titleEl.textContent = `Catálogo de ${category.name}`;
+            }
+          }
+          
+          // Actualizar descripción si existe
+          const descEl = document.getElementById('category-description');
+          if (descEl && category.description) {
+            descEl.textContent = category.description;
+          } else if (descEl && category.min_quantity) {
+            descEl.textContent = `Cantidad mínima: ${category.min_quantity} unidades`;
+          }
+          
+          // Actualizar breadcrumb
+          updateBreadcrumb(category.name);
+        } else {
+          // Si no se encuentra la categoría, mostrar error
+          const titleEl = document.getElementById('category-title');
+          if (titleEl) {
+            titleEl.textContent = 'Categoría no encontrada';
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar información de categoría:', error);
+      // Fallback: usar el slug como nombre
+      const titleEl = document.getElementById('category-title');
+      if (titleEl) {
+        const categoriaName = categoriaSlug.charAt(0).toUpperCase() + categoriaSlug.slice(1);
+        titleEl.textContent = `Catálogo de ${categoriaName}`;
+      }
+      updateBreadcrumb(categoriaSlug);
+    }
+  }
+
+  function updateBreadcrumb(categoryName) {
+    const container = document.getElementById('breadcrumb-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="breadcrumb">
+          <div class="container">
+            <a href="/">Inicio</a>
+            <span class="separator">/</span>
+            <span class="current">${categoryName}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Inicializar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCategoryInfo();
+      // Asegurar que los productos se carguen después de cargar la info de categoría
+      setTimeout(() => {
+        if (window.initProductsLoader && document.querySelector('.products-grid')) {
+          const categoriaSlug = getCategoriaFromPath();
+          if (categoriaSlug) {
+            window.initProductsLoader({
+              containerSelector: '.products-grid',
+              categoria: categoriaSlug,
+              autoLoad: true
+            });
+          }
+        }
+      }, 100);
+    });
+  } else {
+    loadCategoryInfo();
+    // Asegurar que los productos se carguen después de cargar la info de categoría
+    setTimeout(() => {
+      if (window.initProductsLoader && document.querySelector('.products-grid')) {
+        const categoriaSlug = getCategoriaFromPath();
+        if (categoriaSlug) {
+          window.initProductsLoader({
+            containerSelector: '.products-grid',
+            categoria: categoriaSlug,
+            autoLoad: true
+          });
+        }
+      }
+    }, 100);
+  }
+})();
+</script>
+

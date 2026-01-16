@@ -1,0 +1,240 @@
+<section class="info-velas">
+  <div class="container">
+    <div class="info-header">
+      <div class="header-badge">ℹ️ Información importante</div>
+      <h2>Antes de hacer tu pedido</h2>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="card-icon">⏱️</div>
+        <div class="card-content">
+          <h3>Tiempo de producción</h3>
+          <p><strong>2 días hábiles</strong> para crear tu vela personalizada. En el caso de velas para souvenir, <strong>el tiempo depende de la cantidad.</strong></p>
+        </div>
+      </div>
+
+
+
+      <div class="info-card">
+        <div class="card-icon">💳</div>
+        <div class="card-content">
+          <h3>Pagos</h3>
+          <p>
+            Podés pagar a través de <strong>MercadoPago</strong> hasta en <strong>3 cuotas sin interés</strong>. Si abonás por <strong>transferencia</strong> o <strong>efectivo</strong> tenés un <strong>25% de descuento</strong> sobre el precio publicado.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="info-card">
+        <div class="card-icon">🚚</div>
+        <div class="card-content">
+          <h3>Envíos</h3>
+          <p><strong>Todo el país</strong> por Correo Argentino o retiro en Corrientes</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-icon">🎨</div>
+        <div class="card-content">
+          <h3>Personalización</h3>
+          <p>Dejá tus <strong>aclaraciones especiales</strong> en el pedido</p>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .info-velas {
+    padding: var(--space-lg) 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    margin: 0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .info-header {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    color: white;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .info-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .info-card {
+    background: white;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid #f0f0f0;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+  }
+
+  .info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    transform: scaleX(0);
+    transition: transform var(--transition-normal);
+  }
+
+  .info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: #e0a4ce;
+  }
+
+  .info-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+    border: 2px solid #e0e0e0;
+  }
+
+  .card-content h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xs) 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .card-content p {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    font-size: var(--font-size-sm);
+    margin: 0;
+  }
+
+  .card-content strong {
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  /* 📱 RESPONSIVE DESIGN */
+  @media (max-width: 768px) {
+    .info-velas {
+      padding: var(--space-md) 0;
+    }
+
+    .info-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-sm);
+      max-width: 600px;
+      padding: 0 var(--space-sm);
+    }
+
+    .info-card {
+      padding: var(--space-sm);
+      gap: var(--space-sm);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      min-width: 45px;
+      height: 45px;
+    }
+
+    .card-content h3 {
+      font-size: var(--font-size-sm);
+    }
+
+    .card-content p {
+      font-size: var(--font-size-xs);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .info-velas {
+      padding: var(--space-sm) 0;
+    }
+
+    .info-header h2 {
+      font-size: 1.3rem;
+    }
+
+    .header-badge {
+      font-size: var(--font-size-xs);
+      padding: var(--space-xs) var(--space-sm);
+    }
+
+    .info-grid {
+      max-width: 100%;
+      gap: var(--space-xs);
+      padding: 0 var(--space-xs);
+    }
+
+    .info-card {
+      padding: var(--space-xs);
+      gap: var(--space-xs);
+    }
+
+    .card-icon {
+      font-size: 1.3rem;
+      min-width: 40px;
+      height: 40px;
+    }
+
+    .card-content h3 {
+      font-size: var(--font-size-xs);
+    }
+
+    .card-content p {
+      font-size: var(--font-size-xs);
+      line-height: 1.3;
+    }
+  }
+</style>

@@ -1,0 +1,6 @@
+{
+  "console-ninja.enabled": false,
+  "console-ninja.disableInProduction": true,
+  "console-ninja.disableCodeInjection": true
+}
+

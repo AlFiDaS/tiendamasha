@@ -1,0 +1,160 @@
+---
+// Componente de búsqueda para souvenirs
+---
+
+<div class="product-search-container">
+  <div class="search-input-wrapper">
+    <input 
+      type="text" 
+      id="souvenirSearchInput"
+      class="search-input" 
+      placeholder="Buscar souvenirs..."
+      autocomplete="off"
+    />
+    <div class="search-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+      <div id="searchResults" class="search-results">
+      <div class="search-results-header">
+        <span class="results-count">Resultados: <span id="resultsCount">0</span></span>
+        <button id="closeSearch" class="close-search-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    <div id="searchResultsList" class="search-results-list">
+      <!-- Los resultados se insertarán aquí dinámicamente -->
+    </div>
+  </div>
+</div>
+
+<script is:inline src="/js/souvenir-search.js"></script>
+
+<style>
+  /* Solo estilos básicos del contenedor - sin conflictos */
+  .product-search-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    z-index: 100;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1.5rem;
+    border: 2px solid #e8e8e8;
+    border-radius: 50px;
+    font-size: 1rem;
+    background: white;
+    color: #2c2c2c;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    outline: none;
+    font-family: inherit;
+  }
+
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 4px 16px rgba(224, 164, 206, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .search-input::placeholder {
+    color: #999;
+    font-style: italic;
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    pointer-events: none;
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e8e8e8;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 101;
+  }
+
+  .search-results-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .results-count {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .close-search-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .close-search-btn:hover {
+    background: #e8e8e8;
+    color: #666;
+  }
+
+  .search-results-list {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  /* 🎯 AJUSTES PARA MÓVIL - Z-INDEX REDUCIDO */
+  @media (max-width: 767px) {
+    .product-search-container {
+      z-index: 50;
+    }
+    
+    .search-results {
+      z-index: 51;
+    }
+  }
+</style>

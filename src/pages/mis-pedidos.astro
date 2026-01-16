@@ -1,0 +1,740 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+---
+
+<Layout>
+  <Breadcrumb items={[
+    { text: "Inicio", href: "/" },
+    { text: "Mis Pedidos" }
+  ]} />
+
+  <section class="orders-section">
+    <div class="container">
+      <div class="section-header">
+        <h1>📦 Mis Pedidos</h1>
+        <p>Consulta el estado de tus pedidos</p>
+      </div>
+      
+      <!-- Formulario de búsqueda inicial -->
+      <div id="search-form" class="orders-search-form">
+        <div class="search-card">
+          <h2>Buscar mi pedido</h2>
+          <p>Ingresa tu número de pedido y teléfono para verificar tu identidad</p>
+          
+          <div class="form-group">
+            <label for="order-id">Número de pedido</label>
+            <input 
+              type="text" 
+              id="order-id" 
+              placeholder="Ej: 29 o #29"
+              class="form-input"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="order-phone">Teléfono (sin espacios ni guiones)</label>
+            <input 
+              type="tel" 
+              id="order-phone" 
+              placeholder="Ej: 3794123456"
+              class="form-input"
+            />
+          </div>
+          
+          <button onclick="verifyAndSearch()" class="btn-search">Buscar Pedido</button>
+          
+          <div class="help-text">
+            <p>¿No recuerdas tu teléfono?</p>
+            <a href="#" id="whatsapp-link" class="whatsapp-link" onclick="openWhatsApp(); return false;">
+              📱 Contáctanos por WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contenedor de resultados -->
+      <div id="orders-container" class="orders-list" style="display: none;">
+        <!-- Los pedidos se mostrarán aquí -->
+      </div>
+      
+      <!-- Estado vacío -->
+      <div id="empty-orders" class="empty-orders" style="display: none;">
+        <div class="empty-icon">📦</div>
+        <h2>No se encontró el pedido</h2>
+        <p>Verifica que hayas ingresado correctamente el número de pedido y tu teléfono</p>
+        <button onclick="resetSearch()" class="btn-secondary">Buscar otro pedido</button>
+      </div>
+      
+      <!-- Error de verificación -->
+      <div id="verification-error" class="verification-error" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h2>Teléfono incorrecto</h2>
+        <p>El teléfono ingresado no coincide con el del pedido. Por favor, verifica e intenta nuevamente.</p>
+        <button onclick="resetSearch()" class="btn-secondary">Intentar de nuevo</button>
+        <a href="#" id="whatsapp-link-error" class="whatsapp-link" onclick="openWhatsApp(); return false;">
+          📱 Contáctanos por WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style is:global>
+  .orders-section {
+    padding: var(--space-lg) 0;
+    min-height: 60vh;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .section-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .section-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+
+  .orders-search-form {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+
+  .search-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .search-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .search-card > p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #e0a4ce;
+  }
+
+  .btn-search {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 1rem;
+  }
+
+  .btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(224, 164, 206, 0.4);
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: #f0f0f0;
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+  }
+
+  .btn-secondary:hover {
+    background: #e0e0e0;
+  }
+
+  .help-text {
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .help-text p {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .whatsapp-link {
+    display: inline-block;
+    color: #25D366;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s;
+  }
+
+  .whatsapp-link:hover {
+    color: #128C7E;
+    text-decoration: underline;
+  }
+
+  .orders-list {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .order-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+  }
+
+  .order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+
+  .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .order-number {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #333;
+  }
+
+  .order-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .status-pending, .status-a_confirmar {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .status-approved, .status-finalizado {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .order-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detail-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .order-items {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .order-items-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .order-item:last-child {
+    border-bottom: none;
+  }
+
+  .item-name {
+    flex: 1;
+  }
+
+  .item-quantity {
+    margin: 0 1rem;
+    color: #666;
+  }
+
+  .item-price {
+    font-weight: 600;
+    color: #e0a4ce;
+  }
+
+  .order-total {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px solid #e0a4ce;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .total-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .total-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #e0a4ce;
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #e0a4ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+  .empty-orders, .verification-error {
+    text-align: center;
+    padding: 4rem 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .empty-icon, .error-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .empty-orders h2, .verification-error h2 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .empty-orders p, .verification-error p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .orders-search-form {
+      padding: 0 1rem;
+    }
+
+    .search-card {
+      padding: 1.5rem;
+    }
+
+    .order-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .order-details {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script is:inline>
+let currentOrderId = null;
+let currentOrderStatus = null;
+let pollingInterval = null;
+let verifiedPhone = null; // Guardar el teléfono verificado para poder hacer polling
+
+function normalizePhone(phone) {
+  // Eliminar espacios, guiones, paréntesis y el prefijo +54 si existe
+  return phone.replace(/\s+/g, '').replace(/-/g, '').replace(/\(/g, '').replace(/\)/g, '').replace(/^\+54/, '');
+}
+
+// Función para verificar si el estado del pedido cambió
+async function checkOrderStatus() {
+  if (!currentOrderId || !verifiedPhone) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/orders.php?search=${encodeURIComponent(currentOrderId)}`);
+    const data = await response.json();
+    
+    if (data.success && data.orders && data.orders.length > 0) {
+      const order = data.orders.find(o => {
+        const orderPhone = normalizePhone(o.phone || '');
+        return orderPhone === verifiedPhone;
+      });
+      
+      if (order && order.status !== currentOrderStatus) {
+        // El estado cambió, actualizar la vista
+        currentOrderStatus = order.status;
+        displayOrder(order);
+        
+        // Mostrar notificación visual de que el estado cambió
+        showStatusUpdateNotification();
+      }
+    }
+  } catch (error) {
+    console.error('Error al verificar estado del pedido:', error);
+  }
+}
+
+// Mostrar notificación cuando el estado cambia
+function showStatusUpdateNotification() {
+  // Crear una notificación temporal
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease-out;
+    font-weight: 600;
+  `;
+  notification.textContent = '✓ Estado del pedido actualizado';
+  document.body.appendChild(notification);
+  
+  // Remover después de 3 segundos
+  setTimeout(() => {
+    notification.style.animation = 'slideOutRight 0.3s ease-out';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+}
+
+// Iniciar polling automático
+function startPolling() {
+  // Detener polling anterior si existe
+  stopPolling();
+  
+  // Verificar cada 30 segundos
+  pollingInterval = setInterval(checkOrderStatus, 30000);
+}
+
+// Detener polling automático
+function stopPolling() {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+}
+
+async function verifyAndSearch() {
+  const orderIdInput = document.getElementById('order-id');
+  const phoneInput = document.getElementById('order-phone');
+  const searchForm = document.getElementById('search-form');
+  const container = document.getElementById('orders-container');
+  const emptyState = document.getElementById('empty-orders');
+  const errorState = document.getElementById('verification-error');
+  
+  const orderId = orderIdInput.value.trim();
+  const phone = normalizePhone(phoneInput.value.trim());
+  
+  if (!orderId || !phone) {
+    alert('Por favor, completa ambos campos');
+    return;
+  }
+  
+  // Limpiar estados anteriores
+  container.style.display = 'none';
+  emptyState.style.display = 'none';
+  errorState.style.display = 'none';
+  container.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="spinner"></div><p>Verificando y buscando pedido...</p></div>';
+  container.style.display = 'block';
+  
+  try {
+    // Limpiar el ID de pedido (quitar # si existe)
+    const cleanOrderId = orderId.replace(/^#/, '');
+    
+    const response = await fetch(`/api/orders.php?search=${encodeURIComponent(cleanOrderId)}`);
+    const data = await response.json();
+    
+    if (data.success && data.orders && data.orders.length > 0) {
+      // Buscar el pedido que coincida con el teléfono
+      const order = data.orders.find(o => {
+        const orderPhone = normalizePhone(o.phone || '');
+        return orderPhone === phone;
+      });
+      
+      if (order) {
+        // Verificación exitosa, mostrar el pedido
+        currentOrderId = order.id;
+        currentOrderStatus = order.status;
+        verifiedPhone = phone; // Guardar teléfono verificado para polling
+        displayOrder(order);
+        searchForm.style.display = 'none';
+        // Iniciar polling automático
+        startPolling();
+      } else {
+        // Teléfono no coincide
+        container.style.display = 'none';
+        errorState.style.display = 'block';
+        currentOrderId = cleanOrderId;
+      }
+    } else {
+      // No se encontró el pedido
+      container.style.display = 'none';
+      emptyState.style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Error al buscar pedidos:', error);
+    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #dc3545;">Error al buscar pedidos. Por favor, intenta nuevamente.</div>';
+  }
+}
+
+function displayOrder(order) {
+  const container = document.getElementById('orders-container');
+  
+  // Parsear items - puede tener 'cantidad' o 'quantity'
+  let items = [];
+  try {
+    items = JSON.parse(order.items || '[]');
+  } catch (e) {
+    console.error('Error al parsear items:', e);
+  }
+  
+  const statusClass = order.status === 'pending' || order.status === 'a_confirmar' ? 'status-pending' : 
+                     order.status === 'approved' || order.status === 'finalizado' ? 'status-approved' : 
+                     'status-rejected';
+  
+  const statusText = order.status === 'pending' ? '⏳ Pendiente' : 
+                    order.status === 'a_confirmar' ? '⏳ A Confirmar' :
+                    order.status === 'approved' ? '✅ Aprobado' : 
+                    order.status === 'finalizado' ? '✅ Finalizado' :
+                    '❌ Rechazado';
+  
+  const itemsHtml = items.map(item => {
+    // Manejar diferentes formatos de items
+    const quantity = item.cantidad || item.quantity || 1;
+    const name = item.name || 'Producto';
+    const price = item.price || '$0';
+    
+    return `
+      <div class="order-item">
+        <span class="item-name">${escapeHtml(name)}</span>
+        <span class="item-quantity">x${quantity}</span>
+        <span class="item-price">${escapeHtml(price)}</span>
+      </div>
+    `;
+  }).join('');
+  
+  // Formatear total
+  const total = order.total ? (typeof order.total === 'number' ? `$${order.total.toLocaleString('es-AR')}` : order.total) : 'N/A';
+  
+  container.innerHTML = `
+    <div class="order-card">
+      <div class="order-header">
+        <div class="order-number">Pedido #${order.id}</div>
+        <div class="order-status ${statusClass}">${statusText}</div>
+      </div>
+      <div class="order-details">
+        <div class="detail-item">
+          <span class="detail-label">Fecha</span>
+          <span class="detail-value">${new Date(order.created_at).toLocaleDateString('es-AR')}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email</span>
+          <span class="detail-value">${escapeHtml(order.email || 'N/A')}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Teléfono</span>
+          <span class="detail-value">${escapeHtml(order.phone || 'N/A')}</span>
+        </div>
+      </div>
+      ${items.length > 0 ? `
+        <div class="order-items">
+          <div class="order-items-title">Productos:</div>
+          ${itemsHtml}
+        </div>
+      ` : ''}
+      <div class="order-total">
+        <span class="total-label">Total:</span>
+        <span class="total-value">${escapeHtml(total)}</span>
+      </div>
+      <div style="margin-top: 1rem; text-align: center;">
+        <button onclick="resetSearch()" class="btn-secondary">Buscar otro pedido</button>
+      </div>
+    </div>
+  `;
+  container.style.display = 'block';
+}
+
+function resetSearch() {
+  // Detener polling
+  stopPolling();
+  
+  document.getElementById('search-form').style.display = 'block';
+  document.getElementById('orders-container').style.display = 'none';
+  document.getElementById('empty-orders').style.display = 'none';
+  document.getElementById('verification-error').style.display = 'none';
+  document.getElementById('order-id').value = '';
+  document.getElementById('order-phone').value = '';
+  currentOrderId = null;
+  currentOrderStatus = null;
+  verifiedPhone = null;
+}
+
+function openWhatsApp() {
+  const orderId = currentOrderId || document.getElementById('order-id')?.value?.replace(/^#/, '') || '';
+  const message = encodeURIComponent(`Hola Lume, me comunico por el pedido #${orderId}.`);
+  const whatsappUrl = `https://wa.me/5493795330156?text=${message}`;
+  window.open(whatsappUrl, '_blank');
+}
+
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Permitir buscar con Enter
+document.addEventListener('DOMContentLoaded', function() {
+  const orderIdInput = document.getElementById('order-id');
+  const phoneInput = document.getElementById('order-phone');
+  
+  if (orderIdInput) {
+    orderIdInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        verifyAndSearch();
+      }
+    });
+  }
+  
+  if (phoneInput) {
+    phoneInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        verifyAndSearch();
+      }
+    });
+  }
+  
+  // Detener polling cuando el usuario sale de la página
+  window.addEventListener('beforeunload', stopPolling);
+  
+  // Detener polling cuando la página pierde el foco (opcional, para ahorrar recursos)
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      // Página no visible, pausar polling
+      stopPolling();
+    } else if (currentOrderId) {
+      // Página visible de nuevo, verificar inmediatamente y reanudar polling
+      checkOrderStatus();
+      startPolling();
+    }
+  });
+  
+  // Verificar inmediatamente si ya hay un pedido visible al cargar la página
+  if (currentOrderId && verifiedPhone) {
+    startPolling();
+  }
+});
+</script>

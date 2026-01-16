@@ -1,0 +1,153 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+
+// Obtener order_id de la URL (si está disponible)
+const orderId = Astro.url.searchParams.get('order_id');
+---
+
+<Layout>
+  <div class="pagina-carrito">
+    <Breadcrumb items={[
+      { text: "Inicio", href: "/" },
+      { text: "Carrito", href: "/carrito" },
+      { text: "Pago Cancelado" }
+    ]} />
+
+    <section class="carrito">
+      <div class="container">
+        <div class="carrito-header" style="text-align: center;">
+          <h1 style="color: #dc3545; font-size: 2.5rem; margin-bottom: 1rem;">❌ Pago Cancelado</h1>
+          <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+            El pago no pudo ser procesado. No te preocupes, tu carrito sigue disponible.
+          </p>
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 2rem; border-radius: 8px;">
+          <div data-order-id-placeholder>
+            {orderId && (
+              <div style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                <h3 style="margin: 0 0 0.5rem 0; color: #721c24; font-size: 1rem;">📋 Información del Pedido</h3>
+                <p style="margin: 0; color: #333; font-size: 0.95rem;">
+                  <strong>ID del Pedido: #{orderId}</strong>
+                </p>
+                <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.85rem;">
+                  Si tienes dudas sobre este pedido, menciona este número al contactarnos.
+                </p>
+              </div>
+            )}
+          </div>
+          <h2 style="margin-bottom: 1rem;">¿Qué puedes hacer?</h2>
+          <ul style="line-height: 2; color: #333;">
+            <li>🔄 Intentar nuevamente el pago</li>
+            <li>💬 Contactarnos por WhatsApp para coordinar otra forma de pago</li>
+            <li>📦 Realizar el pedido por transferencia bancaria</li>
+          </ul>
+
+          <div id="buttons-container" style="margin-top: 2rem; text-align: center; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/carrito" class="btn btn-primary" style="display: inline-block; padding: 1rem 2rem; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              Volver al carrito
+            </a>
+            <a href="/" class="btn btn-secondary" style="display: inline-block; padding: 1rem 2rem; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              Volver al inicio
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    // Función para crear/actualizar el botón de WhatsApp
+    function updateWhatsAppButton(orderId) {
+      if (!orderId) return;
+      
+      const buttonsContainer = document.getElementById('buttons-container');
+      if (buttonsContainer) {
+        let whatsappBtn = buttonsContainer.querySelector('.btn-whatsapp');
+        if (!whatsappBtn) {
+          whatsappBtn = document.createElement('a');
+          whatsappBtn.href = 'https://wa.me/5493795330156?text=' + encodeURIComponent('Hola Lume, mi pedido es el #' + orderId + '.');
+          whatsappBtn.target = '_blank';
+          whatsappBtn.rel = 'noopener noreferrer';
+          whatsappBtn.className = 'btn btn-whatsapp';
+          whatsappBtn.style.cssText = 'display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: linear-gradient(135deg, #25d366, #1ed760); color: white; text-decoration: none; border-radius: 4px; font-weight: bold; transition: all 0.3s ease;';
+          whatsappBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>Contactanos por WhatsApp';
+          buttonsContainer.appendChild(whatsappBtn);
+        } else {
+          whatsappBtn.href = 'https://wa.me/5493795330156?text=' + encodeURIComponent('Hola Lume, mi pedido es el #' + orderId + '.');
+        }
+      }
+    }
+
+    // Cancelar la orden cuando el usuario llega a esta página
+    // MercadoPago puede pasar preference_id en la URL, o podemos obtenerlo de sessionStorage
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Si hay order_id en la URL, crear el botón de WhatsApp inmediatamente
+      const orderIdFromUrl = urlParams.get('order_id');
+      if (orderIdFromUrl) {
+        updateWhatsAppButton(orderIdFromUrl);
+      }
+      
+      // Intentar obtener preference_id de la URL primero (MercadoPago lo pasa cuando redirige)
+      let preferenceId = urlParams.get('preference_id');
+      
+      // Si no está en la URL, intentar obtenerlo de sessionStorage (lo guardamos antes de redirigir)
+      if (!preferenceId) {
+        preferenceId = sessionStorage.getItem('mp_preference_id');
+      }
+
+      // Si tenemos preference_id, cancelar la orden y obtener order_id
+      if (preferenceId) {
+        // Primero obtener el order_id antes de cancelar
+        fetch(`/api/orders/get-order-id.php?preference_id=${encodeURIComponent(preferenceId)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.order_id) {
+              // Mostrar el order_id en la página
+              const orderInfoDiv = document.querySelector('[data-order-id-placeholder]');
+              if (orderInfoDiv && !orderInfoDiv.querySelector('.order-id-info')) {
+                orderInfoDiv.innerHTML = `
+                  <div class="order-id-info" style="background: #f8d7da; border: 1px solid #dc3545; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0 0 0.5rem 0; color: #721c24; font-size: 1rem;">📋 Información del Pedido</h3>
+                    <p style="margin: 0; color: #333; font-size: 0.95rem;">
+                      <strong>ID del Pedido: #${data.order_id}</strong>
+                    </p>
+                    <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.85rem;">
+                      Si tienes dudas sobre este pedido, menciona este número al contactarnos.
+                    </p>
+                  </div>
+                `;
+              }
+              
+              // Crear o actualizar el botón de WhatsApp
+              updateWhatsAppButton(data.order_id);
+            }
+          })
+          .catch(err => {
+            console.error('Error al obtener order_id:', err);
+          });
+
+        // Luego cancelar la orden
+        fetch('/api/orders/cancel-order.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            preference_id: preferenceId
+          })
+        }).then(() => {
+          // Limpiar sessionStorage después de cancelar
+          sessionStorage.removeItem('mp_preference_id');
+        }).catch(err => {
+          // Silenciar errores, no es crítico si falla
+          console.error('Error al cancelar orden:', err);
+        });
+      }
+    })();
+  </script>
+</Layout>
+

@@ -1,0 +1,299 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<!-- 
+<Layout>
+  <section class="carrito">
+    <div class="carrito-section">
+      <div class="carrito-grid">
+        <h1>Tu Carrito</h1>
+        <div id="carrito-lista"></div>
+
+        <button id="vaciar-carrito" class="btn btn-vaciar">Vaciar carrito</button>
+        <div class="carrito-resumen">
+          <h2>Resumen</h2>
+          <p id="carrito-total">Tu carrito: $0</p>
+          <p id="descuento-total">Descuento: $0</p>
+          <p id="envio-info"></p>
+          <p id="total">Total a pagar: $0</p>
+        </div>
+      </div>
+
+      <div id="formulario-datos" class="formulario-carrito">
+        <h2>Datos del Pedido</h2>
+        <form id="form-datos">
+          <label>
+            Nombre completo:
+            <input type="text" id="nombre" required />
+          </label>
+
+          <label>
+            Aclaraciones (opcional):
+            <textarea id="aclaraciones" rows="3" placeholder="Ejemplo: perrito color negro"></textarea>
+          </label>
+
+          <label>
+            Forma de pago:
+            <select id="pago">
+              <option value="transferencia">Transferencia</option>
+              <option value="tarjeta">Tarjeta (+25%) - hasta en 3 cuotas</option>
+            </select>
+          </label>
+
+          <label>
+            Tipo de envío:
+            <select id="envio" required>
+              <option value="Corrientes Envio a Domicilio">Envio a Domicilio - Corrientes, Capital</option>
+              <option value="Corrientes Retiro en Sucursal">Retiro sin costo por Pasaje Alvarez 873 - Corrientes, Capital</option>
+              <option value="Correo Argentino - Sucursal">Correo Argentino - Retiro en Sucursal ($8500)</option>
+              <option value="Correo Argentino - Domicilio">Correo Argentino - Envío a Domicilio ($10500)</option>
+            </select>
+          </label>
+
+          <label id="label-provincia" style="display: none;">
+            Provincia:
+            <input type="text" id="provincia" />
+          </label>
+
+          
+          <label id="label-sucursal" style="display: none;">
+            Sucursal de destino:
+            <input type="text" id="sucursal" />
+          </label>
+          
+          <label id="label-localidad" style="display: none;">
+            Localidad:
+            <input type="text" id="localidad" />
+          </label>
+          
+          <label id="label-direccion" style="display: none;">
+            Dirección:
+            <input type="text" id="direccion" />
+          </label>
+
+          <label id="label-cp" style="display: none;">
+            Código Postal:
+            <input type="text" id="cp" />
+          </label>
+
+          <label id="label-email" style="display: none;">
+            Email:
+            <input type="email" id="email" />
+          </label>
+
+          <label id="label-observaciones" style="display: none;">
+            Observaciones:
+            <textarea id="observaciones" rows="2"></textarea>
+          </label>
+
+          <a id="btn-finalizar" class="btn btn-finalizar" href="#" target="_blank">Realizar pedido</a>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" is:inline>
+    import { getCarrito, saveCarrito, updateCartCount } from '/js/cart.js';
+
+    const contenedor = document.querySelector("#carrito-lista");
+    const totalEl = document.querySelector("#total");
+    const envioInfoEl = document.querySelector("#envio-info");
+    const carritoTotalEl = document.querySelector("#carrito-total");
+    const descuentoTotalEl = document.querySelector("#descuento-total");
+    const finalizarBtn = document.querySelector("#btn-finalizar");
+    const vaciarBtn = document.getElementById("vaciar-carrito");
+
+    function actualizarFormularioEnvio() {
+      const tipoEnvio = document.getElementById('envio').value;
+      const mostrar = id => document.getElementById(id).style.display = 'flex';
+      const ocultar = id => document.getElementById(id).style.display = 'none';
+
+      ['label-provincia', 'label-direccion', 'label-sucursal', 'label-localidad', 'label-cp', 'label-email', 'label-observaciones']
+        .forEach(ocultar);
+
+      if (tipoEnvio === 'Corrientes Envio a Domicilio') {
+        mostrar('label-direccion');
+      } else if (tipoEnvio === 'Correo Argentino - Sucursal') {
+        mostrar('label-provincia');
+        mostrar('label-sucursal');
+        mostrar('label-email');
+      } else if (tipoEnvio === 'Correo Argentino - Domicilio') {
+        ['label-provincia', 'label-localidad', 'label-cp', 'label-direccion', 'label-email', 'label-observaciones']
+          .forEach(mostrar);
+      }
+    }
+
+    function renderCarrito() {
+      const carrito = getCarrito();
+      contenedor.innerHTML = "";
+      let totalCarrito = 0;
+
+      if (carrito.length === 0) {
+        contenedor.innerHTML = "<p class='carrito-vacio'>Tu carrito está vacío 🕯️</p>";
+        totalEl.textContent = "Total a pagar: $0";
+        carritoTotalEl.textContent = "Tu Carrito: $0";
+        descuentoTotalEl.textContent = "Descuento: $0";
+        envioInfoEl.textContent = "";
+        finalizarBtn.style.display = "none";
+        vaciarBtn.style.display = "none";
+        return;
+      }
+
+      finalizarBtn.style.display = "inline-block";
+      vaciarBtn.style.display = "inline-block";
+
+      carrito.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "producto-carrito";
+
+        card.innerHTML = `
+          <div class="img-wrap">
+            <img src="${item.image}" alt="${item.name.replace(/"/g, '&quot;')}" />
+          </div>
+          <div class="info">
+            <h3>${item.name.replace(/"/g, '&quot;')}</h3>
+            <p class="price">${item.price}</p>
+            <div class="cantidad-controles">
+              <button class="btn-cantidad menos" data-slug="${item.slug}">−</button>
+              <span class="cantidad">${item.cantidad}</span>
+              <button class="btn-cantidad mas" data-slug="${item.slug}">+</button>
+            </div>
+            <button data-slug="${item.slug}" class="btn-remove">Eliminar</button>
+          </div>
+        `;
+
+        contenedor.appendChild(card);
+        totalCarrito += parseInt(item.price.replace("$", "")) * item.cantidad;
+      });
+
+      const get = id => document.getElementById(id)?.value || '';
+      const nombre = get('nombre');
+      const pago = get('pago');
+      const envio = get('envio');
+
+      let envioCosto = 0;
+      let envioTexto = "";
+
+      switch (envio) {
+        case "Corrientes Retiro en Sucursal":
+          envioTexto = "Sin costo";
+          break;
+        case "Corrientes Envio a Domicilio":
+          envioTexto = "A coordinar precio";
+          break;
+        case "Correo Argentino - Sucursal":
+          envioCosto = 8500;
+          envioTexto = `$${envioCosto}`;
+          break;
+        case "Correo Argentino - Domicilio":
+          envioCosto = 10500;
+          envioTexto = `$${envioCosto}`;
+          break;
+        default:
+          envioTexto = "A coordinar precio";
+      }
+
+            // Obtenemos los precios totales de cada producto (precio * cantidad)
+      const preciosIndividuales = carrito.flatMap(p => {
+        const precioUnitario = parseInt(p.price.replace("$", ""));
+        return Array(p.cantidad).fill(precioUnitario);
+      });
+
+      // Ordenamos de mayor a menor
+      preciosIndividuales.sort((a, b) => b - a);
+
+      let subtotal = preciosIndividuales.reduce((acc, val) => acc + val, 0);
+
+      // Si hay 3 o más unidades, aplicamos la promo: restamos el más barato
+      if (preciosIndividuales.length >= 3) {
+        subtotal -= preciosIndividuales[preciosIndividuales.length - 1];
+      }
+
+      let totalConTarjeta = pago === 'tarjeta' ? Math.round(subtotal * 1.25) : subtotal;
+      let totalFinal = totalConTarjeta + envioCosto;
+      let descuentoTotal = preciosIndividuales[preciosIndividuales.length - 1]
+      
+
+      carritoTotalEl.textContent = `Tu carrito: $${totalConTarjeta}`;
+
+      if (preciosIndividuales.length >= 3 && pago === 'transferencia') {
+        descuentoTotalEl.textContent = `🔥 Descuento HotSale: - $${descuentoTotal * 1}`;
+      } else if ( preciosIndividuales.length >= 3 && pago === 'tarjeta') {
+        descuentoTotalEl.textContent = `🔥 Descuento HotSale: - $${descuentoTotal * 1.25}`;
+      } 
+      else {
+        descuentoTotalEl.textContent = `Descuento: $0`;
+      }
+
+      envioInfoEl.textContent = `Envío: ${envioTexto}`;
+      totalEl.textContent = `Total a pagar: $${totalFinal}`;
+
+      let datosCliente = `*Datos del cliente:*\nNombre: ${nombre}\nTipo de envío: ${envio}`;
+
+      if (envio === "Corrientes Envio a Domicilio") {
+        datosCliente += `\nDirección: ${get('direccion')}`;
+      } else if (envio === "Correo Argentino - Sucursal") {
+        datosCliente += `\nProvincia: ${get('provincia')}\nSucursal: ${get('sucursal')}\nEmail: ${get('email')}`;
+      } else if (envio === "Correo Argentino - Domicilio") {
+        datosCliente += `\nProvincia: ${get('provincia')}\nLocalidad: ${get('localidad')}\nDirección: ${get('direccion')}\nCP: ${get('cp')}\nEmail: ${get('email')}\nObservaciones: ${get('observaciones')}`;
+      }
+
+      const texto = encodeURIComponent(`Hola *Lume*, me gustaría hacer un pedido de:
+${carrito.map(p => `• ${p.name} - ${p.price} x${p.cantidad}`).join("\n")}
+Forma de pago: ${pago === 'tarjeta' ? 'Tarjeta (+25% hasta en 3 cuotas)' : 'Transferencia'}
+Aclaraciones: ${get('aclaraciones') || 'Ninguna'}
+*Tu carrito: $${totalConTarjeta}*
+Envío: ${envioTexto}
+*Total a pagar: $${totalFinal}*
+
+${datosCliente}
+
+Gracias!`);
+
+      finalizarBtn.href = `https://wa.me/5493795330156?text=${texto}`;
+      updateCartCount();
+    }
+
+    document.addEventListener("click", (e) => {
+      const slug = e.target.dataset.slug;
+      if (!slug) return;
+
+      let carrito = getCarrito();
+      const index = carrito.findIndex(p => p.slug === slug);
+      if (index === -1) return;
+
+      const item = carrito[index];
+
+      if (e.target.classList.contains("btn-remove")) {
+        carrito.splice(index, 1);
+      } else if (e.target.classList.contains("mas")) {
+        item.cantidad++;
+      } else if (e.target.classList.contains("menos")) {
+        if (item.cantidad > 1) {
+          item.cantidad--;
+        } else {
+          carrito.splice(index, 1);
+        }
+      }
+
+      saveCarrito(carrito);
+      renderCarrito();
+    });
+
+    vaciarBtn.addEventListener("click", () => {
+      if (confirm("¿Seguro que querés vaciar el carrito?")) {
+        saveCarrito([]);
+        renderCarrito();
+      }
+    });
+
+    document.getElementById("form-datos").addEventListener("input", renderCarrito);
+    document.getElementById("envio").addEventListener("change", () => {
+      actualizarFormularioEnvio();
+      renderCarrito();
+    });
+
+    actualizarFormularioEnvio();
+    renderCarrito();
+  </script>
+</Layout> -->
