@@ -86,6 +86,29 @@ img {
   transition: all var(--transition-normal);
 }
 
+/* 🎠 CARRUSEL SPLIDE - Estilos específicos para el hero slider */
+.splide__slide img {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 500px !important;
+  object-fit: cover !important;
+  vertical-align: bottom !important;
+  display: block !important;
+}
+
+/* Responsive para carrusel en mobile */
+@media (max-width: 768px) {
+  .splide__slide img {
+    min-height: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .splide__slide img {
+    min-height: 250px !important;
+  }
+}
+
 
 
 /* 🎯 UTILIDADES BÁSICAS */

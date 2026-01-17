@@ -45,7 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
     } else {
         // Procesar carrusel
+        // Detectar imágenes eliminadas del carrusel
+        $originalCarouselImages = $carouselImages;
         $carouselData = [];
+        $imagesToDelete = [];
+        
         if (!empty($_POST['carousel_image']) && is_array($_POST['carousel_image'])) {
             foreach ($_POST['carousel_image'] as $index => $imagePath) {
                 if (!empty($imagePath)) {
@@ -64,6 +68,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'image' => $imagePath,
                         'link' => $link
                     ];
+                }
+            }
+        }
+        
+        // Detectar imágenes que fueron eliminadas
+        foreach ($originalCarouselImages as $originalItem) {
+            $found = false;
+            foreach ($carouselData as $newItem) {
+                if ($newItem['image'] === $originalItem['image']) {
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found && !empty($originalItem['image'])) {
+                $imagesToDelete[] = $originalItem['image'];
+            }
+        }
+        
+        // Procesar cambios de imagen del carrusel (botón "Cambiar imagen")
+        if (!empty($_POST['carousel_change_image_index']) && is_array($_POST['carousel_change_image_index'])) {
+            foreach ($_POST['carousel_change_image_index'] as $index => $changeIndex) {
+                if (isset($_FILES['carousel_change_image_' . $changeIndex]) && $_FILES['carousel_change_image_' . $changeIndex]['error'] === UPLOAD_ERR_OK) {
+                    $file = $_FILES['carousel_change_image_' . $changeIndex];
+                    $result = validateUploadedFile($file, ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
+                    if ($result['valid']) {
+                        // Eliminar imagen antigua si existe
+                        if (isset($carouselData[$changeIndex]) && !empty($carouselData[$changeIndex]['image'])) {
+                            $oldImagePath = $carouselData[$changeIndex]['image'];
+                            $oldImageFullPath = str_replace('/images/', IMAGES_PATH . '/', $oldImagePath);
+                            if (file_exists($oldImageFullPath)) {
+                                @unlink($oldImageFullPath);
+                            }
+                        }
+                        
+                        // Subir nueva imagen
+                        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                        $newFilename = 'hero_' . time() . '_' . $changeIndex . '.' . $ext;
+                        $uploadDir = IMAGES_PATH . '/';
+                        
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0755, true);
+                        }
+                        
+                        $destination = $uploadDir . $newFilename;
+                        if (move_uploaded_file($file['tmp_name'], $destination)) {
+                            $carouselData[$changeIndex]['image'] = '/images/' . $newFilename;
+                        }
+                    }
                 }
             }
         }
@@ -130,6 +182,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['sobre_image']) && $_FILES['sobre_image']['error'] === UPLOAD_ERR_OK) {
             $result = validateUploadedFile($_FILES['sobre_image'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
             if ($result['valid']) {
+                // Eliminar imagen antigua si existe
+                if (!empty($settings['sobre_image'])) {
+                    $oldImagePath = $settings['sobre_image'];
+                    $oldImageFullPath = str_replace('/images/', IMAGES_PATH . '/', $oldImagePath);
+                    if (file_exists($oldImageFullPath)) {
+                        @unlink($oldImageFullPath);
+                    }
+                }
+                
+                // Subir nueva imagen
                 $ext = strtolower(pathinfo($_FILES['sobre_image']['name'], PATHINFO_EXTENSION));
                 $newFilename = 'sobre_' . time() . '.' . $ext;
                 $uploadDir = IMAGES_PATH . '/';
@@ -145,6 +207,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } elseif (!empty($settings['sobre_image'])) {
             $sobreData['image'] = $settings['sobre_image'];
+        }
+        
+        // Procesar eliminación de imagen de Sobre
+        if (isset($_POST['delete_sobre_image']) && $_POST['delete_sobre_image'] === '1') {
+            if (!empty($settings['sobre_image'])) {
+                $oldImagePath = $settings['sobre_image'];
+                $oldImageFullPath = str_replace('/images/', IMAGES_PATH . '/', $oldImagePath);
+                if (file_exists($oldImageFullPath)) {
+                    @unlink($oldImageFullPath);
+                }
+                $sobreData['image'] = null;
+            }
         }
         
         // Procesar comentarios
@@ -218,6 +292,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['galeria_image']) && $_FILES['galeria_image']['error'] === UPLOAD_ERR_OK) {
             $result = validateUploadedFile($_FILES['galeria_image'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
             if ($result['valid']) {
+                // Eliminar imagen antigua si existe
+                if (!empty($settings['galeria_image'])) {
+                    $oldImagePath = $settings['galeria_image'];
+                    $oldImageFullPath = str_replace('/images/', IMAGES_PATH . '/', $oldImagePath);
+                    if (file_exists($oldImageFullPath)) {
+                        @unlink($oldImageFullPath);
+                    }
+                }
+                
+                // Subir nueva imagen
                 $ext = strtolower(pathinfo($_FILES['galeria_image']['name'], PATHINFO_EXTENSION));
                 $newFilename = 'galeria_ideas_' . time() . '.' . $ext;
                 $uploadDir = IMAGES_PATH . '/';
@@ -233,6 +317,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } elseif (!empty($settings['galeria_image'])) {
             $galeriaData['image'] = $settings['galeria_image'];
+        }
+        
+        // Procesar eliminación de imagen de Galería
+        if (isset($_POST['delete_galeria_image']) && $_POST['delete_galeria_image'] === '1') {
+            if (!empty($settings['galeria_image'])) {
+                $oldImagePath = $settings['galeria_image'];
+                $oldImageFullPath = str_replace('/images/', IMAGES_PATH . '/', $oldImagePath);
+                if (file_exists($oldImageFullPath)) {
+                    @unlink($oldImageFullPath);
+                }
+                $galeriaData['image'] = null;
+            }
+        }
+        
+        // Eliminar imágenes del carrusel que fueron eliminadas
+        foreach ($imagesToDelete as $imagePath) {
+            $imageFullPath = str_replace('/images/', IMAGES_PATH . '/', $imagePath);
+            if (file_exists($imageFullPath)) {
+                @unlink($imageFullPath);
+            }
         }
         
         // Actualizar base de datos
@@ -329,14 +433,26 @@ require_once '_inc/header.php';
             <?php if (!empty($carouselImages)): ?>
                 <?php foreach ($carouselImages as $index => $item): ?>
                     <div class="carousel-item" style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                        <input type="hidden" name="carousel_original_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>">
                         <div style="display: flex; gap: 1rem; align-items: start;">
                             <div style="flex: 1;">
                                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Imagen <?= $index + 1 ?>:</label>
                                 <?php if (!empty($item['image'])): ?>
-                                    <img src="<?= htmlspecialchars($item['image']) ?>" alt="Carrusel" style="max-width: 200px; max-height: 120px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem;">
+                                    <div style="margin-bottom: 0.5rem;">
+                                        <img src="<?= htmlspecialchars($item['image']) ?>" alt="Carrusel <?= $index + 1 ?>" style="max-width: 200px; max-height: 120px; border: 1px solid #ddd; border-radius: 4px;">
+                                    </div>
+                                    <div style="margin-bottom: 0.5rem;">
+                                        <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem; color: #666; font-weight: 600;">Cambiar imagen:</label>
+                                        <input type="file" name="carousel_change_image_<?= $index ?>" accept="image/jpeg,image/png,image/webp" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                        <input type="hidden" name="carousel_change_image_index[]" value="<?= $index ?>">
+                                        <small style="display: block; margin-top: 0.25rem; color: #666;">Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
+                                    </div>
+                                <?php else: ?>
+                                    <input type="file" name="carousel_change_image_<?= $index ?>" accept="image/jpeg,image/png,image/webp" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                    <input type="hidden" name="carousel_change_image_index[]" value="<?= $index ?>">
+                                    <small style="display: block; margin-top: 0.25rem; color: #666;">Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
                                 <?php endif; ?>
-                                <input type="text" name="carousel_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>" placeholder="/images/hero.webp" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                <small style="display: block; margin-top: 0.25rem; color: #666;">Ruta de la imagen (ej: /images/hero.webp)</small>
+                                <input type="hidden" name="carousel_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>">
                             </div>
                             <div style="flex: 1;">
                                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Link:</label>
@@ -378,8 +494,8 @@ require_once '_inc/header.php';
         
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
         
-        <!-- SOBRE LUME -->
-        <h3 style="margin-bottom: 1rem; color: #333;">Sección "Sobre Lume"</h3>
+        <!-- SOBRE NOSOTROS -->
+        <h3 style="margin-bottom: 1rem; color: #333;">Sección sobre nosotros</h3>
         
         <div class="form-group">
             <label for="sobre_title">Título</label>
@@ -402,9 +518,21 @@ require_once '_inc/header.php';
                 <div style="margin-bottom: 1rem;">
                     <img src="<?= htmlspecialchars($settings['sobre_image']) ?>" alt="Sobre" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Cambiar imagen:</label>
+                    <input type="file" id="sobre_image" name="sobre_image" accept="image/jpeg,image/png,image/webp">
+                    <small style="display: block; margin-top: 0.25rem;">Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="delete_sobre_image" value="1">
+                        <span style="color: #dc3545;">Eliminar imagen</span>
+                    </label>
+                </div>
+            <?php else: ?>
+                <input type="file" id="sobre_image" name="sobre_image" accept="image/jpeg,image/png,image/webp">
+                <small>Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
             <?php endif; ?>
-            <input type="file" id="sobre_image" name="sobre_image" accept="image/jpeg,image/png,image/webp">
-            <small>Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
         </div>
         
         <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: #333;">Estadísticas</h4>
@@ -487,7 +615,7 @@ require_once '_inc/header.php';
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
         
         <!-- GALERÍA DE IDEAS -->
-        <h3 style="margin-bottom: 1rem; color: #333;">Galería de Ideas</h3>
+        <h3 style="margin-bottom: 1rem; color: #333;">Sección de Clientes o Galería</h3>
         
         <div class="form-group">
             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
@@ -512,9 +640,21 @@ require_once '_inc/header.php';
                 <div style="margin-bottom: 1rem;">
                     <img src="<?= htmlspecialchars($settings['galeria_image']) ?>" alt="Galería" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Cambiar imagen:</label>
+                    <input type="file" id="galeria_image" name="galeria_image" accept="image/jpeg,image/png,image/webp">
+                    <small style="display: block; margin-top: 0.25rem;">Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="delete_galeria_image" value="1">
+                        <span style="color: #dc3545;">Eliminar imagen</span>
+                    </label>
+                </div>
+            <?php else: ?>
+                <input type="file" id="galeria_image" name="galeria_image" accept="image/jpeg,image/png,image/webp">
+                <small>Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
             <?php endif; ?>
-            <input type="file" id="galeria_image" name="galeria_image" accept="image/jpeg,image/png,image/webp">
-            <small>Formato: JPG, PNG o WEBP. Tamaño máximo: 5MB</small>
         </div>
         
         <div class="form-group">
@@ -542,7 +682,29 @@ require_once '_inc/header.php';
                         <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 1rem;">
                             <div class="form-group">
                                 <label>Icono (emoji)</label>
-                                <input type="text" name="galeria_feature_icon[]" value="<?= htmlspecialchars($feature['icon'] ?? '') ?>" placeholder="💡" maxlength="5">
+                                <select name="galeria_feature_icon[]" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1.2rem;">
+                                    <option value="">Seleccionar emoji</option>
+                                    <option value="💡" <?= ($feature['icon'] ?? '') === '💡' ? 'selected' : '' ?>>💡 Ideas</option>
+                                    <option value="🏠" <?= ($feature['icon'] ?? '') === '🏠' ? 'selected' : '' ?>>🏠 Hogar</option>
+                                    <option value="✨" <?= ($feature['icon'] ?? '') === '✨' ? 'selected' : '' ?>>✨ Estrella</option>
+                                    <option value="🎨" <?= ($feature['icon'] ?? '') === '🎨' ? 'selected' : '' ?>>🎨 Arte</option>
+                                    <option value="🎯" <?= ($feature['icon'] ?? '') === '🎯' ? 'selected' : '' ?>>🎯 Objetivo</option>
+                                    <option value="💎" <?= ($feature['icon'] ?? '') === '💎' ? 'selected' : '' ?>>💎 Diamante</option>
+                                    <option value="🔥" <?= ($feature['icon'] ?? '') === '🔥' ? 'selected' : '' ?>>🔥 Fuego</option>
+                                    <option value="⭐" <?= ($feature['icon'] ?? '') === '⭐' ? 'selected' : '' ?>>⭐ Estrella</option>
+                                    <option value="🎉" <?= ($feature['icon'] ?? '') === '🎉' ? 'selected' : '' ?>>🎉 Celebración</option>
+                                    <option value="🎁" <?= ($feature['icon'] ?? '') === '🎁' ? 'selected' : '' ?>>🎁 Regalo</option>
+                                    <option value="❤️" <?= ($feature['icon'] ?? '') === '❤️' ? 'selected' : '' ?>>❤️ Corazón</option>
+                                    <option value="🚀" <?= ($feature['icon'] ?? '') === '🚀' ? 'selected' : '' ?>>🚀 Cohete</option>
+                                    <option value="🌟" <?= ($feature['icon'] ?? '') === '🌟' ? 'selected' : '' ?>>🌟 Estrella brillante</option>
+                                    <option value="💫" <?= ($feature['icon'] ?? '') === '💫' ? 'selected' : '' ?>>💫 Estrella fugaz</option>
+                                    <option value="🎊" <?= ($feature['icon'] ?? '') === '🎊' ? 'selected' : '' ?>>🎊 Confeti</option>
+                                    <option value="🌈" <?= ($feature['icon'] ?? '') === '🌈' ? 'selected' : '' ?>>🌈 Arcoíris</option>
+                                    <option value="🛍️" <?= ($feature['icon'] ?? '') === '🛍️' ? 'selected' : '' ?>>🛍️ Compras</option>
+                                    <option value="📱" <?= ($feature['icon'] ?? '') === '📱' ? 'selected' : '' ?>>📱 Móvil</option>
+                                    <option value="💻" <?= ($feature['icon'] ?? '') === '💻' ? 'selected' : '' ?>>💻 Computadora</option>
+                                    <option value="📸" <?= ($feature['icon'] ?? '') === '📸' ? 'selected' : '' ?>>📸 Foto</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Texto</label>
@@ -707,7 +869,29 @@ document.addEventListener('DOMContentLoaded', function() {
             <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 1rem;">
                 <div class="form-group">
                     <label>Icono (emoji)</label>
-                    <input type="text" name="new_galeria_feature_icon[]" placeholder="💡" maxlength="5">
+                    <select name="new_galeria_feature_icon[]" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1.2rem;">
+                        <option value="">Seleccionar emoji</option>
+                        <option value="💡">💡 Ideas</option>
+                        <option value="🏠">🏠 Hogar</option>
+                        <option value="✨">✨ Estrella</option>
+                        <option value="🎨">🎨 Arte</option>
+                        <option value="🎯">🎯 Objetivo</option>
+                        <option value="💎">💎 Diamante</option>
+                        <option value="🔥">🔥 Fuego</option>
+                        <option value="⭐">⭐ Estrella</option>
+                        <option value="🎉">🎉 Celebración</option>
+                        <option value="🎁">🎁 Regalo</option>
+                        <option value="❤️">❤️ Corazón</option>
+                        <option value="🚀">🚀 Cohete</option>
+                        <option value="🌟">🌟 Estrella brillante</option>
+                        <option value="💫">💫 Estrella fugaz</option>
+                        <option value="🎊">🎊 Confeti</option>
+                        <option value="🌈">🌈 Arcoíris</option>
+                        <option value="🛍️">🛍️ Compras</option>
+                        <option value="📱">📱 Móvil</option>
+                        <option value="💻">💻 Computadora</option>
+                        <option value="📸">📸 Foto</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Texto</label>
@@ -723,5 +907,59 @@ document.addEventListener('DOMContentLoaded', function() {
             div.remove();
         });
     });
+    
+    // Función para previsualizar imágenes
+    function previewImage(input, previewContainer) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Buscar el contenedor de la imagen o crearlo si no existe
+                let imgElement = previewContainer.querySelector('img');
+                if (!imgElement) {
+                    imgElement = document.createElement('img');
+                    imgElement.style.cssText = 'max-width: 200px; max-height: 120px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem;';
+                    previewContainer.insertBefore(imgElement, input.parentElement);
+                }
+                imgElement.src = e.target.result;
+                imgElement.alt = 'Vista previa';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // Previsualizar imágenes del carrusel al cambiar
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.name && e.target.name.startsWith('carousel_change_image_')) {
+            const carouselItem = e.target.closest('.carousel-item');
+            if (carouselItem) {
+                const imgContainer = carouselItem.querySelector('div[style*="flex: 1"]');
+                if (imgContainer) {
+                    previewImage(e.target, imgContainer);
+                }
+            }
+        }
+    });
+    
+    // Previsualizar imagen de "Sobre nosotros"
+    const sobreImageInput = document.getElementById('sobre_image');
+    if (sobreImageInput) {
+        sobreImageInput.addEventListener('change', function(e) {
+            const formGroup = e.target.closest('.form-group');
+            if (formGroup) {
+                previewImage(e.target, formGroup);
+            }
+        });
+    }
+    
+    // Previsualizar imagen de "Galería"
+    const galeriaImageInput = document.getElementById('galeria_image');
+    if (galeriaImageInput) {
+        galeriaImageInput.addEventListener('change', function(e) {
+            const formGroup = e.target.closest('.form-group');
+            if (formGroup) {
+                previewImage(e.target, formGroup);
+            }
+        });
+    }
 });
 </script>

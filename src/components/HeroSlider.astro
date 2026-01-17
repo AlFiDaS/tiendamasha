@@ -45,11 +45,13 @@
   }
 
   .splide__slide img {
-    width: 100%;
-    height: 100%;
-    min-height: 500px;
-    object-fit: cover;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 500px !important;
+    object-fit: cover !important;
+    vertical-align: bottom !important;
     transition: transform var(--transition-normal);
+    display: block !important;
   }
 
   .splide__slide:hover img {
@@ -63,16 +65,100 @@
     text-decoration: none;
   }
 
+  /* Ajustar flechas y paginación */
+  .splide__arrow {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    opacity: 0.8;
+  }
+
+  .splide__arrow:hover {
+    opacity: 1;
+  }
+
+  .splide__pagination__page {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .splide__pagination__page.is-active {
+    background: rgba(255, 255, 255, 1);
+  }
+
   /* 💡 Responsive: móviles */
   @media (max-width: 768px) {
     .splide {
-      height: 50vh;
+      height: 40vh;
+      min-height: 300px;
+      max-height: 500px;
+      margin-bottom: var(--space-md);
+    }
+
+    .splide__slide {
+      height: 100%;
+    }
+
+    .splide__slide img {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 300px !important;
+      object-fit: cover !important;
+      vertical-align: bottom !important;
+      display: block !important;
+    }
+
+    /* Ajustar tamaño de flechas en mobile */
+    .splide__arrow {
+      width: 32px;
+      height: 32px;
+    }
+
+    .splide__arrow svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Ajustar paginación en mobile */
+    .splide__pagination {
+      bottom: 10px;
+    }
+
+    .splide__pagination__page {
+      width: 8px;
+      height: 8px;
+      margin: 0 4px;
     }
   }
 
   @media (max-width: 480px) {
     .splide {
-      height: 40vh;
+      height: 35vh;
+      min-height: 250px;
+      max-height: 400px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .splide__slide {
+      height: 100%;
+    }
+
+    .splide__slide img {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 250px !important;
+      object-fit: cover !important;
+      vertical-align: bottom !important;
+      display: block !important;
+    }
+
+    /* Flechas más pequeñas en mobile pequeño */
+    .splide__arrow {
+      width: 28px;
+      height: 28px;
+    }
+
+    .splide__arrow svg {
+      width: 12px;
+      height: 12px;
     }
   }
 </style>

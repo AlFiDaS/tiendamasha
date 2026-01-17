@@ -12,8 +12,8 @@ const staticLinksAfter = [
 <nav>
   <div class="nav-container">
     <!-- Izquierda: logo -->
-    <a href="/" class="logo">
-      <img src="/images/lume-logo.png" alt="Lume Logo" width="120" height="60" loading="eager" decoding="async" />
+    <a href="/" class="logo" id="nav-logo">
+      <img src="/images/lume-logo.png" alt="Logo" width="120" height="60" id="nav-logo-img" loading="eager" decoding="async" />
     </a>
  <!-- Centro: menú hamburguesa (solo mobile) -->
     <button id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
@@ -64,6 +64,33 @@ const staticLinksAfter = [
 </nav>
 
 <script is:inline>
+  // Cargar configuración de la tienda (logo, etc.)
+  (async function loadShopSettings() {
+    try {
+      const response = await fetch('/api/shop.php');
+      const data = await response.json();
+      
+      if (data.success && data.shop) {
+        const shop = data.shop;
+        
+        // Actualizar logo del navbar
+        if (shop.shop_logo) {
+          const logoImg = document.getElementById('nav-logo-img');
+          const logoLink = document.getElementById('nav-logo');
+          if (logoImg) {
+            logoImg.src = shop.shop_logo;
+            logoImg.alt = shop.shop_name || 'Logo';
+          }
+          if (logoLink && shop.shop_name) {
+            logoLink.title = shop.shop_name;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar configuración de la tienda:', error);
+    }
+  })();
+  
   // Cargar categorías dinámicamente
   (function() {
     async function loadCategories() {
@@ -231,6 +258,7 @@ const staticLinksAfter = [
   .logo img {
     height: 40px;
     width: auto;
+    max-width: 200px;
     object-fit: contain;
     display: block;
   }
@@ -304,6 +332,10 @@ const staticLinksAfter = [
 
   /* MOBILE */
   @media (max-width: 767px) {
+    .logo img {
+      max-width: 120px;
+    }
+    
     .menu-toggle {
       display: block;
       position: absolute;

@@ -56,7 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email' => sanitize($_POST['email'] ?? ''),
             'phone' => sanitize($_POST['phone'] ?? ''),
             'description' => sanitize($_POST['description'] ?? ''),
-            'primary_color' => $primaryColor
+            'primary_color' => $primaryColor,
+            'footer_description' => sanitize($_POST['footer_description'] ?? ''),
+            'footer_copyright' => sanitize($_POST['footer_copyright'] ?? ''),
+            'creation_year' => !empty($_POST['creation_year']) ? (int)$_POST['creation_year'] : null
         ];
         
         // Validar email si se proporciona
@@ -329,6 +332,8 @@ require_once '_inc/header.php';
         
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
         
+        <h3 style="margin-bottom: 1rem; color: #333;">Información General</h3>
+        
         <div class="form-group">
             <label for="description">Descripción de la Tienda</label>
             <textarea 
@@ -339,6 +344,42 @@ require_once '_inc/header.php';
             ><?= htmlspecialchars($settings['description'] ?? '') ?></textarea>
             <small>Descripción que puede aparecer en el sitio web (opcional)</small>
         </div>
+        
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        
+        <h3 style="margin-bottom: 1rem; color: #333;">Configuración del Footer</h3>
+        
+        <div class="form-group">
+            <label for="footer_description">Descripción del Footer</label>
+            <textarea 
+                id="footer_description" 
+                name="footer_description" 
+                rows="3"
+                placeholder="Iluminando momentos especiales con velas artesanales únicas"
+            ><?= htmlspecialchars($settings['footer_description'] ?? '') ?></textarea>
+            <small>Texto que aparece debajo del nombre de la tienda en el footer</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="creation_year">Año de Creación</label>
+            <input 
+                type="number" 
+                id="creation_year" 
+                name="creation_year" 
+                value="<?= htmlspecialchars($settings['creation_year'] ?? date('Y')) ?>" 
+                placeholder="<?= date('Y') ?>"
+                min="1900"
+                max="<?= date('Y') ?>"
+            >
+            <small>El copyright mostrará: © [AÑO] [NOMBRE_DE_TIENDA]. Todos los derechos reservados.</small>
+        </div>
+        
+        <input 
+            type="hidden" 
+            id="footer_copyright" 
+            name="footer_copyright" 
+            value="<?= htmlspecialchars($settings['footer_copyright'] ?? '') ?>"
+        >
         
         <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
             <button type="submit" class="btn btn-primary">
@@ -365,6 +406,43 @@ document.addEventListener('DOMContentLoaded', function() {
         colorText.addEventListener('input', function() {
             if (this.value.match(/^#[0-9A-Fa-f]{6}$/i)) {
                 colorInput.value = this.value.toUpperCase();
+            }
+        });
+    }
+    
+    // Previsualizar logo al cambiar
+    const shopLogoInput = document.getElementById('shop_logo');
+    if (shopLogoInput) {
+        shopLogoInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Buscar el contenedor del logo
+                    const formGroup = shopLogoInput.closest('.form-group');
+                    if (formGroup) {
+                        // Buscar la imagen existente o crear el contenedor
+                        let logoContainer = formGroup.querySelector('div[style*="margin-bottom: 1rem"]');
+                        if (!logoContainer) {
+                            // Si no hay contenedor, crear uno nuevo antes del input
+                            logoContainer = document.createElement('div');
+                            logoContainer.style.cssText = 'margin-bottom: 1rem;';
+                            shopLogoInput.parentElement.insertBefore(logoContainer, shopLogoInput);
+                        }
+                        
+                        // Buscar o crear la imagen
+                        let imgElement = logoContainer.querySelector('img');
+                        if (!imgElement) {
+                            imgElement = document.createElement('img');
+                            imgElement.style.cssText = 'max-width: 200px; max-height: 100px; display: block; border: 2px solid #ddd; border-radius: 8px; padding: 5px; background: #f5f5f5;';
+                            imgElement.alt = 'Vista previa del logo';
+                            logoContainer.insertBefore(imgElement, logoContainer.firstChild);
+                        }
+                        
+                        // Actualizar la imagen
+                        imgElement.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(e.target.files[0]);
             }
         });
     }

@@ -40,30 +40,75 @@ function getShopSettings() {
  * @return bool True si se actualizó correctamente
  */
 function updateShopSettings($data) {
-    $allowedFields = [
+    // Campos básicos que siempre existen
+    $baseFields = [
         'shop_name', 'shop_logo', 'whatsapp_number', 'whatsapp_message',
         'address', 'instagram', 'facebook', 'email', 'phone', 'description', 'primary_color'
     ];
     
+    // Campos adicionales que pueden no existir si no se ejecutaron las migraciones
+    $optionalFields = [
+        'footer_description', 'footer_copyright', 'creation_year'
+    ];
+    
+    // Obtener columnas existentes de la tabla para verificar qué campos podemos actualizar
+    $existingColumns = [];
+    try {
+        $pdo = getDB();
+        if ($pdo) {
+            $stmt = $pdo->query("SHOW COLUMNS FROM `shop_settings`");
+            $columns = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $existingColumns = array_map('strtolower', $columns);
+        }
+    } catch (Exception $e) {
+        error_log('updateShopSettings: Error al obtener columnas: ' . $e->getMessage());
+    }
+    
+    // Determinar qué campos están permitidos basándose en lo que existe en la tabla
+    $allowedFields = array_merge($baseFields, $optionalFields);
     $updateFields = [];
     $params = [];
     
     foreach ($allowedFields as $field) {
         if (isset($data[$field])) {
-            $updateFields[] = "`{$field}` = :{$field}";
-            $params[$field] = $data[$field];
+            // Si el campo es opcional, verificar que existe en la tabla
+            if (in_array($field, $optionalFields) && !empty($existingColumns)) {
+                $fieldLower = strtolower($field);
+                if (!in_array($fieldLower, $existingColumns)) {
+                    // Saltar este campo si no existe en la tabla
+                    continue;
+                }
+            }
+            
+            // Escapar el nombre del campo para evitar problemas con caracteres especiales
+            $fieldEscaped = '`' . str_replace('`', '``', $field) . '`';
+            $updateFields[] = "{$fieldEscaped} = :{$field}";
+            $params[$field] = $data[$field] !== null && $data[$field] !== '' ? $data[$field] : null;
         }
     }
     
     if (empty($updateFields)) {
+        error_log('updateShopSettings: No hay campos para actualizar');
         return false;
     }
     
     $params['id'] = 1;
-    $sql = "UPDATE shop_settings SET " . implode(', ', $updateFields) . " WHERE id = :id";
+    $sql = "UPDATE `shop_settings` SET " . implode(', ', $updateFields) . " WHERE `id` = :id";
     
-    $result = executeQuery($sql, $params);
-    return $result !== false;
+    try {
+        $result = executeQuery($sql, $params);
+        if ($result === false) {
+            error_log('updateShopSettings: executeQuery retornó false');
+            error_log('updateShopSettings: SQL: ' . $sql);
+            error_log('updateShopSettings: Params: ' . print_r($params, true));
+        }
+        return $result !== false;
+    } catch (Exception $e) {
+        error_log('updateShopSettings: Exception: ' . $e->getMessage());
+        error_log('updateShopSettings: SQL: ' . $sql);
+        error_log('updateShopSettings: Params: ' . print_r($params, true));
+        return false;
+    }
 }
 
 /**

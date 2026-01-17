@@ -620,12 +620,6 @@ import HeroSlider from '../components/HeroSlider.astro';
         border-radius: var(--radius-lg);
         overflow: hidden;
         box-shadow: var(--shadow-lg);
-        transition: all var(--transition-normal);
-      }
-      
-      .cta-image:hover {
-        transform: scale(1.05) rotate(2deg);
-        box-shadow: var(--shadow-lg), 0 20px 40px rgba(224, 164, 206, 0.3);
       }
       
              .cta-image .image-link {
@@ -654,10 +648,6 @@ import HeroSlider from '../components/HeroSlider.astro';
         justify-content: center;
         opacity: 0;
         transition: all var(--transition-normal);
-      }
-      
-      .cta-image:hover .image-overlay {
-        opacity: 1;
       }
       
       .overlay-content {
@@ -1011,41 +1001,49 @@ import HeroSlider from '../components/HeroSlider.astro';
             if (document.getElementById('sobre-image') && sobre.image) {
               document.getElementById('sobre-image').src = sobre.image;
             }
-            if (sobre.stats && sobre.stats.length >= 3) {
-              const stat1El = document.getElementById('sobre-stat-1-number');
-              const stat2El = document.getElementById('sobre-stat-2-number');
-              const stat3El = document.getElementById('sobre-stat-3-number');
+            if (sobre.stats && sobre.stats.length > 0) {
+              // Filtrar estadísticas válidas (que tengan número y label)
+              const validStats = sobre.stats.filter(stat => 
+                stat && stat.number && stat.number.trim() !== '' && stat.label && stat.label.trim() !== ''
+              );
               
-              if (stat1El) {
-                stat1El.textContent = sobre.stats[0].number;
-                // Si el número tiene más de 5 caracteres, reducir tamaño
-                if (sobre.stats[0].number && sobre.stats[0].number.length > 5) {
-                  stat1El.setAttribute('data-long', 'true');
-                } else {
-                  stat1El.removeAttribute('data-long');
-                }
-              }
-              if (document.getElementById('sobre-stat-1-label')) document.getElementById('sobre-stat-1-label').textContent = sobre.stats[0].label;
+              // Ocultar todas las estadísticas primero
+              const stat1Container = document.getElementById('sobre-stat-1-number')?.closest('.stat');
+              const stat2Container = document.getElementById('sobre-stat-2-number')?.closest('.stat');
+              const stat3Container = document.getElementById('sobre-stat-3-number')?.closest('.stat');
               
-              if (stat2El) {
-                stat2El.textContent = sobre.stats[1].number;
-                if (sobre.stats[1].number && sobre.stats[1].number.length > 5) {
-                  stat2El.setAttribute('data-long', 'true');
-                } else {
-                  stat2El.removeAttribute('data-long');
-                }
-              }
-              if (document.getElementById('sobre-stat-2-label')) document.getElementById('sobre-stat-2-label').textContent = sobre.stats[1].label;
+              if (stat1Container) stat1Container.style.display = 'none';
+              if (stat2Container) stat2Container.style.display = 'none';
+              if (stat3Container) stat3Container.style.display = 'none';
               
-              if (stat3El) {
-                stat3El.textContent = sobre.stats[2].number;
-                if (sobre.stats[2].number && sobre.stats[2].number.length > 5) {
-                  stat3El.setAttribute('data-long', 'true');
-                } else {
-                  stat3El.removeAttribute('data-long');
+              // Mostrar solo las estadísticas válidas
+              validStats.forEach((stat, index) => {
+                if (index >= 3) return; // Solo hay 3 contenedores
+                
+                const statNumberEl = document.getElementById(`sobre-stat-${index + 1}-number`);
+                const statLabelEl = document.getElementById(`sobre-stat-${index + 1}-label`);
+                const statContainer = statNumberEl?.closest('.stat');
+                
+                if (statNumberEl && statLabelEl && statContainer) {
+                  statNumberEl.textContent = stat.number;
+                  statLabelEl.textContent = stat.label;
+                  
+                  // Si el número tiene más de 5 caracteres, reducir tamaño
+                  if (stat.number && stat.number.length > 5) {
+                    statNumberEl.setAttribute('data-long', 'true');
+                  } else {
+                    statNumberEl.removeAttribute('data-long');
+                  }
+                  
+                  statContainer.style.display = 'block';
                 }
+              });
+              
+              // Ajustar el grid según la cantidad de estadísticas válidas
+              const statsContainer = document.querySelector('.sobre-stats');
+              if (statsContainer && validStats.length > 0) {
+                statsContainer.style.gridTemplateColumns = `repeat(${validStats.length}, 1fr)`;
               }
-              if (document.getElementById('sobre-stat-3-label')) document.getElementById('sobre-stat-3-label').textContent = sobre.stats[2].label;
             }
           }
           
