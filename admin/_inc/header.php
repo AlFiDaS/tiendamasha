@@ -1086,25 +1086,27 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                         <?php endif; ?>
                     </div>
             
-            <nav class="admin-header-nav-right">
-                <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
-                <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
-                <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
-            </nav>
+                    <nav class="admin-header-nav-right">
+                        <a href="<?= ADMIN_URL ?>/landing-page.php">Landing Page</a>
+                        <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
+                        <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
+                        <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
+                    </nav>
             
             <button id="admin-menu-toggle" class="admin-menu-toggle" aria-label="Abrir menú">
                 ☰
             </button>
             
-            <nav class="admin-header-nav" id="admin-header-nav">
-                <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
-                <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
-                <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
-                <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
-                <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
-                <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
-                <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
-            </nav>
+                    <nav class="admin-header-nav" id="admin-header-nav">
+                        <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
+                        <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
+                        <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
+                        <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
+                        <a href="<?= ADMIN_URL ?>/landing-page.php">Landing Page</a>
+                        <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
+                        <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
+                        <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
+                    </nav>
         </div>
     </header>
     
