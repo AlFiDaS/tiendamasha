@@ -10,7 +10,7 @@ import HeroSlider from '../components/HeroSlider.astro';
   <section class="productos">
     <div class="section-header">
       <h2>Más Vendidos</h2>
-      <p>Descubre nuestras velas más populares, elegidas por nuestros clientes</p>
+      <p>Descubre nuestros productos más populares, elegidos por nuestros clientes</p>
     </div>
     <!-- Contenedor para productos destacados desde la BD -->
     <div class="grid desktop-grid products-grid" data-destacados="true" data-limit="5">
@@ -24,129 +24,94 @@ import HeroSlider from '../components/HeroSlider.astro';
 
 
   <!-- Sobre Lume -->
-  <section class="sobre">
+  <section class="sobre" id="sobre-section">
     <div class="container">
       <div class="sobre-content">
         <div class="sobre-text">
-          <h2>Sobre LUME</h2>
-          <p>
+          <h2 id="sobre-title">Sobre LUME</h2>
+          <p id="sobre-text-1">
             En LUME creamos velas artesanales inspiradas en emociones y momentos únicos. 
             Nos especializamos en figuras personalizadas para regalar o regalarte algo especial.
           </p>
-          <p>
+          <p id="sobre-text-2">
             Usamos materiales de primera calidad y mucho amor en cada detalle, 
             transformando cera en arte que ilumina y aromatiza tus espacios.
           </p>
           <div class="sobre-stats">
             <div class="stat">
-              <span class="stat-number">500+</span>
-              <span class="stat-label">Clientes felices</span>
+              <span class="stat-number" id="sobre-stat-1-number">500+</span>
+              <span class="stat-label" id="sobre-stat-1-label">Clientes felices</span>
             </div>
             <div class="stat">
-              <span class="stat-number">50+</span>
-              <span class="stat-label">Diseños únicos</span>
+              <span class="stat-number" id="sobre-stat-2-number">50+</span>
+              <span class="stat-label" id="sobre-stat-2-label">Diseños únicos</span>
             </div>
             <div class="stat">
-              <span class="stat-number">2</span>
-              <span class="stat-label">Años de experiencia</span>
+              <span class="stat-number" id="sobre-stat-3-number">2</span>
+              <span class="stat-label" id="sobre-stat-3-label">Años de experiencia</span>
             </div>
           </div>
         </div>
         <div class="sobre-image">
-          <img src="/images/sobre-nosotros.webp" alt="Velas Lume en mesa" />
+          <img id="sobre-image" src="/images/sobre-nosotros.webp" alt="Velas Lume en mesa" />
         </div>
       </div>
     </div>
   </section>
 
   <!-- Comentarios de clientes -->
-  <section class="testimonials">
+  <section class="testimonials" id="testimonials-section" style="display: none;">
     <div class="container">
       <div class="section-header">
         <h2>Comentarios de Clientes</h2>
-        <p>Lo que dicen nuestros clientes sobre nuestras velas</p>
+        <p>Lo que dicen nuestros clientes sobre nosotros</p>
       </div>
-                    <div class="testimonials-grid">
-          <div class="testimonial-card">
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p class="testimonial-text">"Hermosas velas, ahora mi oficina tiene aroma a café, me encanta."</p>
-            <div class="client-info">
-              <span class="client-name">María G.</span>
-            </div>
-          </div>
-          <div class="testimonial-card">
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p class="testimonial-text">"Compré una velita de mi perrito que falleció, me largué a llorar, lo hicieron igual."</p>
-            <div class="client-info">
-              <span class="client-name">Carlos L.</span>
-            </div>
-          </div>
-          
-          <div class="testimonial-card">
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p class="testimonial-text">"Regalé una vela personalizada a mi mamá y se emocionó muchísimo."</p>
-            <div class="client-info">
-              <span class="client-name">Lucía R.</span>
-            </div>
-          </div>
-          <div class="testimonial-card">
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p class="testimonial-text">"Los souvenirs para el bautismo de mi bebé quedaron hermosos."</p>
-            <div class="client-info">
-              <span class="client-name">Valentina P.</span>
-            </div>
-          </div>
-          <div class="testimonial-card mobile-wide">
-            <div class="stars">⭐⭐⭐⭐⭐</div>
-            <p class="testimonial-text">"La vela de mi gatito quedó perfecta, hasta los detalles de las manchas."</p>
-            <div class="client-info">
-              <span class="client-name">Diego S.</span>
-            </div>
-          </div>
-        </div>
+      <div class="testimonials-grid" id="testimonials-grid">
+        <!-- Los comentarios se cargarán dinámicamente desde la API -->
+      </div>
     </div>
   </section>
 
 
 
   <!-- CTA final -->
-  <section class="cta">
+  <section class="cta" id="galeria-section">
     <div class="container">
       <div class="cta-content">
         <div class="cta-text">
-          <div class="cta-badge">✨ Inspiración</div>
-                     <h2>Revisa nuestra galería de ideas</h2>
-           <p>Inspírate con más de 30 ideas creativas de velas y decoraciones que puedes pedirnos. Desde velas decorativas, souvenirs y muchas cosas más.</p>
-           <div class="cta-features">
-             <div class="feature">
-               <span class="feature-icon">💡</span>
-               <span>Ideas creativas</span>
-             </div>
-             <div class="feature">
-               <span class="feature-icon">🏠</span>
-               <span>Decoración hogar</span>
-             </div>
-             <div class="feature">
-               <span class="feature-icon">✨</span>
-               <span>Paso a paso</span>
-             </div>
-           </div>
+          <div class="cta-badge" id="galeria-badge">✨ Inspiración</div>
+          <h2 id="galeria-title">Revisa nuestra galería de ideas</h2>
+          <p id="galeria-description">Inspírate con más de 30 ideas creativas de velas y decoraciones que puedes pedirnos. Desde velas decorativas, souvenirs y muchas cosas más.</p>
+          <div class="cta-features" id="galeria-features">
+            <div class="feature">
+              <span class="feature-icon">💡</span>
+              <span>Ideas creativas</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">🏠</span>
+              <span>Decoración hogar</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">✨</span>
+              <span>Paso a paso</span>
+            </div>
+          </div>
         </div>
         <div class="cta-visual">
-                     <div class="cta-image">
-             <a href="/ideas" class="image-link">
-               <img src="/images/0_galeria/idea28.webp" alt="Galería de ideas Lume" />
+          <div class="cta-image">
+            <a href="/ideas" class="image-link" id="galeria-link">
+              <img src="/images/0_galeria/idea28.webp" alt="Galería de ideas Lume" id="galeria-image" />
               <div class="image-overlay">
-                               <div class="overlay-content">
-                   <span class="overlay-text">30+ Ideas</span>
-                   <span class="overlay-subtext">Para inspirarte</span>
-                 </div>
+                <div class="overlay-content">
+                  <span class="overlay-text">30+ Ideas</span>
+                  <span class="overlay-subtext">Para inspirarte</span>
+                </div>
               </div>
-             </a>
-           </div>
+            </a>
+          </div>
           <div class="cta-button">
-            <a href="/ideas" class="btn btn-primary">
-              <span>Galeria de ideas</span>
+            <a href="/ideas" class="btn btn-primary" id="galeria-button-link">
+              <span id="galeria-button-text">Galeria de ideas</span>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -264,71 +229,108 @@ import HeroSlider from '../components/HeroSlider.astro';
     }
     
     /* 💬 TESTIMONIALS SECTION */
-    .testimonials {
+    :global(.testimonials) {
       padding: var(--space-xl) 0;
       background: linear-gradient(135deg, var(--secondary) 0%, var(--surface-light) 100%);
     }
     
-         .testimonials-grid {
+    :global(.testimonials-grid) {
        display: grid;
-       grid-template-columns: repeat(5, 1fr);
-       gap: var(--space-sm);
+       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+       gap: var(--space-md);
        margin-top: var(--space-xl);
        max-width: 1400px;
        margin-left: auto;
        margin-right: auto;
        padding: 0 var(--space-md);
+       justify-items: center;
+     }
+     
+     /* Ajustar columnas según cantidad de testimonials */
+     :global(.testimonials-grid[data-count="1"]) {
+       grid-template-columns: 1fr;
+       max-width: 500px;
+     }
+     
+     :global(.testimonials-grid[data-count="2"]) {
+       grid-template-columns: repeat(2, 1fr);
+       max-width: 900px;
+     }
+     
+     :global(.testimonials-grid[data-count="3"]) {
+       grid-template-columns: repeat(3, 1fr);
+       max-width: 1200px;
+     }
+     
+     :global(.testimonials-grid[data-count="4"]) {
+       grid-template-columns: repeat(4, 1fr);
+       max-width: 1400px;
+     }
+     
+     :global(.testimonials-grid[data-count="5"]) {
+       grid-template-columns: repeat(5, 1fr);
+       max-width: 1400px;
      }
     
-         .testimonial-card {
-       background: white;
-       padding: var(--space-sm);
+    :global(.testimonial-card) {
+       background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+       padding: var(--space-lg) var(--space-md);
        border-radius: var(--radius-lg);
-       box-shadow: var(--shadow-sm);
-       border: 1px solid #f0f0f0;
+       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+       border: 2px solid #f0f0f0;
        transition: all var(--transition-normal);
        position: relative;
        overflow: hidden;
        text-align: center;
        display: flex;
        flex-direction: column;
-       min-height: 160px;
+       min-height: 180px;
+       max-width: 300px;
+       width: 100%;
+       justify-content: space-between;
      }
     
-    .testimonial-card::before {
+    :global(.testimonial-card::before) {
       content: '"';
       position: absolute;
-      top: -10px;
-      left: 20px;
-      font-size: 4rem;
-      color: var(--primary-light);
-      opacity: 0.3;
+      top: 5px;
+      left: 15px;
+      font-size: 5rem;
+      color: var(--primary);
+      opacity: 0.15;
       font-family: 'Playfair Display', serif;
+      line-height: 1;
     }
     
-    .testimonial-card:hover {
-      transform: translateY(-8px);
-      box-shadow: var(--shadow-lg);
-      border-color: var(--primary-light);
+    :global(.testimonial-card:hover) {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(224, 164, 206, 0.2);
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #ffffff 0%, #fff5fa 100%);
     }
     
-         .stars {
-       font-size: 0.7rem;
-       margin-bottom: var(--space-xs);
+    :global(.stars) {
+       font-size: 1.2rem;
+       margin-bottom: var(--space-md);
        display: block;
+       color: #ffc107;
+       letter-spacing: 2px;
+       filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
      }
     
-         .testimonial-text {
-       font-size: var(--font-size-xs);
-       color: var(--text-secondary);
-       line-height: 1.3;
-       margin-bottom: var(--space-sm);
-       font-style: italic;
+    :global(.testimonial-text) {
+       font-size: var(--font-size-base);
+       color: var(--text-primary);
+       line-height: 1.6;
+       margin-bottom: var(--space-md);
+       font-style: normal;
        position: relative;
        z-index: 1;
+       flex-grow: 1;
+       font-weight: 400;
      }
     
-    .client-info {
+    :global(.client-info) {
       display: flex;
       flex-direction: column;
       gap: var(--space-xs);
@@ -336,12 +338,14 @@ import HeroSlider from '../components/HeroSlider.astro';
       margin-top: auto;
     }
     
-    .client-name {
+    :global(.client-name) {
       font-weight: 600;
-      color: var(--text-primary);
+      color: var(--primary);
       font-size: var(--font-size-base);
       text-align: center;
-      margin-top: var(--space-sm);
+      margin-top: auto;
+      padding-top: var(--space-sm);
+      border-top: 1px solid #f0f0f0;
     }
     
     /* 🏢 SOBRE SECTION */
@@ -427,6 +431,14 @@ import HeroSlider from '../components/HeroSlider.astro';
       margin-bottom: var(--space-xs);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }
+    
+    /* Ajustar tamaño para números largos (más de 5 caracteres) */
+    .stat-number[data-long="true"] {
+      font-size: 2rem;
     }
     
     .stat-label {
@@ -547,40 +559,51 @@ import HeroSlider from '../components/HeroSlider.astro';
           margin-bottom: var(--space-lg);
         }
       
-      .cta-features {
+      :global(.cta-features) {
         display: flex;
         gap: var(--space-md);
         margin-bottom: var(--space-lg);
       }
       
-             .feature {
-         display: flex;
-         align-items: center;
-         gap: var(--space-xs);
-         background: rgba(255, 255, 255, 0.1);
-         padding: var(--space-sm) var(--space-md);
-         border-radius: var(--radius-lg);
-         box-shadow: var(--shadow-sm);
-         border: 1px solid rgba(224, 164, 206, 0.3);
-         transition: all var(--transition-normal);
-         backdrop-filter: blur(10px);
-       }
-      
-      .feature:hover {
+      :global(.feature) {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        background: rgba(255, 255, 255, 0.1);
+        padding: var(--space-sm) var(--space-md);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid rgba(224, 164, 206, 0.3);
+        transition: all var(--transition-normal);
+        backdrop-filter: blur(10px);
+      }
+       
+      :global(.feature:hover) {
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
         border-color: var(--primary-light);
+        background: rgba(255, 255, 255, 0.15);
       }
       
-      .feature-icon {
+      :global(.feature-icon) {
         font-size: 1.2rem;
+        display: inline-block;
+        line-height: 1;
       }
       
-             .feature span:last-child {
-         font-size: var(--font-size-sm);
-         font-weight: 500;
-         color: white;
-       }
+      :global(.feature-text) {
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: white;
+        display: inline-block;
+      }
+      
+      /* Fallback para spans sin clase específica */
+      :global(.feature span:last-child:not(.feature-icon)) {
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: white;
+      }
       
       .cta-visual {
         flex-shrink: 0;
@@ -743,11 +766,8 @@ import HeroSlider from '../components/HeroSlider.astro';
          grid-template-columns: repeat(4, 1fr);
        }
        
-       .testimonials-grid {
-         grid-template-columns: repeat(5, 1fr);
-         max-width: 100%;
-         padding: 0 var(--space-md);
-         gap: var(--space-xs);
+       :global(.testimonials-grid) {
+         gap: var(--space-sm);
        }
      }
     
@@ -902,25 +922,18 @@ import HeroSlider from '../components/HeroSlider.astro';
          font-size: var(--font-size-md);
        }
       
-                           .testimonials-grid {
-          grid-template-columns: repeat(2, 1fr);
+                           :global(.testimonials-grid) {
           gap: var(--space-sm);
-          max-width: 100%;
           padding: 0 var(--space-sm);
         }
         
-        .mobile-wide {
-          grid-column: span 2;
-        }
-        
-        .mobile-wide .testimonial-card {
-          min-height: auto;
-          padding: var(--space-lg);
-        }
-        
-        .mobile-wide .testimonial-text {
-          font-size: var(--font-size-base);
-          line-height: 1.5;
+        :global(.testimonials-grid[data-count="1"]),
+        :global(.testimonials-grid[data-count="2"]),
+        :global(.testimonials-grid[data-count="3"]),
+        :global(.testimonials-grid[data-count="4"]),
+        :global(.testimonials-grid[data-count="5"]) {
+          grid-template-columns: repeat(2, 1fr) !important;
+          max-width: 100%;
         }
       
       .testimonial-card {
@@ -941,7 +954,191 @@ import HeroSlider from '../components/HeroSlider.astro';
         font-size: 0.7rem;
       }
     }
-    
+  </style>
+
+<script>
+      // Cargar datos de la landing page desde la API
+      async function loadLandingPageData() {
+        try {
+          const response = await fetch('/api/landing-page.php');
+          const data = await response.json();
+          
+          // Cargar carrusel
+          if (data.carousel && data.carousel.length > 0) {
+            const carouselList = document.getElementById('carousel-list');
+            if (carouselList) {
+              carouselList.innerHTML = data.carousel.map(item => {
+                const link = item.link ? `href="${item.link}"` : '';
+                const linkTag = item.link ? '<a ' + link + '>' : '';
+                const linkClose = item.link ? '</a>' : '';
+                return `
+                  <li class="splide__slide">
+                    ${linkTag}
+                      <img src="${item.image}" alt="Carrusel" width="1920" height="1080" loading="lazy" decoding="async" />
+                    ${linkClose}
+                  </li>
+                `;
+              }).join('');
+              
+              // Reinicializar el slider después de un pequeño delay para asegurar que las imágenes se cargaron
+              setTimeout(() => {
+                if (typeof Splide !== 'undefined') {
+                  // Destruir slider existente si hay uno
+                  const existingSlider = document.getElementById('hero-slider');
+                  if (existingSlider && existingSlider.splide) {
+                    existingSlider.splide.destroy();
+                  }
+                  
+                  new Splide('#hero-slider', {
+                    type: 'fade',
+                    autoplay: true,
+                    interval: 4000,
+                    rewind: true,
+                    arrows: true,
+                    pagination: true
+                  }).mount();
+                }
+              }, 100);
+            }
+          }
+          
+          // Cargar sección Sobre
+          if (data.sobre) {
+            const sobre = data.sobre;
+            if (document.getElementById('sobre-title')) document.getElementById('sobre-title').textContent = sobre.title;
+            if (document.getElementById('sobre-text-1')) document.getElementById('sobre-text-1').textContent = sobre.text_1;
+            if (document.getElementById('sobre-text-2')) document.getElementById('sobre-text-2').textContent = sobre.text_2;
+            if (document.getElementById('sobre-image') && sobre.image) {
+              document.getElementById('sobre-image').src = sobre.image;
+            }
+            if (sobre.stats && sobre.stats.length >= 3) {
+              const stat1El = document.getElementById('sobre-stat-1-number');
+              const stat2El = document.getElementById('sobre-stat-2-number');
+              const stat3El = document.getElementById('sobre-stat-3-number');
+              
+              if (stat1El) {
+                stat1El.textContent = sobre.stats[0].number;
+                // Si el número tiene más de 5 caracteres, reducir tamaño
+                if (sobre.stats[0].number && sobre.stats[0].number.length > 5) {
+                  stat1El.setAttribute('data-long', 'true');
+                } else {
+                  stat1El.removeAttribute('data-long');
+                }
+              }
+              if (document.getElementById('sobre-stat-1-label')) document.getElementById('sobre-stat-1-label').textContent = sobre.stats[0].label;
+              
+              if (stat2El) {
+                stat2El.textContent = sobre.stats[1].number;
+                if (sobre.stats[1].number && sobre.stats[1].number.length > 5) {
+                  stat2El.setAttribute('data-long', 'true');
+                } else {
+                  stat2El.removeAttribute('data-long');
+                }
+              }
+              if (document.getElementById('sobre-stat-2-label')) document.getElementById('sobre-stat-2-label').textContent = sobre.stats[1].label;
+              
+              if (stat3El) {
+                stat3El.textContent = sobre.stats[2].number;
+                if (sobre.stats[2].number && sobre.stats[2].number.length > 5) {
+                  stat3El.setAttribute('data-long', 'true');
+                } else {
+                  stat3El.removeAttribute('data-long');
+                }
+              }
+              if (document.getElementById('sobre-stat-3-label')) document.getElementById('sobre-stat-3-label').textContent = sobre.stats[2].label;
+            }
+          }
+          
+          // Cargar comentarios
+          if (data.testimonials) {
+            const testimonials = data.testimonials;
+            if (testimonials.visible && testimonials.items && testimonials.items.length > 0) {
+              const testimonialsSection = document.getElementById('testimonials-section');
+              const testimonialsGrid = document.getElementById('testimonials-grid');
+              
+              if (testimonialsSection) testimonialsSection.style.display = 'block';
+              
+              if (testimonialsGrid) {
+                const count = Math.min(testimonials.items.length, 5); // Máximo 5
+                testimonialsGrid.setAttribute('data-count', count);
+                testimonialsGrid.innerHTML = testimonials.items.slice(0, 5).map((item, index) => {
+                  return `
+                    <div class="testimonial-card">
+                      <div class="stars">${item.stars || '⭐⭐⭐⭐⭐'}</div>
+                      <p class="testimonial-text">"${item.text}"</p>
+                      <div class="client-info">
+                        <span class="client-name">${item.client_name}</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('');
+              }
+            } else {
+              const testimonialsSection = document.getElementById('testimonials-section');
+              if (testimonialsSection) testimonialsSection.style.display = 'none';
+            }
+          }
+          
+          // Cargar Galería de Ideas
+          if (data.galeria) {
+            const galeria = data.galeria;
+            if (galeria.visible) {
+              const galeriaSection = document.getElementById('galeria-section');
+              if (galeriaSection) galeriaSection.style.display = 'block';
+              
+              if (document.getElementById('galeria-badge')) document.getElementById('galeria-badge').textContent = galeria.badge || '✨ Inspiración';
+              if (document.getElementById('galeria-title')) document.getElementById('galeria-title').textContent = galeria.title;
+              if (document.getElementById('galeria-description')) document.getElementById('galeria-description').textContent = galeria.description;
+              if (document.getElementById('galeria-image') && galeria.image) {
+                document.getElementById('galeria-image').src = galeria.image;
+              }
+              if (document.getElementById('galeria-link') && galeria.link) {
+                document.getElementById('galeria-link').href = galeria.link;
+              }
+              if (document.getElementById('galeria-button-link') && galeria.link) {
+                document.getElementById('galeria-button-link').href = galeria.link;
+              }
+              if (document.getElementById('galeria-button-text')) {
+                document.getElementById('galeria-button-text').textContent = galeria.button_text || 'Galeria de ideas';
+              }
+              
+              // Actualizar features (botones)
+              if (galeria.features && galeria.features.length > 0) {
+                const featuresContainer = document.getElementById('galeria-features');
+                if (featuresContainer) {
+                  featuresContainer.innerHTML = galeria.features.map(feature => `
+                    <div class="feature">
+                      <span class="feature-icon">${feature.icon || '✨'}</span>
+                      <span class="feature-text">${feature.text || ''}</span>
+                    </div>
+                  `).join('');
+                }
+              } else {
+                // Si no hay features, ocultar el contenedor
+                const featuresContainer = document.getElementById('galeria-features');
+                if (featuresContainer) {
+                  featuresContainer.style.display = 'none';
+                }
+              }
+            } else {
+              const galeriaSection = document.getElementById('galeria-section');
+              if (galeriaSection) galeriaSection.style.display = 'none';
+            }
+          }
+        } catch (error) {
+          console.error('Error al cargar datos de landing page:', error);
+        }
+      }
+      
+      // Cargar cuando el DOM esté listo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadLandingPageData);
+      } else {
+        loadLandingPageData();
+      }
+    </script>
+
+<style>
     @media (max-width: 600px) {
       .mobile-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1037,12 +1234,12 @@ import HeroSlider from '../components/HeroSlider.astro';
          
 
         
-        .testimonial-card {
+        :global(.testimonial-card) {
           padding: var(--space-xs);
           min-height: 140px;
         }
         
-        .testimonial-text {
+        :global(.testimonial-text) {
           font-size: var(--font-size-xs);
           line-height: 1.2;
           margin-bottom: var(--space-sm);

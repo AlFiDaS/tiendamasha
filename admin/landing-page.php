@@ -29,6 +29,11 @@ if (!$settings) {
 // Decodificar JSONs
 $carouselImages = !empty($settings['carousel_images']) ? json_decode($settings['carousel_images'], true) : [];
 $testimonials = !empty($settings['testimonials']) ? json_decode($settings['testimonials'], true) : [];
+$galeriaFeatures = !empty($settings['galeria_features']) ? json_decode($settings['galeria_features'], true) : [
+    ['icon' => '💡', 'text' => 'Ideas creativas'],
+    ['icon' => '🏠', 'text' => 'Decoración hogar'],
+    ['icon' => '✨', 'text' => 'Paso a paso']
+];
 
 // Obtener categorías para los links del carrusel
 $categories = getAllCategories(true);
@@ -50,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $link = '';
                     if ($linkType === 'category' && !empty($linkValue)) {
                         $category = getCategoryBySlug($linkValue);
-                        $link = $category ? '/categoria/' . $linkValue : '';
+                        $link = $category ? '/' . $linkValue : '';
                     } elseif ($linkType === 'ideas' && !empty($linkValue)) {
                         $link = '/ideas';
                     }
@@ -93,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $link = '';
                             if ($linkType === 'category' && !empty($linkValue)) {
                                 $category = getCategoryBySlug($linkValue);
-                                $link = $category ? '/categoria/' . $linkValue : '';
+                                $link = $category ? '/' . $linkValue : '';
                             } elseif ($linkType === 'ideas' && !empty($linkValue)) {
                                 $link = '/ideas';
                             }
@@ -170,11 +175,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Procesar Galería de Ideas
+        // Procesar features (botones)
+        $featuresData = [];
+        if (!empty($_POST['galeria_feature_icon']) && !empty($_POST['galeria_feature_text'])) {
+            $icons = $_POST['galeria_feature_icon'];
+            $texts = $_POST['galeria_feature_text'];
+            foreach ($icons as $index => $icon) {
+                if (!empty($icon) && !empty($texts[$index])) {
+                    $featuresData[] = [
+                        'icon' => sanitize($icon),
+                        'text' => sanitize($texts[$index])
+                    ];
+                }
+            }
+        }
+        
+        // Procesar nuevas features
+        if (!empty($_POST['new_galeria_feature_icon']) && !empty($_POST['new_galeria_feature_text'])) {
+            $newIcons = $_POST['new_galeria_feature_icon'];
+            $newTexts = $_POST['new_galeria_feature_text'];
+            foreach ($newIcons as $index => $icon) {
+                if (!empty($icon) && !empty($newTexts[$index])) {
+                    $featuresData[] = [
+                        'icon' => sanitize($icon),
+                        'text' => sanitize($newTexts[$index])
+                    ];
+                }
+            }
+        }
+        
         $galeriaData = [
             'title' => sanitize($_POST['galeria_title'] ?? ''),
             'description' => sanitize($_POST['galeria_description'] ?? ''),
             'link' => sanitize($_POST['galeria_link'] ?? '/ideas'),
-            'visible' => isset($_POST['galeria_visible']) ? 1 : 0
+            'visible' => isset($_POST['galeria_visible']) ? 1 : 0,
+            'badge' => sanitize($_POST['galeria_badge'] ?? '✨ Inspiración'),
+            'features' => $featuresData,
+            'button_text' => sanitize($_POST['galeria_button_text'] ?? 'Galeria de ideas')
         ];
         
         // Procesar imagen de Galería
@@ -217,7 +254,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'galeria_description' => $galeriaData['description'],
             'galeria_image' => $galeriaData['image'] ?? null,
             'galeria_link' => $galeriaData['link'],
-            'galeria_visible' => $galeriaData['visible']
+            'galeria_visible' => $galeriaData['visible'],
+            'galeria_badge' => $galeriaData['badge'],
+            'galeria_features' => json_encode($galeriaData['features']),
+            'galeria_button_text' => $galeriaData['button_text']
         ];
         
         $updateFields = [];
@@ -247,6 +287,16 @@ if (isset($_GET['updated'])) {
     $settings = fetchOne("SELECT * FROM landing_page_settings WHERE id = 1 LIMIT 1");
     $carouselImages = !empty($settings['carousel_images']) ? json_decode($settings['carousel_images'], true) : [];
     $testimonials = !empty($settings['testimonials']) ? json_decode($settings['testimonials'], true) : [];
+    $galeriaFeatures = !empty($settings['galeria_features']) ? json_decode($settings['galeria_features'], true) : [
+        ['icon' => '💡', 'text' => 'Ideas creativas'],
+        ['icon' => '🏠', 'text' => 'Decoración hogar'],
+        ['icon' => '✨', 'text' => 'Paso a paso']
+    ];
+}
+
+// Obtener categorías para los links del carrusel
+if (!isset($categories)) {
+    $categories = getAllCategories(true);
 }
 
 require_once '_inc/header.php';
@@ -292,16 +342,16 @@ require_once '_inc/header.php';
                                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Link:</label>
                                 <select name="carousel_link_type[]" class="carousel-link-type" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem;">
                                     <option value="none" <?= empty($item['link']) ? 'selected' : '' ?>>Sin link</option>
-                                    <option value="category" <?= !empty($item['link']) && strpos($item['link'], '/categoria/') !== false ? 'selected' : '' ?>>Categoría</option>
+                                    <option value="category" <?= !empty($item['link']) && $item['link'] !== '/ideas' && !empty(str_replace('/', '', $item['link'])) ? 'selected' : '' ?>>Categoría</option>
                                     <option value="ideas" <?= !empty($item['link']) && $item['link'] === '/ideas' ? 'selected' : '' ?>>Galería de Ideas</option>
                                 </select>
-                                <select name="carousel_link_value[]" class="carousel-link-category" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; display: <?= !empty($item['link']) && strpos($item['link'], '/categoria/') !== false ? 'block' : 'none'; ?>;">
+                                <select name="carousel_link_value[]" class="carousel-link-category" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; display: <?= !empty($item['link']) && $item['link'] !== '/ideas' && !empty(str_replace('/', '', $item['link'])) ? 'block' : 'none'; ?>;">
                                     <option value="">Seleccionar categoría</option>
                                     <?php foreach ($categories as $cat): ?>
                                         <?php 
                                         $slug = '';
-                                        if (!empty($item['link']) && strpos($item['link'], '/categoria/') !== false) {
-                                            $slug = str_replace('/categoria/', '', $item['link']);
+                                        if (!empty($item['link']) && $item['link'] !== '/ideas') {
+                                            $slug = ltrim($item['link'], '/');
                                         }
                                         ?>
                                         <option value="<?= htmlspecialchars($cat['slug']) ?>" <?= $cat['slug'] === $slug ? 'selected' : '' ?>>
@@ -473,6 +523,44 @@ require_once '_inc/header.php';
             <small>URL de destino (ej: /ideas)</small>
         </div>
         
+        <div class="form-group">
+            <label for="galeria_badge">Badge (puede incluir emoji)</label>
+            <input type="text" id="galeria_badge" name="galeria_badge" value="<?= htmlspecialchars($settings['galeria_badge'] ?? '✨ Inspiración') ?>" placeholder="✨ Inspiración">
+            <small>Ejemplo: ✨ Inspiración, 🎨 Diseño, etc.</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="galeria_button_text">Texto del botón principal</label>
+            <input type="text" id="galeria_button_text" name="galeria_button_text" value="<?= htmlspecialchars($settings['galeria_button_text'] ?? 'Galeria de ideas') ?>" placeholder="Galeria de ideas">
+        </div>
+        
+        <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: #333;">Botones de características</h4>
+        <div id="galeria-features-container">
+            <?php if (!empty($galeriaFeatures)): ?>
+                <?php foreach ($galeriaFeatures as $index => $feature): ?>
+                    <div class="galeria-feature-item" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                        <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Icono (emoji)</label>
+                                <input type="text" name="galeria_feature_icon[]" value="<?= htmlspecialchars($feature['icon'] ?? '') ?>" placeholder="💡" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>Texto</label>
+                                <input type="text" name="galeria_feature_text[]" value="<?= htmlspecialchars($feature['text'] ?? '') ?>" placeholder="Ideas creativas">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-remove-galeria-feature" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-top: 0.5rem;">Eliminar</button>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        
+        <button type="button" id="add-galeria-feature" style="background: var(--primary-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-top: 1rem;">
+            + Agregar Botón
+        </button>
+        
+        <div id="new-galeria-features"></div>
+        
         <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
             <button type="submit" class="btn btn-primary">
                 💾 Guardar Configuración
@@ -599,6 +687,40 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-remove-testimonial').forEach(function(btn) {
         btn.addEventListener('click', function() {
             this.closest('.testimonial-item').remove();
+        });
+    });
+    
+    // Eliminar features de galería existentes
+    document.querySelectorAll('.btn-remove-galeria-feature').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            this.closest('.galeria-feature-item').remove();
+        });
+    });
+    
+    // Agregar nueva feature de galería
+    document.getElementById('add-galeria-feature').addEventListener('click', function() {
+        const container = document.getElementById('new-galeria-features');
+        const div = document.createElement('div');
+        div.className = 'galeria-feature-item';
+        div.style.cssText = 'margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;';
+        div.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 3fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Icono (emoji)</label>
+                    <input type="text" name="new_galeria_feature_icon[]" placeholder="💡" maxlength="5">
+                </div>
+                <div class="form-group">
+                    <label>Texto</label>
+                    <input type="text" name="new_galeria_feature_text[]" placeholder="Ideas creativas">
+                </div>
+            </div>
+            <button type="button" class="btn-remove-new-galeria-feature" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin-top: 0.5rem;">Eliminar</button>
+        `;
+        container.appendChild(div);
+        
+        // Manejar eliminación
+        div.querySelector('.btn-remove-new-galeria-feature').addEventListener('click', function() {
+            div.remove();
         });
     });
 });
