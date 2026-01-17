@@ -36,9 +36,9 @@ if (!$isProduction) {
     define('DB_PASS', '');
 } else {
     // Configuración para PRODUCCIÓN (Hostinger)
-    define('DB_NAME', 'u161673556_lume');
-    define('DB_USER', 'u161673556_lume');
-    define('DB_PASS', 'Luky2428');
+    define('DB_NAME', 'u161673556_tiendamasha');
+    define('DB_USER', 'u161673556_tiendamasha');
+    define('DB_PASS', 'eoC8!qh$Q3');
 }
 define('DB_CHARSET', 'utf8mb4');
 

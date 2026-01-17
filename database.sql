@@ -72,10 +72,13 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
   `username` VARCHAR(100) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) DEFAULT NULL,
+  `password_reset_token` VARCHAR(255) NULL DEFAULT NULL,
+  `password_reset_expires` DATETIME NULL DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `last_login` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `username` (`username`),
+  KEY `idx_reset_token` (`password_reset_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
@@ -231,6 +234,32 @@ CREATE TABLE IF NOT EXISTS `stock_movements` (
   KEY `idx_created_at` (`created_at`),
   FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- TABLA: shop_settings
+-- ============================================
+-- Configuración general de la tienda
+-- ============================================
+CREATE TABLE IF NOT EXISTS `shop_settings` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `shop_name` VARCHAR(255) DEFAULT NULL COMMENT 'Nombre de la tienda',
+  `shop_logo` VARCHAR(500) DEFAULT NULL COMMENT 'Ruta del logo de la tienda',
+  `whatsapp_number` VARCHAR(50) DEFAULT NULL COMMENT 'Número de WhatsApp',
+  `whatsapp_message` TEXT DEFAULT NULL COMMENT 'Mensaje predefinido para WhatsApp',
+  `address` TEXT DEFAULT NULL COMMENT 'Dirección del local',
+  `instagram` VARCHAR(255) DEFAULT NULL COMMENT 'URL de Instagram',
+  `facebook` VARCHAR(255) DEFAULT NULL COMMENT 'URL de Facebook',
+  `email` VARCHAR(255) DEFAULT NULL COMMENT 'Email de contacto',
+  `phone` VARCHAR(50) DEFAULT NULL COMMENT 'Teléfono de contacto',
+  `description` TEXT DEFAULT NULL COMMENT 'Descripción de la tienda',
+  `primary_color` VARCHAR(7) DEFAULT '#FF6B35' COMMENT 'Color primario del panel (hex)',
+  `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insertar registro inicial (solo uno)
+INSERT INTO `shop_settings` (`id`, `shop_name`) VALUES (1, 'LUME - Velas Artesanales')
+ON DUPLICATE KEY UPDATE `shop_name` = `shop_name`;
 
 -- ============================================
 -- DATOS DE EJEMPLO (Opcional)

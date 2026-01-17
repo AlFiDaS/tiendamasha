@@ -8,13 +8,38 @@ if (!defined('LUME_ADMIN')) {
 
 requireAuth();
 $currentUser = getCurrentUser();
+
+// Obtener configuración de la tienda
+require_once __DIR__ . '/../../helpers/shop-settings.php';
+$shopSettings = getShopSettings();
+$shopName = $shopSettings['shop_name'] ?? SITE_NAME;
+$primaryColor = $shopSettings['primary_color'] ?? '#FF6B35';
+
+// Función para ajustar brillo de color (para hover states)
+function adjustBrightness($hex, $percent) {
+    $hex = ltrim($hex, '#');
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    
+    $r = max(0, min(255, round($r + ($r * $percent / 100))));
+    $g = max(0, min(255, round($g + ($g * $percent / 100))));
+    $b = max(0, min(255, round($b + ($b * $percent / 100))));
+    
+    return '#' . str_pad(dechex((int)$r), 2, '0', STR_PAD_LEFT) . 
+           str_pad(dechex((int)$g), 2, '0', STR_PAD_LEFT) . 
+           str_pad(dechex((int)$b), 2, '0', STR_PAD_LEFT);
+}
+
+$primaryColorHover = adjustBrightness($primaryColor, -15);
+$primaryColorLight = adjustBrightness($primaryColor, 20);
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($pageTitle) ? $pageTitle . ' - ' : '' ?>LUME</title>
+    <title><?= isset($pageTitle) ? $pageTitle . ' - ' : '' ?><?= htmlspecialchars($shopName) ?></title>
     <style>
         * {
             margin: 0;
@@ -29,11 +54,18 @@ $currentUser = getCurrentUser();
             line-height: 1.6;
         }
         
+        :root {
+            --primary-color: <?= htmlspecialchars($primaryColor) ?>;
+            --primary-color-hover: <?= htmlspecialchars($primaryColorHover) ?>;
+            --primary-color-light: <?= htmlspecialchars($primaryColorLight) ?>;
+        }
+        
         .admin-header {
-            background: linear-gradient(135deg, #e0a4ce 0%, #d89bc0 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: white;
             padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-bottom: 3px solid var(--primary-color);
         }
         
         .admin-header-content {
@@ -42,11 +74,90 @@ $currentUser = getCurrentUser();
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
         
-        .admin-header h1 {
-            font-size: 1.5rem;
+        .admin-header-nav-left,
+        .admin-header-nav-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .admin-header-nav {
+            display: none;
+        }
+        
+        .admin-header-nav-left {
+            flex: 1;
+        }
+        
+        .admin-header-nav-right {
+            flex: 1;
+            justify-content: flex-end;
+        }
+        
+        .admin-header-nav-left a,
+        .admin-header-nav-right a,
+        .admin-header-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .admin-header-nav-left a:hover,
+        .admin-header-nav-right a:hover,
+        .admin-header-nav a:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--primary-color-light);
+        }
+        
+        .admin-header-nav-left .logout-btn,
+        .admin-header-nav-right .logout-btn,
+        .admin-header-nav .logout-btn {
+            background: var(--primary-color);
             font-weight: 600;
+            border: 2px solid var(--primary-color);
+            padding: 0.5rem 1.25rem;
+        }
+        
+        .admin-header-nav-left .logout-btn:hover,
+        .admin-header-nav-right .logout-btn:hover,
+        .admin-header-nav .logout-btn:hover {
+            background: var(--primary-color-hover);
+            border-color: var(--primary-color-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .admin-header-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .admin-header-center h1 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .admin-header-center .admin-logo {
+            max-width: 100px;
+            max-height: 40px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin-top: 0.25rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: 4px;
         }
         
         .admin-menu-toggle {
@@ -58,38 +169,6 @@ $currentUser = getCurrentUser();
             cursor: pointer;
             padding: 0.5rem;
             z-index: 1002;
-        }
-        
-        .admin-header-nav {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .admin-header-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .admin-header-nav a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .admin-header-nav .logout-btn {
-            background: rgba(255,255,255,0.25);
-            font-weight: 600;
-            border: 2px solid rgba(255,255,255,0.5);
-            padding: 0.5rem 1.25rem;
-        }
-        
-        .admin-header-nav .logout-btn:hover {
-            background: rgba(255,255,255,0.35);
-            border-color: rgba(255,255,255,0.7);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .admin-container {
@@ -124,7 +203,7 @@ $currentUser = getCurrentUser();
         
         .admin-sidebar a:hover,
         .admin-sidebar a.active {
-            background: #e0a4ce;
+            background: var(--primary-color);
             color: white;
         }
         
@@ -168,8 +247,8 @@ $currentUser = getCurrentUser();
         
         .filters-form .form-group input[type="text"]:focus {
             outline: none;
-            border-color: #e0a4ce;
-            box-shadow: 0 0 0 2px rgba(224, 164, 206, 0.2);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
         }
         
         .filters-actions {
@@ -230,12 +309,13 @@ $currentUser = getCurrentUser();
         }
         
         .btn-primary {
-            background: #e0a4ce;
+            background: var(--primary-color);
             color: white;
+            border: none;
         }
         
         .btn-primary:hover {
-            background: #d89bc0;
+            background: var(--primary-color-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
@@ -431,8 +511,9 @@ $currentUser = getCurrentUser();
         }
         
         .data-table thead {
-            background: linear-gradient(135deg, #e0a4ce 0%, #d89bc0 100%);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             color: white;
+            border-bottom: 2px solid var(--primary-color);
         }
         
         .data-table th {
@@ -510,7 +591,7 @@ $currentUser = getCurrentUser();
             color: #333;
             margin: 2rem 0 1rem 0;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e0a4ce;
+            border-bottom: 2px solid var(--primary-color);
         }
         
         .stats-grid {
@@ -537,7 +618,7 @@ $currentUser = getCurrentUser();
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #e0a4ce;
+            color: var(--primary-color);
             margin-bottom: 0.5rem;
         }
         
@@ -574,13 +655,20 @@ $currentUser = getCurrentUser();
                 display: block;
             }
             
+            .admin-header-nav-left,
+            .admin-header-nav-right {
+                display: none !important;
+            }
+            
             .admin-header-nav {
                 display: none;
                 flex-direction: column;
                 position: absolute;
                 top: 100%;
+                left: 0;
                 right: 0;
-                background: linear-gradient(135deg, #e0a4ce 0%, #d89bc0 100%);
+                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                border-bottom: 2px solid var(--primary-color);
                 width: 100%;
                 padding: 1rem;
                 gap: 0.5rem;
@@ -591,7 +679,30 @@ $currentUser = getCurrentUser();
             }
             
             .admin-header-nav.open {
-                display: flex;
+                display: flex !important;
+            }
+            
+            .admin-header-center {
+                flex: 1;
+                text-align: center;
+                order: -1;
+            }
+            
+            .admin-header-center h1 {
+                font-size: 0.75rem;
+            }
+            
+            .admin-header-center .admin-logo {
+                max-width: 70px;
+                max-height: 35px;
+            }
+            
+            .admin-header-content {
+                flex-wrap: wrap;
+            }
+            
+            .admin-menu-toggle {
+                order: -1;
             }
             
             .admin-header-nav a {
@@ -727,7 +838,7 @@ $currentUser = getCurrentUser();
                 align-self: start;
                 font-size: 1.1rem;
                 font-weight: 700;
-                color: #e0a4ce;
+                color: var(--primary-color);
                 margin-top: 0;
             }
             
@@ -868,8 +979,8 @@ $currentUser = getCurrentUser();
             
             .filters-form .form-group input[type="text"]:focus {
                 outline: none;
-                border-color: #e0a4ce;
-                box-shadow: 0 0 0 2px rgba(224, 164, 206, 0.2);
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
             }
             
             /* Campo de búsqueda ocupa toda la primera fila en mobile */
@@ -948,15 +1059,50 @@ $currentUser = getCurrentUser();
 <body>
     <header class="admin-header">
         <div class="admin-header-content">
-            <h1>Hola, Gisela</h1>
+            <nav class="admin-header-nav-left">
+                <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
+                <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
+                <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
+                <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
+            </nav>
+            
+                    <div class="admin-header-center">
+                        <h1>Panel Administrativo</h1>
+                        <?php if (!empty($shopSettings['shop_logo'])): ?>
+                            <?php 
+                            // Cache busting: agregar timestamp de última modificación
+                            $logoPath = $shopSettings['shop_logo'];
+                            $logoFullPath = str_replace(BASE_URL, '', $logoPath);
+                            $logoFullPath = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($logoFullPath, '/');
+                            $logoTime = file_exists($logoFullPath) ? filemtime($logoFullPath) : time();
+                            $logoUrl = $logoPath . '?v=' . $logoTime;
+                            ?>
+                            <img 
+                                src="<?= htmlspecialchars($logoUrl) ?>" 
+                                alt="<?= htmlspecialchars($shopName) ?>" 
+                                class="admin-logo"
+                                onerror="this.style.display='none';"
+                            >
+                        <?php endif; ?>
+                    </div>
+            
+            <nav class="admin-header-nav-right">
+                <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
+                <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
+                <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
+            </nav>
+            
             <button id="admin-menu-toggle" class="admin-menu-toggle" aria-label="Abrir menú">
                 ☰
             </button>
+            
             <nav class="admin-header-nav" id="admin-header-nav">
                 <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
                 <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
                 <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
                 <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
+                <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
+                <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
                 <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
             </nav>
         </div>

@@ -6,7 +6,16 @@ $pageTitle = 'Dashboard';
 require_once '../config.php';
 require_once '../helpers/stats.php';
 require_once '../helpers/stock.php';
+require_once '../helpers/shop-settings.php';
 require_once '_inc/header.php';
+
+// Obtener configuración de la tienda
+$shopSettings = getShopSettings();
+$shopName = $shopSettings['shop_name'] ?? SITE_NAME;
+$primaryColor = $shopSettings['primary_color'] ?? '#FF6B35';
+
+// La función adjustBrightness() está definida en header.php
+// Obtener el color hover (se calcula en header.php después de incluir)
 
 // Obtener estadísticas del dashboard
 $dashboardStats = getDashboardStats();
@@ -23,7 +32,7 @@ $salesByDay = getSalesByDay();
 
 <div class="admin-content">
     <h2>Dashboard</h2>
-    <p style="color: #666; margin-bottom: 2rem;">Bienvenido al panel de administración de LUME</p>
+    <p style="color: #666; margin-bottom: 2rem;">Bienvenido al panel de administración de <?= htmlspecialchars($shopName) ?></p>
     
     <!-- Estadísticas de Ventas -->
     <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -198,6 +207,11 @@ $salesByDay = getSalesByDay();
 </div>
 
 <style>
+    :root {
+        --primary-color: <?= htmlspecialchars($primaryColor) ?>;
+        --primary-color-hover: <?= htmlspecialchars(adjustBrightness($primaryColor, -15)) ?>;
+    }
+    
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -219,53 +233,53 @@ $salesByDay = getSalesByDay();
     }
     
     .stat-total {
-        background: linear-gradient(135deg, #ffeef8, #ffe0f0);
-        border-left: 4px solid #e0a4ce;
+        background: linear-gradient(135deg, #fffdf9, #fff6ef);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-visible {
-        background: linear-gradient(135deg, #eef0ff, #e0e5ff);
-        border-left: 4px solid #667eea;
+        background: linear-gradient(135deg, #fffdf9, #fff6ef);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-destacados {
-        background: linear-gradient(135deg, #fff0f8, #ffe0f0);
-        border-left: 4px solid #f093fb;
+        background: linear-gradient(135deg, #fffdf9, #fff6ef);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-sales {
-        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        background: linear-gradient(135deg, #f0f9f4, #e8f5e9);
         border-left: 4px solid #4caf50;
     }
     
     .stat-month {
-        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-        border-left: 4px solid #2196f3;
+        background: linear-gradient(135deg, #f0f9f4, #e8f5e9);
+        border-left: 4px solid #4caf50;
     }
     
     .stat-pending {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border-left: 4px solid #ff9800;
+        background: linear-gradient(135deg, #fff6ef, #ffe8d6);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-confirm {
-        background: linear-gradient(135deg, #fce4ec, #f8bbd0);
-        border-left: 4px solid #e91e63;
+        background: linear-gradient(135deg, #fff6ef, #ffe8d6);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-low-stock {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border-left: 4px solid #ff9800;
+        background: linear-gradient(135deg, #fff6ef, #ffe8d6);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-no-stock {
-        background: linear-gradient(135deg, #ffebee, #ffcdd2);
+        background: linear-gradient(135deg, #fff6ef, #ffe8d6);
         border-left: 4px solid #f44336;
     }
     
     .stat-avg {
-        background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-        border-left: 4px solid #9c27b0;
+        background: linear-gradient(135deg, #fffdf9, #fff6ef);
+        border-left: 4px solid var(--primary-color);
     }
     
     .stat-number {
@@ -317,7 +331,7 @@ $salesByDay = getSalesByDay();
     .product-rank {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #e0a4ce;
+        color: var(--primary-color);
         min-width: 40px;
         text-align: center;
     }
@@ -404,7 +418,7 @@ $salesByDay = getSalesByDay();
     
     .product-link,
     .stock-link {
-        color: #e0a4ce;
+        color: var(--primary-color);
         text-decoration: none;
         font-weight: 500;
         transition: color 0.3s;
@@ -412,7 +426,7 @@ $salesByDay = getSalesByDay();
     
     .product-link:hover,
     .stock-link:hover {
-        color: #d89bc0;
+        color: var(--primary-color-hover);
         text-decoration: underline;
     }
     
@@ -446,7 +460,7 @@ $salesByDay = getSalesByDay();
     }
     
     .action-card:hover {
-        border-color: #e0a4ce;
+        border-color: var(--primary-color);
         transform: translateY(-3px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
@@ -497,20 +511,20 @@ $salesByDay = getSalesByDay();
     .category-count {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #e0a4ce;
+        color: var(--primary-color);
         margin-bottom: 0.75rem;
     }
     
     .category-link {
         display: inline-block;
-        color: #e0a4ce;
+        color: var(--primary-color);
         text-decoration: none;
         font-size: 0.9rem;
         transition: color 0.3s;
     }
     
     .category-link:hover {
-        color: #d89bc0;
+        color: var(--primary-color-hover);
         text-decoration: underline;
     }
     
