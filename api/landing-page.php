@@ -97,6 +97,10 @@ $response = [
             ['icon' => '✨', 'text' => 'Paso a paso']
         ],
         'button_text' => $settings['galeria_button_text'] ?? 'Galeria de ideas'
+    ],
+    'colors' => [
+        'primary_light' => $settings['primary_color_light'] ?? '#ff8c00',
+        'primary_dark' => $settings['primary_color_dark'] ?? '#ff8c00'
     ]
 ];
 

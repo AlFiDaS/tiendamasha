@@ -66,7 +66,7 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
     <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /></noscript>
     
     <!-- 📱 META TAGS MÓVILES -->
-    <meta name="theme-color" content="#e0a4ce" />
+    <meta name="theme-color" content="#ff8c00" id="theme-color-meta" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -97,9 +97,202 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
       "openingHours": "Mo-Fr 09:00-18:00, Sa 09:00-13:00"
     })} />
     
+    <!-- 🚀 CARGAR DATOS CRÍTICOS INMEDIATAMENTE (antes del renderizado) -->
+    <script is:inline>
+      (function() {
+        // Intentar cargar desde localStorage primero (cache)
+        const cachedShop = localStorage.getItem('shop_settings');
+        const cachedColors = localStorage.getItem('landing_colors');
+        const cacheTime = 5 * 60 * 1000; // 5 minutos
+        
+        let shopData = null;
+        let colorsData = null;
+        
+        // Verificar cache válido
+        if (cachedShop) {
+          try {
+            const parsed = JSON.parse(cachedShop);
+            if (parsed.timestamp && Date.now() - parsed.timestamp < cacheTime) {
+              shopData = parsed.data;
+            }
+          } catch(e) {}
+        }
+        
+        if (cachedColors) {
+          try {
+            const parsed = JSON.parse(cachedColors);
+            if (parsed.timestamp && Date.now() - parsed.timestamp < cacheTime) {
+              colorsData = parsed.data;
+            }
+          } catch(e) {}
+        }
+        
+        // Si hay datos en cache, aplicarlos inmediatamente
+        if (shopData) {
+          if (shopData.shop_name) {
+            document.title = shopData.shop_name;
+          }
+          if (shopData.description) {
+            let metaDesc = document.querySelector('meta[name="description"]');
+            if (!metaDesc) {
+              metaDesc = document.createElement('meta');
+              metaDesc.name = 'description';
+              document.head.appendChild(metaDesc);
+            }
+            metaDesc.content = shopData.description;
+          }
+        }
+        
+        if (colorsData && colorsData.colors) {
+          const primaryColorLight = colorsData.colors.primary_light || '#ff8c00';
+          const root = document.documentElement;
+          
+          // Calcular variantes
+          function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+              r: parseInt(result[1], 16),
+              g: parseInt(result[2], 16),
+              b: parseInt(result[3], 16)
+            } : null;
+          }
+          
+          function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+              const hex = x.toString(16);
+              return hex.length === 1 ? "0" + hex : hex;
+            }).join("");
+          }
+          
+          const rgb = hexToRgb(primaryColorLight);
+          if (rgb) {
+            const darker = {
+              r: Math.max(0, Math.floor(rgb.r * 0.85)),
+              g: Math.max(0, Math.floor(rgb.g * 0.85)),
+              b: Math.max(0, Math.floor(rgb.b * 0.85))
+            };
+            const lighter = {
+              r: Math.min(255, Math.floor(rgb.r + (255 - rgb.r) * 0.4)),
+              g: Math.min(255, Math.floor(rgb.g + (255 - rgb.g) * 0.4)),
+              b: Math.min(255, Math.floor(rgb.b + (255 - rgb.b) * 0.4))
+            };
+            
+            root.style.setProperty('--primary', primaryColorLight);
+            root.style.setProperty('--primary-color', primaryColorLight);
+            root.style.setProperty('--primary-dark', rgbToHex(darker.r, darker.g, darker.b));
+            root.style.setProperty('--primary-light', rgbToHex(lighter.r, lighter.g, lighter.b));
+            root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${primaryColorLight}, ${rgbToHex(lighter.r, lighter.g, lighter.b)})`);
+            root.style.setProperty('--primary-gradient-dark', `linear-gradient(135deg, ${rgbToHex(darker.r, darker.g, darker.b)}, ${primaryColorLight})`);
+            
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            if (themeColorMeta) {
+              themeColorMeta.setAttribute('content', primaryColorLight);
+            }
+          }
+        }
+        
+        // Cargar datos frescos en segundo plano (actualizar cache)
+        if (!shopData || !colorsData) {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', '/api/shop.php', true);
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.success && data.shop) {
+                  localStorage.setItem('shop_settings', JSON.stringify({
+                    timestamp: Date.now(),
+                    data: data.shop
+                  }));
+                  if (!shopData) {
+                    if (data.shop.shop_name) document.title = data.shop.shop_name;
+                    if (data.shop.description) {
+                      let metaDesc = document.querySelector('meta[name="description"]');
+                      if (!metaDesc) {
+                        metaDesc = document.createElement('meta');
+                        metaDesc.name = 'description';
+                        document.head.appendChild(metaDesc);
+                      }
+                      metaDesc.content = data.shop.description;
+                    }
+                  }
+                }
+              } catch(e) {}
+            }
+          };
+          xhr.send();
+        }
+        
+        if (!colorsData) {
+          const xhr2 = new XMLHttpRequest();
+          xhr2.open('GET', '/api/landing-page.php', true);
+          xhr2.onload = function() {
+            if (xhr2.status === 200) {
+              try {
+                const data = JSON.parse(xhr2.responseText);
+                if (data.colors) {
+                  localStorage.setItem('landing_colors', JSON.stringify({
+                    timestamp: Date.now(),
+                    data: data
+                  }));
+                  if (!colorsData) {
+                    const primaryColorLight = data.colors.primary_light || '#ff8c00';
+                    const root = document.documentElement;
+                    
+                    function hexToRgb(hex) {
+                      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                      return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                      } : null;
+                    }
+                    
+                    function rgbToHex(r, g, b) {
+                      return "#" + [r, g, b].map(x => {
+                        const hex = x.toString(16);
+                        return hex.length === 1 ? "0" + hex : hex;
+                      }).join("");
+                    }
+                    
+                    const rgb = hexToRgb(primaryColorLight);
+                    if (rgb) {
+                      const darker = {
+                        r: Math.max(0, Math.floor(rgb.r * 0.85)),
+                        g: Math.max(0, Math.floor(rgb.g * 0.85)),
+                        b: Math.max(0, Math.floor(rgb.b * 0.85))
+                      };
+                      const lighter = {
+                        r: Math.min(255, Math.floor(rgb.r + (255 - rgb.r) * 0.4)),
+                        g: Math.min(255, Math.floor(rgb.g + (255 - rgb.g) * 0.4)),
+                        b: Math.min(255, Math.floor(rgb.b + (255 - rgb.b) * 0.4))
+                      };
+                      
+                      root.style.setProperty('--primary', primaryColorLight);
+                      root.style.setProperty('--primary-color', primaryColorLight);
+                      root.style.setProperty('--primary-dark', rgbToHex(darker.r, darker.g, darker.b));
+                      root.style.setProperty('--primary-light', rgbToHex(lighter.r, lighter.g, lighter.b));
+                      root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${primaryColorLight}, ${rgbToHex(lighter.r, lighter.g, lighter.b)})`);
+                      root.style.setProperty('--primary-gradient-dark', `linear-gradient(135deg, ${rgbToHex(darker.r, darker.g, darker.b)}, ${primaryColorLight})`);
+                      
+                      const themeColorMeta = document.getElementById('theme-color-meta');
+                      if (themeColorMeta) {
+                        themeColorMeta.setAttribute('content', primaryColorLight);
+                      }
+                    }
+                  }
+                }
+              } catch(e) {}
+            }
+          };
+          xhr2.send();
+        }
+      })();
+    </script>
+    
     <!-- 🎨 CSS CRÍTICO INLINE (Above-the-fold) -->
     <style is:inline>
-      :root{--primary:#e0a4ce;--primary-dark:#765580;--primary-light:#f7d4ed;--secondary:#fff6ef;--text-primary:#2c2c2c;--text-secondary:#666;--background:#ffffff;--surface:#fafafa;--surface-light:#fffdf9;--space-xs:0.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--font-size-xs:0.75rem;--font-size-sm:1rem;--font-size-base:1rem;--font-size-md:1.125rem;--font-size-lg:1.25rem;--font-size-xl:1.5rem;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.07);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--transition-normal:0.3s ease}*{margin:0;padding:0;box-sizing:border-box}html{font-size:16px;-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%}body{font-family:'Inter','Open Sans','Segoe UI',sans-serif;background-color:var(--surface-light);color:var(--text-primary);font-size:1rem;line-height:1.7;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;padding:0}img{max-width:100%;height:auto;display:block}.container{max-width:1200px;margin:0 auto;padding:0 var(--space-md)}nav{background-color:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.05);position:sticky;top:0;z-index:1000}.nav-container{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0.6rem 2rem;position:relative}.logo img{height:40px}.menu-toggle{font-size:1.5rem;background:none;border:none;cursor:pointer;display:none}.carrito-icon,.wishlist-icon{position:relative;font-size:1.4rem;text-decoration:none;color:#333}.nav-desktop-right{display:flex;align-items:center;gap:2rem}.nav-links{list-style:none;gap:1rem;padding:0;margin:0;display:flex;align-items:center}.nav-links li{margin:0;padding:0}.nav-links li a{text-decoration:none;color:#333;font-weight:500;transition:color 0.3s;display:block}#cart-count,#cart-count-mobile,#wishlist-count,#wishlist-count-mobile{background:#e0a4ce;color:white;font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:50%;position:absolute;top:-10px;right:-12px}@media (max-width:767px){.menu-toggle{display:block;position:absolute;left:50%;transform:translateX(-50%)}.nav-desktop-right{display:none}.nav-links.mobile{display:none;flex-direction:column;padding:1rem 2rem;background:white;border:1px solid #eee;position:absolute;top:100%;left:0;width:100%;z-index:1001;box-shadow:0 5px 15px rgba(0,0,0,0.05);text-align:center}.nav-links.mobile.open{display:flex}}@media (min-width:768px){html{font-size:18px}.menu-toggle{display:none}.nav-links.mobile,.mobile-cart,.mobile-wishlist,.mobile-icons{display:none!important}}
+      :root{--primary:#ff8c00;--primary-color:#ff8c00;--primary-dark:#cc7000;--primary-light:#ffb84d;--primary-gradient:linear-gradient(135deg,var(--primary),var(--primary-light));--primary-gradient-dark:linear-gradient(135deg,var(--primary-dark),var(--primary));--secondary:#ffffff;--text-primary:#2c2c2c;--text-secondary:#666;--background:#ffffff;--surface:#ffffff;--surface-light:#ffffff;--space-xs:0.5rem;--space-sm:1rem;--space-md:1.5rem;--space-lg:2rem;--space-xl:3rem;--font-size-xs:0.75rem;--font-size-sm:1rem;--font-size-base:1rem;--font-size-md:1.125rem;--font-size-lg:1.25rem;--font-size-xl:1.5rem;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.07);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--transition-normal:0.3s ease}*{margin:0;padding:0;box-sizing:border-box}html{font-size:16px;-webkit-text-size-adjust:100%;-moz-text-size-adjust:100%;-ms-text-size-adjust:100%;text-size-adjust:100%}body{font-family:'Inter','Open Sans','Segoe UI',sans-serif;background-color:var(--surface-light);color:var(--text-primary);font-size:1rem;line-height:1.7;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;margin:0;padding:0}img{max-width:100%;height:auto;display:block}.container{max-width:1200px;margin:0 auto;padding:0 var(--space-md)}nav{background-color:#fff;box-shadow:0 2px 10px rgba(0,0,0,0.05);position:sticky;top:0;z-index:1000}.nav-container{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:0.6rem 2rem;position:relative}.logo img{height:40px}.menu-toggle{font-size:1.5rem;background:none;border:none;cursor:pointer;display:none}.carrito-icon,.wishlist-icon{position:relative;font-size:1.4rem;text-decoration:none;color:#333}.nav-desktop-right{display:flex;align-items:center;gap:2rem}.nav-links{list-style:none;gap:1rem;padding:0;margin:0;display:flex;align-items:center}.nav-links li{margin:0;padding:0}.nav-links li a{text-decoration:none;color:#333;font-weight:500;transition:color 0.3s;display:block}#cart-count,#cart-count-mobile,#wishlist-count,#wishlist-count-mobile{background:var(--primary);color:white;font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:50%;position:absolute;top:-10px;right:-12px}@media (max-width:767px){.menu-toggle{display:block;position:absolute;left:50%;transform:translateX(-50%)}.nav-desktop-right{display:none}.nav-links.mobile{display:none;flex-direction:column;padding:1rem 2rem;background:white;border:1px solid #eee;position:absolute;top:100%;left:0;width:100%;z-index:1001;box-shadow:0 5px 15px rgba(0,0,0,0.05);text-align:center}.nav-links.mobile.open{display:flex}}@media (min-width:768px){html{font-size:18px}.menu-toggle{display:none}.nav-links.mobile,.mobile-cart,.mobile-wishlist,.mobile-icons{display:none!important}}
     </style>
     
     <!-- 🎨 CSS COMPLETO (Carga asíncrona) -->
@@ -134,6 +327,7 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
     
     <!-- 🔄 SCRIPTS NO CRÍTICOS - Cargar después del renderizado -->
     <script>
+      // @ts-nocheck
       // Polyfill para requestIdleCallback
       if (!window.requestIdleCallback) {
         window.requestIdleCallback = function(cb) {
@@ -160,13 +354,19 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
         history.scrollRestoration = 'manual';
       }
       
-      // Cargar configuración de la tienda y actualizar título y meta description
+      // Cargar configuración de la tienda y actualizar título y meta description (actualizar cache)
       async function loadShopSettings() {
         try {
           const response = await fetch('/api/shop.php');
           const data = await response.json();
           
           if (data.success && data.shop) {
+            // Actualizar cache
+            localStorage.setItem('shop_settings', JSON.stringify({
+              timestamp: Date.now(),
+              data: data.shop
+            }));
+            
             // Actualizar título con el nombre de la tienda
             if (data.shop.shop_name) {
               document.title = data.shop.shop_name;
@@ -199,11 +399,98 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
         }
       }
       
+      // Cargar colores de la landing page y aplicarlos (actualizar cache)
+      async function loadColors() {
+        try {
+          const response = await fetch('/api/landing-page.php');
+          const data = await response.json();
+          
+          if (data.colors) {
+            // Actualizar cache
+            localStorage.setItem('landing_colors', JSON.stringify({
+              timestamp: Date.now(),
+              data: data
+            }));
+            
+            const primaryColorLight = data.colors.primary_light || '#ff8c00';
+            const primaryColorDark = data.colors.primary_dark || '#ff8c00';
+            
+            // Actualizar variables CSS
+            const root = document.documentElement;
+            root.style.setProperty('--primary', primaryColorLight);
+            root.style.setProperty('--primary-color', primaryColorLight); // Para compatibilidad
+            
+            // Actualizar theme-color meta tag
+            const themeColorMeta = document.getElementById('theme-color-meta');
+            if (themeColorMeta) {
+              themeColorMeta.setAttribute('content', primaryColorLight);
+            }
+            
+            // Calcular variantes del color primario
+            /**
+             * @param {string} hex
+             * @returns {{r: number, g: number, b: number} | null}
+             */
+            function hexToRgb(hex) {
+              const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+              return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+              } : null;
+            }
+            
+            /**
+             * @param {number} r
+             * @param {number} g
+             * @param {number} b
+             * @returns {string}
+             */
+            function rgbToHex(r, g, b) {
+              return "#" + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+              }).join("");
+            }
+            
+            // Crear versiones más oscuras y claras
+            const rgb = hexToRgb(primaryColorLight);
+            if (rgb) {
+              // Versión más oscura (para hover)
+              const darker = {
+                r: Math.max(0, Math.floor(rgb.r * 0.85)),
+                g: Math.max(0, Math.floor(rgb.g * 0.85)),
+                b: Math.max(0, Math.floor(rgb.b * 0.85))
+              };
+              root.style.setProperty('--primary-dark', rgbToHex(darker.r, darker.g, darker.b));
+              
+              // Versión más clara (para fondos suaves)
+              const lighter = {
+                r: Math.min(255, Math.floor(rgb.r + (255 - rgb.r) * 0.4)),
+                g: Math.min(255, Math.floor(rgb.g + (255 - rgb.g) * 0.4)),
+                b: Math.min(255, Math.floor(rgb.b + (255 - rgb.b) * 0.4))
+              };
+              root.style.setProperty('--primary-light', rgbToHex(lighter.r, lighter.g, lighter.b));
+              
+              // Actualizar gradientes
+              root.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${primaryColorLight}, ${rgbToHex(lighter.r, lighter.g, lighter.b)})`);
+              root.style.setProperty('--primary-gradient-dark', `linear-gradient(135deg, ${rgbToHex(darker.r, darker.g, darker.b)}, ${primaryColorLight})`);
+            }
+          }
+        } catch (error) {
+          console.error('Error al cargar colores:', error);
+        }
+      }
+      
       // Cargar configuración al iniciar
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadShopSettings);
+        document.addEventListener('DOMContentLoaded', () => {
+          loadShopSettings();
+          loadColors();
+        });
       } else {
         loadShopSettings();
+        loadColors();
       }
     </script>
   </body>

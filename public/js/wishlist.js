@@ -259,6 +259,9 @@
             
             const count = data.success && data.items ? data.items.length : 0;
             
+            // Guardar en localStorage para evitar flash
+            localStorage.setItem('wishlist_count', count.toString());
+            
             // Actualizar contadores
             const countElements = document.querySelectorAll('#wishlist-count, #wishlist-count-mobile');
             countElements.forEach(el => {

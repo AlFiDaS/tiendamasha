@@ -288,6 +288,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'button_text' => sanitize($_POST['galeria_button_text'] ?? 'Galeria de ideas')
         ];
         
+        // Procesar colores (modo claro y oscuro)
+        $primaryColorLight = sanitize($_POST['primary_color_light'] ?? '#ff8c00');
+        $primaryColorDark = sanitize($_POST['primary_color_dark'] ?? '#ff8c00');
+        
+        // Validar formato de color hexadecimal
+        if (!preg_match('/^#[a-fA-F0-9]{6}$/', $primaryColorLight)) {
+            $primaryColorLight = '#ff8c00';
+        }
+        if (!preg_match('/^#[a-fA-F0-9]{6}$/', $primaryColorDark)) {
+            $primaryColorDark = '#ff8c00';
+        }
+        
         // Procesar imagen de Galería
         if (isset($_FILES['galeria_image']) && $_FILES['galeria_image']['error'] === UPLOAD_ERR_OK) {
             $result = validateUploadedFile($_FILES['galeria_image'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
@@ -361,7 +373,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'galeria_visible' => $galeriaData['visible'],
             'galeria_badge' => $galeriaData['badge'],
             'galeria_features' => json_encode($galeriaData['features']),
-            'galeria_button_text' => $galeriaData['button_text']
+            'galeria_button_text' => $galeriaData['button_text'],
+            'primary_color_light' => $primaryColorLight,
+            'primary_color_dark' => $primaryColorDark
         ];
         
         $updateFields = [];
@@ -721,6 +735,59 @@ require_once '_inc/header.php';
         
         <div id="new-galeria-features"></div>
         
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        
+        <!-- CONFIGURACIÓN DE COLORES -->
+        <h3 style="margin-bottom: 1rem; color: #333;">Configuración de Colores</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label for="primary_color_light">Color Primario - Modo Claro</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input 
+                        type="color" 
+                        id="primary_color_light" 
+                        name="primary_color_light" 
+                        value="<?= htmlspecialchars($settings['primary_color_light'] ?? '#ff8c00') ?>"
+                        style="width: 80px; height: 40px; border: 2px solid #ddd; border-radius: 4px; cursor: pointer;"
+                    >
+                    <input 
+                        type="text" 
+                        id="primary_color_light_hex" 
+                        value="<?= htmlspecialchars($settings['primary_color_light'] ?? '#ff8c00') ?>"
+                        pattern="^#[a-fA-F0-9]{6}$"
+                        style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;"
+                        placeholder="#ff8c00"
+                        onchange="document.getElementById('primary_color_light').value = this.value.toLowerCase();"
+                    >
+                </div>
+                <small style="display: block; margin-top: 0.25rem; color: #666;">Color para páginas en modo claro</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="primary_color_dark">Color Primario - Modo Oscuro</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input 
+                        type="color" 
+                        id="primary_color_dark" 
+                        name="primary_color_dark" 
+                        value="<?= htmlspecialchars($settings['primary_color_dark'] ?? '#ff8c00') ?>"
+                        style="width: 80px; height: 40px; border: 2px solid #ddd; border-radius: 4px; cursor: pointer;"
+                    >
+                    <input 
+                        type="text" 
+                        id="primary_color_dark_hex" 
+                        value="<?= htmlspecialchars($settings['primary_color_dark'] ?? '#ff8c00') ?>"
+                        pattern="^#[a-fA-F0-9]{6}$"
+                        style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;"
+                        placeholder="#ff8c00"
+                        onchange="document.getElementById('primary_color_dark').value = this.value.toLowerCase();"
+                    >
+                </div>
+                <small style="display: block; margin-top: 0.25rem; color: #666;">Color para páginas en modo oscuro</small>
+            </div>
+        </div>
+        
         <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
             <button type="submit" class="btn btn-primary">
                 💾 Guardar Configuración
@@ -958,6 +1025,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 previewImage(e.target, formGroup);
             }
         });
+    }
+    
+    // Sincronizar selectores de color con inputs de texto hexadecimal
+    const colorLightPicker = document.getElementById('primary_color_light');
+    const colorLightHex = document.getElementById('primary_color_light_hex');
+    const colorDarkPicker = document.getElementById('primary_color_dark');
+    const colorDarkHex = document.getElementById('primary_color_dark_hex');
+    
+    // Sincronizar color picker → input hex (modo claro)
+    if (colorLightPicker && colorLightHex) {
+        colorLightPicker.addEventListener('input', function() {
+            colorLightHex.value = this.value.toUpperCase();
+        });
+        
+        // Sincronizar input hex → color picker (modo claro)
+        colorLightHex.addEventListener('input', function() {
+            if (/^#[a-fA-F0-9]{6}$/.test(this.value)) {
+                colorLightPicker.value = this.value;
+            }
+        });
+    }
+    
+    // Sincronizar color picker → input hex (modo oscuro)
+    if (colorDarkPicker && colorDarkHex) {
+        colorDarkPicker.addEventListener('input', function() {
+            colorDarkHex.value = this.value.toUpperCase();
+        });
+        
+        // Sincronizar input hex → color picker (modo oscuro)
+        colorDarkHex.addEventListener('input', function() {
+            if (/^#[a-fA-F0-9]{6}$/.test(this.value)) {
+                colorDarkPicker.value = this.value;
+            }
+        });
+        
+        // Actualizar el input de color picker antes de enviar el formulario
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                // Asegurar que los valores del color picker estén sincronizados
+                if (colorLightHex && /^#[a-fA-F0-9]{6}$/.test(colorLightHex.value)) {
+                    colorLightPicker.value = colorLightHex.value.toLowerCase();
+                }
+                if (colorDarkHex && /^#[a-fA-F0-9]{6}$/.test(colorDarkHex.value)) {
+                    colorDarkPicker.value = colorDarkHex.value.toLowerCase();
+                }
+            });
+        }
     }
 });
 </script>

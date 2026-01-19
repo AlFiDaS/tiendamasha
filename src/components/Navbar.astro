@@ -33,20 +33,20 @@ const staticLinksAfter = [
       </ul>
 
       <a href="/wishlist" class="wishlist-icon desktop-wishlist" title="Mis Favoritos">
-        ❤️ <span id="wishlist-count">0</span>
+        ❤️ <span id="wishlist-count" style="display: none;">0</span>
       </a>
       <a href="/carrito" class="carrito-icon desktop-cart">
-        🛒 <span id="cart-count">0</span>
+        🛒 <span id="cart-count" style="display: none;">0</span>
       </a>
     </div>
 
     <!-- Wishlist y Carrito en mobile (separado) -->
     <div class="mobile-icons">
       <a href="/wishlist" class="wishlist-icon mobile-wishlist" title="Mis Favoritos">
-        ❤️ <span id="wishlist-count-mobile">0</span>
+        ❤️ <span id="wishlist-count-mobile" style="display: none;">0</span>
       </a>
       <a href="/carrito" class="carrito-icon mobile-cart">
-        🛒 <span id="cart-count-mobile">0</span>
+        🛒 <span id="cart-count-mobile" style="display: none;">0</span>
       </a>
     </div>
   </div>
@@ -64,36 +64,211 @@ const staticLinksAfter = [
 </nav>
 
 <script is:inline>
-  // Cargar configuración de la tienda (logo, etc.)
-  (async function loadShopSettings() {
-    try {
-      const response = await fetch('/api/shop.php');
-      const data = await response.json();
-      
-      if (data.success && data.shop) {
-        const shop = data.shop;
-        
-        // Actualizar logo del navbar
-        if (shop.shop_logo) {
-          const logoImg = document.getElementById('nav-logo-img');
-          const logoLink = document.getElementById('nav-logo');
-          if (logoImg) {
-            logoImg.src = shop.shop_logo;
-            logoImg.alt = shop.shop_name || 'Logo';
-          }
-          if (logoLink && shop.shop_name) {
-            logoLink.title = shop.shop_name;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error al cargar configuración de la tienda:', error);
+  // Cargar contadores desde cache inmediatamente para evitar flash
+  (function() {
+    // Cargar wishlist count desde localStorage
+    const cachedWishlistCount = localStorage.getItem('wishlist_count');
+    if (cachedWishlistCount !== null) {
+      const count = parseInt(cachedWishlistCount, 10);
+      const countElements = document.querySelectorAll('#wishlist-count, #wishlist-count-mobile');
+      countElements.forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'block' : 'none';
+      });
+    } else {
+      // Si no hay cache, ocultar desde el inicio
+      const countElements = document.querySelectorAll('#wishlist-count, #wishlist-count-mobile');
+      countElements.forEach(el => {
+        el.style.display = 'none';
+      });
+    }
+    
+    // Cargar cart count desde localStorage
+    const cachedCartCount = localStorage.getItem('cart_count');
+    if (cachedCartCount !== null) {
+      const count = parseInt(cachedCartCount, 10);
+      const countElements = document.querySelectorAll('#cart-count, #cart-count-mobile');
+      countElements.forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'block' : 'none';
+      });
+    } else {
+      // Si no hay cache, ocultar desde el inicio
+      const countElements = document.querySelectorAll('#cart-count, #cart-count-mobile');
+      countElements.forEach(el => {
+        el.style.display = 'none';
+      });
     }
   })();
   
-  // Cargar categorías dinámicamente
+  // Cargar configuración de la tienda (logo, etc.) - Usar cache para evitar flash
+  (function loadShopSettings() {
+    // Intentar cargar desde cache primero
+    const cachedShop = localStorage.getItem('shop_settings');
+    let shopData = null;
+    
+    if (cachedShop) {
+      try {
+        const parsed = JSON.parse(cachedShop);
+        if (parsed.timestamp && Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+          shopData = parsed.data;
+        }
+      } catch(e) {}
+    }
+    
+    // Aplicar logo inmediatamente si está en cache
+    if (shopData && shopData.shop_logo) {
+      const logoImg = document.getElementById('nav-logo-img');
+      const logoLink = document.getElementById('nav-logo');
+      if (logoImg) {
+        logoImg.src = shopData.shop_logo;
+        logoImg.alt = shopData.shop_name || 'Logo';
+      }
+      if (logoLink && shopData.shop_name) {
+        logoLink.title = shopData.shop_name;
+      }
+    }
+    
+    // Cargar datos frescos en segundo plano
+    (async function() {
+      try {
+        const response = await fetch('/api/shop.php');
+        const data = await response.json();
+        
+        if (data.success && data.shop) {
+          const shop = data.shop;
+          
+          // Actualizar cache
+          localStorage.setItem('shop_settings', JSON.stringify({
+            timestamp: Date.now(),
+            data: shop
+          }));
+          
+          // Actualizar logo del navbar
+          if (shop.shop_logo) {
+            const logoImg = document.getElementById('nav-logo-img');
+            const logoLink = document.getElementById('nav-logo');
+            if (logoImg) {
+              logoImg.src = shop.shop_logo;
+              logoImg.alt = shop.shop_name || 'Logo';
+            }
+            if (logoLink && shop.shop_name) {
+              logoLink.title = shop.shop_name;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error al cargar configuración de la tienda:', error);
+      }
+    })();
+  })();
+  
+  // Cargar categorías dinámicamente (solo una vez)
   (function() {
+    let categoriesLoaded = false;
+    const CATEGORIES_MARKER = 'data-categories-loaded';
+    const CATEGORIES_CACHE_KEY = 'navbar_categories';
+    const CACHE_TIME = 5 * 60 * 1000; // 5 minutos
+    
+    // Función para insertar categorías en el DOM
+    function insertCategories(categoryLinks, desktopLinks, mobileLinks) {
+      if (!categoryLinks || categoryLinks.length === 0) return;
+      
+      // Insertar en desktop
+      if (desktopLinks) {
+        const allLinks = Array.from(desktopLinks.querySelectorAll('li'));
+        if (allLinks.length >= 2 && !desktopLinks.hasAttribute(CATEGORIES_MARKER)) {
+          const galeriaLink = allLinks[1];
+          categoryLinks.forEach(link => {
+            // Verificar si el link ya existe
+            const existingLink = Array.from(desktopLinks.querySelectorAll('a')).find(a => a.href.endsWith(link.href));
+            if (!existingLink) {
+              const li = document.createElement('li');
+              li.setAttribute('data-category-link', 'true');
+              const a = document.createElement('a');
+              a.href = link.href;
+              a.textContent = link.text;
+              li.appendChild(a);
+              desktopLinks.insertBefore(li, galeriaLink);
+            }
+          });
+          desktopLinks.setAttribute(CATEGORIES_MARKER, 'true');
+        }
+      }
+      
+      // Insertar en mobile
+      if (mobileLinks) {
+        const allMobileLinks = Array.from(mobileLinks.querySelectorAll('li'));
+        if (allMobileLinks.length >= 2 && !mobileLinks.hasAttribute(CATEGORIES_MARKER)) {
+          const galeriaMobileLink = allMobileLinks[1];
+          categoryLinks.forEach(link => {
+            // Verificar si el link ya existe
+            const existingLink = Array.from(mobileLinks.querySelectorAll('a')).find(a => a.href.endsWith(link.href));
+            if (!existingLink) {
+              const li = document.createElement('li');
+              li.setAttribute('data-category-link', 'true');
+              const a = document.createElement('a');
+              a.href = link.href;
+              a.textContent = link.text;
+              li.appendChild(a);
+              mobileLinks.insertBefore(li, galeriaMobileLink);
+            }
+          });
+          mobileLinks.setAttribute(CATEGORIES_MARKER, 'true');
+        }
+      }
+    }
+    
     async function loadCategories() {
+      // Verificar si ya están cargadas usando un marcador en el DOM
+      const desktopLinks = document.getElementById('nav-links-desktop');
+      const mobileLinks = document.getElementById('nav-links');
+      
+      if (desktopLinks && desktopLinks.hasAttribute(CATEGORIES_MARKER)) {
+        categoriesLoaded = true;
+        return;
+      }
+      
+      if (mobileLinks && mobileLinks.hasAttribute(CATEGORIES_MARKER)) {
+        categoriesLoaded = true;
+        return;
+      }
+      
+      // Cargar desde cache primero (inmediatamente, sin esperar)
+      const cachedCategories = localStorage.getItem(CATEGORIES_CACHE_KEY);
+      if (cachedCategories) {
+        try {
+          const parsed = JSON.parse(cachedCategories);
+          if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TIME && parsed.data) {
+            // Insertar categorías inmediatamente desde cache
+            insertCategories(parsed.data, desktopLinks, mobileLinks);
+            categoriesLoaded = true;
+          }
+        } catch(e) {}
+      }
+      
+      // Evitar recargar si ya están cargadas
+      if (categoriesLoaded) {
+        // Cargar datos frescos en segundo plano
+        fetch('/api/categories.php')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.categories) {
+              const categoryLinks = data.categories.map(cat => ({
+                href: `/${cat.slug}`,
+                text: cat.name
+              }));
+              localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify({
+                timestamp: Date.now(),
+                data: categoryLinks
+              }));
+            }
+          })
+          .catch(() => {});
+        return;
+      }
+      
+      // Cargar desde API
       try {
         const response = await fetch('/api/categories.php');
         const data = await response.json();
@@ -105,115 +280,33 @@ const staticLinksAfter = [
             text: cat.name
           }));
           
-          // Insertar categorías en el menú desktop (después de "Inicio", antes de "Galería de Ideas")
-          const desktopLinks = document.getElementById('nav-links-desktop');
-          if (desktopLinks) {
-            // Encontrar todos los links estáticos
-            const allLinks = Array.from(desktopLinks.querySelectorAll('li'));
-            // El segundo link (índice 1) es "Galería de Ideas"
-            if (allLinks.length >= 2) {
-              const galeriaLink = allLinks[1];
-              // Insertar categorías antes de "Galería de Ideas" (en orden normal, no reverse)
-              categoryLinks.forEach(link => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.href = link.href;
-                a.textContent = link.text;
-                li.appendChild(a);
-                desktopLinks.insertBefore(li, galeriaLink);
-              });
-            } else {
-              // Fallback: agregar después del primer link
-              const firstLink = allLinks[0];
-              if (firstLink && firstLink.nextSibling) {
-                categoryLinks.forEach(link => {
-                  const li = document.createElement('li');
-                  const a = document.createElement('a');
-                  a.href = link.href;
-                  a.textContent = link.text;
-                  li.appendChild(a);
-                  desktopLinks.insertBefore(li, firstLink.nextSibling);
-                });
-              } else {
-                categoryLinks.forEach(link => {
-                  const li = document.createElement('li');
-                  const a = document.createElement('a');
-                  a.href = link.href;
-                  a.textContent = link.text;
-                  li.appendChild(a);
-                  desktopLinks.appendChild(li);
-                });
-              }
-            }
-          }
+          // Guardar en cache
+          localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            data: categoryLinks
+          }));
           
-          // Insertar categorías en el menú mobile (después de "Inicio", antes de "Galería de Ideas")
-          const mobileLinks = document.getElementById('nav-links');
-          if (mobileLinks) {
-            // Encontrar todos los links estáticos
-            const allMobileLinks = Array.from(mobileLinks.querySelectorAll('li'));
-            // El segundo link (índice 1) es "Galería de Ideas"
-            if (allMobileLinks.length >= 2) {
-              const galeriaMobileLink = allMobileLinks[1];
-              // Insertar categorías antes de "Galería de Ideas"
-              categoryLinks.forEach(link => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.href = link.href;
-                a.textContent = link.text;
-                li.appendChild(a);
-                mobileLinks.insertBefore(li, galeriaMobileLink);
-              });
-            } else {
-              // Fallback: agregar después del primer link
-              const firstMobileLink = allMobileLinks[0];
-              if (firstMobileLink && firstMobileLink.nextSibling) {
-                categoryLinks.forEach(link => {
-                  const li = document.createElement('li');
-                  const a = document.createElement('a');
-                  a.href = link.href;
-                  a.textContent = link.text;
-                  li.appendChild(a);
-                  mobileLinks.insertBefore(li, firstMobileLink.nextSibling);
-                });
-              } else {
-                categoryLinks.forEach(link => {
-                  const li = document.createElement('li');
-                  const a = document.createElement('a');
-                  a.href = link.href;
-                  a.textContent = link.text;
-                  li.appendChild(a);
-                  mobileLinks.appendChild(li);
-                });
-              }
-            }
-          }
+          // Insertar categorías en el DOM
+          insertCategories(categoryLinks, desktopLinks, mobileLinks);
+          
+          categoriesLoaded = true;
         }
       } catch (error) {
         console.error('Error al cargar categorías:', error);
       }
     }
     
-    // Cargar categorías cuando el DOM esté listo
+    // Cargar categorías inmediatamente (antes de DOMContentLoaded si es posible)
+    // Esto evita el parpadeo al hacer clic
+    loadCategories();
+    
+    // También cargar cuando el DOM esté listo (por si acaso)
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
         loadCategories();
-        
-        // Actualizar contador del carrito
-        if (typeof window.updateCartCount === 'function') {
-          window.updateCartCount();
-        }
-        
         initMenuToggle();
       });
     } else {
-      loadCategories();
-      
-      // Actualizar contador del carrito
-      if (typeof window.updateCartCount === 'function') {
-        window.updateCartCount();
-      }
-      
       initMenuToggle();
     }
     
@@ -294,7 +387,7 @@ const staticLinksAfter = [
   #cart-count-mobile,
   #wishlist-count,
   #wishlist-count-mobile {
-    background: #e0a4ce;
+    background: var(--primary);
     color: white;
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
@@ -327,7 +420,7 @@ const staticLinksAfter = [
   }
 
   ul.nav-links li a:hover {
-    color: #e0a4ce;
+    color: var(--primary);
   }
 
   /* MOBILE */

@@ -3,20 +3,23 @@
 
 /* 🎨 DESIGN SYSTEM - Solo lo esencial */
 :root {
-  /* Colors principales */
-  --primary: #e0a4ce;
-  --primary-dark: #765580;
-  --primary-light: #f7d4ed;
-  --secondary: #fff6ef;
+  /* Colors principales - Se actualizan dinámicamente desde la configuración */
+  --primary: #ff8c00;
+  --primary-color: #ff8c00; /* Alias para compatibilidad */
+  --primary-dark: #cc7000;
+  --primary-light: #ffb84d;
+  --primary-gradient: linear-gradient(135deg, var(--primary), var(--primary-light));
+  --primary-gradient-dark: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  --secondary: #ffffff;
   
   /* Text Colors */
   --text-primary: #2c2c2c;
   --text-secondary: #666;
   
-  /* Background Colors */
+  /* Background Colors - Estética blanca por defecto */
   --background: #ffffff;
-  --surface: #fafafa;
-  --surface-light: #fffdf9;
+  --surface: #ffffff;
+  --surface-light: #ffffff;
   
   /* Spacing básico */
   --space-xs: 0.5rem;
@@ -188,7 +191,7 @@ img {
 
 .btn-continuar {
   display: inline-block;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  background: var(--primary-gradient);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -216,7 +219,7 @@ img {
 }
 
 .btn-continuar:hover {
-  background: linear-gradient(135deg, #765580, #e0a4ce);
+  background: var(--primary-gradient-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(224, 164, 206, 0.3);
 }
@@ -321,9 +324,9 @@ img {
 .producto-precio {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #e0a4ce;
+  color: var(--primary);
   margin: 0;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -372,8 +375,8 @@ img {
 .transferencia-label {
   font-size: 1rem;
   font-weight: 600;
-  color: #e0a4ce;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  color: var(--primary);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -390,8 +393,8 @@ img {
 .transferencia-value {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #e0a4ce;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  color: var(--primary);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -420,7 +423,7 @@ img {
   width: 28px;
   height: 28px;
   border: none;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  background: var(--primary-gradient);
   color: white;
   border-radius: 4px;
   font-size: 1rem;
@@ -451,7 +454,7 @@ img {
 }
 
 .btn-cantidad:hover {
-  background: linear-gradient(135deg, #765580, #e0a4ce);
+  background: var(--primary-gradient-dark);
   transform: scale(1.05);
   box-shadow: 0 2px 6px rgba(224, 164, 206, 0.3);
 }
@@ -577,7 +580,7 @@ img {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-top: 2px solid #e0a4ce;
+  border-top: 2px solid var(--primary);
   margin-top: 0.75rem;
   font-size: 1.1rem;
   font-weight: 700;
@@ -608,13 +611,13 @@ img {
 
 .coupon-input:focus {
   outline: none;
-  border-color: #e0a4ce;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(224, 164, 206, 0.1);
 }
 
 .btn-aplicar-cupon {
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   border: none;
   border-radius: 6px;
@@ -626,7 +629,7 @@ img {
 }
 
 .btn-aplicar-cupon:hover {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
   transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(224, 164, 206, 0.3);
 }
@@ -718,7 +721,7 @@ img {
 }
 
 .btn-submit-review {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   padding: 0.75rem 2rem;
   border: none;
@@ -730,7 +733,7 @@ img {
 }
 
 .btn-submit-review:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(224, 164, 206, 0.3);
 }
@@ -854,7 +857,7 @@ img {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #e0a4ce, #f7d4ed, #e0a4ce);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1;
@@ -1022,7 +1025,7 @@ img {
   transform: translateX(-50%);
   width: 40px;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #e0a4ce, transparent);
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
   opacity: 0.5;
 }
 
@@ -1059,7 +1062,7 @@ img {
   transform: translateX(-50%);
   width: 50px;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #e0a4ce, transparent);
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
   border-radius: 1px;
   opacity: 0.7;
 }
@@ -1070,7 +1073,7 @@ img {
   font-size: 2.2rem;
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1177,7 +1180,7 @@ img {
 }
 
 .product-card .btn-agregar {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: #fff;
   padding: 0.5rem 1rem;
   border: none;
@@ -1211,7 +1214,7 @@ img {
 }
 
 .product-card .btn-agregar:hover {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
@@ -1329,7 +1332,7 @@ img {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #e0a4ce;
+  border-color: var(--primary);
 }
 
 .form-group textarea {
@@ -1357,7 +1360,7 @@ img {
 }
 
 .envio-option:hover {
-  border-color: #e0a4ce;
+  border-color: var(--primary);
   background: #fff;
   box-shadow: 0 2px 8px rgba(224, 164, 206, 0.15);
   transform: translateY(-1px);
@@ -1397,12 +1400,12 @@ img {
 }
 
 .envio-option:hover .envio-option-content::before {
-  border-color: #e0a4ce;
+  border-color: var(--primary);
 }
 
 .envio-option input[type="radio"]:checked + .envio-option-content::before {
-  background: linear-gradient(135deg, #e0a4ce, #f7d4ed);
-  border-color: #e0a4ce;
+  background: var(--primary-gradient);
+  border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(224, 164, 206, 0.15);
 }
 
@@ -1425,7 +1428,7 @@ img {
 }
 
 .envio-option:has(input[type="radio"]:checked) {
-  border-color: #e0a4ce;
+  border-color: var(--primary);
   background: linear-gradient(135deg, #fef7ff, #fff);
   box-shadow: 0 4px 16px rgba(224, 164, 206, 0.25);
 }
@@ -1523,7 +1526,7 @@ img {
   text-align: center;
   font-size: 1.1rem;
   color: #333;
-  border: 2px solid #e0a4ce;
+  border: 2px solid var(--primary);
 }
 
 .total-a-pagar strong {
@@ -1532,7 +1535,7 @@ img {
 }
 
 .total-a-pagar span {
-  color: #e0a4ce;
+  color: var(--primary);
   font-size: 1.3rem;
   font-weight: 700;
 }
@@ -1602,7 +1605,7 @@ img {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   padding: 1rem 1.5rem;
   border: none;
@@ -1634,7 +1637,7 @@ img {
 }
 
 .btn-finalizar-directa:hover {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(224, 164, 206, 0.4);
 }
@@ -2507,7 +2510,7 @@ div.breadcrumb .current {
 
 .categoria {
   display: inline-block;
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
@@ -2552,7 +2555,7 @@ div.breadcrumb .current {
 }
 
 .price-badge {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   padding: 0.3rem 0.6rem;
   border-radius: 15px;
@@ -2744,7 +2747,7 @@ div.breadcrumb .current {
 
 .btn-agregar-detalle,
 .btn-agregar {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   padding: var(--space-sm) var(--space-lg);
   border: none;
@@ -2778,7 +2781,7 @@ div.breadcrumb .current {
 
 .btn-agregar-detalle:hover:not(:disabled),
 .btn-agregar:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
@@ -2801,7 +2804,7 @@ div.breadcrumb .current {
   background: linear-gradient(135deg, #fff, #f8f9fa);
   color: #333;
   padding: var(--space-sm) var(--space-lg);
-  border: 2px solid #e0a4ce;
+  border: 2px solid var(--primary);
   border-radius: var(--radius-md);
   font-size: 1rem;
   font-weight: 600;
@@ -2813,21 +2816,21 @@ div.breadcrumb .current {
 }
 
 .wishlist-btn-detail:hover {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
-  border-color: #d89bc0;
+  border-color: var(--primary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
 .wishlist-btn-detail.in-wishlist {
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
-  border-color: #d89bc0;
+  border-color: var(--primary);
 }
 
 .wishlist-btn-detail.in-wishlist:hover {
-  background: linear-gradient(135deg, #d89bc0, #e0a4ce);
+  background: var(--primary-gradient);
 }
 
 /* Botón de favoritos en la imagen principal del detalle */
@@ -3053,7 +3056,7 @@ div.breadcrumb .current {
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #e0a4ce, #f7d4ed, #e0a4ce);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 1;
@@ -3141,7 +3144,7 @@ div.breadcrumb .current {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #e0a4ce;
+  border-top: 4px solid var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -3175,7 +3178,7 @@ div.breadcrumb .current {
 .empty-wishlist .btn-browse {
   display: inline-block;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+  background: var(--primary-gradient);
   color: white;
   text-decoration: none;
   border-radius: 8px;

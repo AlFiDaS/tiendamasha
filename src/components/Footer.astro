@@ -115,11 +115,12 @@
 
 <style>
   footer {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
+    background: #ffffff;
+    color: var(--text-primary);
     padding: var(--space-xl) 0;
     position: relative;
     z-index: 100;
+    border-top: 1px solid #e0e0e0;
   }
 
   .footer-container {
@@ -144,7 +145,7 @@
 
   .footer-brand p {
     font-size: var(--font-size-md);
-    opacity: 0.9;
+    color: var(--text-secondary);
     line-height: 1.6;
   }
 
@@ -152,6 +153,7 @@
     font-size: var(--font-size-lg);
     font-weight: 600;
     margin-bottom: var(--space-md);
+    color: var(--text-primary);
   }
 
   .social-links {
@@ -165,15 +167,18 @@
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm);
-    background: rgba(255, 255, 255, 0.1);
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
     border-radius: var(--radius-md);
     transition: all var(--transition-normal);
     text-decoration: none;
-    color: white;
+    color: var(--text-primary);
   }
 
   .social-link:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
     transform: translateX(5px);
   }
 
@@ -184,7 +189,7 @@
 
   .footer-divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.2);
+    background: #e0e0e0;
     margin: var(--space-lg) 0;
   }
 
@@ -195,24 +200,26 @@
     flex-wrap: wrap;
     gap: var(--space-md);
     font-size: var(--font-size-sm);
+    color: var(--text-secondary);
   }
 
   .footer-bottom p {
     margin: 0;
-    opacity: 0.8;
   }
 
   .dev-link {
-    color: white;
+    color: var(--primary);
     text-decoration: none;
     padding: var(--space-xs) var(--space-sm);
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border: 1px solid var(--primary);
     border-radius: var(--radius-sm);
     transition: all var(--transition-normal);
   }
 
   .dev-link:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--primary);
+    color: white;
     transform: translateY(-2px);
   }
 

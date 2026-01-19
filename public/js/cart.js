@@ -81,12 +81,21 @@
   function updateCartCount() {
     const carrito = getCarrito();
     const total = carrito.reduce((acc, p) => acc + p.cantidad, 0);
+    
+    // Guardar en localStorage para evitar flash
+    localStorage.setItem('cart_count', total.toString());
 
     const badgeDesktop = document.getElementById("cart-count");
     const badgeMobile = document.getElementById("cart-count-mobile");
 
-    if (badgeDesktop) badgeDesktop.textContent = total;
-    if (badgeMobile) badgeMobile.textContent = total;
+    if (badgeDesktop) {
+      badgeDesktop.textContent = total;
+      badgeDesktop.style.display = total > 0 ? 'block' : 'none';
+    }
+    if (badgeMobile) {
+      badgeMobile.textContent = total;
+      badgeMobile.style.display = total > 0 ? 'block' : 'none';
+    }
   }
 
   function mostrarToast(mensaje) {

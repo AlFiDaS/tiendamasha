@@ -64,7 +64,7 @@
 
   .header-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    background: var(--primary-gradient);
     color: white;
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-lg);
@@ -112,7 +112,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    background: var(--primary-gradient);
     transform: scaleX(0);
     transition: transform var(--transition-normal);
   }
@@ -120,7 +120,7 @@
   .info-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-md);
-    border-color: #e0a4ce;
+    border-color: var(--primary);
   }
 
   .info-card:hover::before {
