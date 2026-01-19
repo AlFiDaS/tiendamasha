@@ -10,8 +10,8 @@ export interface Props {
 }
 
 const { 
-  title = "Lume - Velas Artesanales Artesanales de Corrientes",
-  description = "Descubrí nuestras velas artesanales únicas, souvenirs personalizados y velas aromáticas. Envíos a todo el país desde Corrientes.",
+  title = "Somos Tiendi",
+  description = "Creando paginas webs al alcance de todos los emprendedores",
   image = "/images/hero.webp",
   canonical = ""
 } = Astro.props;
@@ -158,6 +158,52 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
       // Scroll restoration - Solo si es necesario
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
+      }
+      
+      // Cargar configuración de la tienda y actualizar título y meta description
+      async function loadShopSettings() {
+        try {
+          const response = await fetch('/api/shop.php');
+          const data = await response.json();
+          
+          if (data.success && data.shop) {
+            // Actualizar título con el nombre de la tienda
+            if (data.shop.shop_name) {
+              document.title = data.shop.shop_name;
+            }
+            
+            // Actualizar meta description con la descripción de la tienda
+            if (data.shop.description) {
+              let metaDescription = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+              if (!metaDescription) {
+                metaDescription = document.createElement('meta');
+                metaDescription.name = 'description';
+                document.head.appendChild(metaDescription);
+              }
+              metaDescription.content = data.shop.description;
+              
+              // También actualizar Open Graph y Twitter Card
+              let ogDescription = document.querySelector('meta[property="og:description"]') as HTMLMetaElement;
+              if (ogDescription) {
+                ogDescription.content = data.shop.description;
+              }
+              
+              let twitterDescription = document.querySelector('meta[name="twitter:description"]') as HTMLMetaElement;
+              if (twitterDescription) {
+                twitterDescription.content = data.shop.description;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error al cargar configuración de tienda:', error);
+        }
+      }
+      
+      // Cargar configuración al iniciar
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadShopSettings);
+      } else {
+        loadShopSettings();
       }
     </script>
   </body>

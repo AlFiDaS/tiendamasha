@@ -35,8 +35,8 @@
     # PRIORIDAD 5: Redirigir rutas dinámicas de productos a placeholder/placeholder/index.html
     # Esto permite que las páginas dinámicas funcionen sin necesidad de build
     # Ejemplo: /test3/producto-slug -> /placeholder/placeholder/index.html (JavaScript extrae la categoría y slug real)
-    # Excluir rutas especiales (api, admin, ideas, carrito, wishlist, mis-pedidos, etc.)
-    RewriteCond %{REQUEST_URI} !^/(api|admin|ideas|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
+    # Excluir rutas especiales (api, admin, galeria, carrito, wishlist, mis-pedidos, etc.)
+    RewriteCond %{REQUEST_URI} !^/(api|admin|galeria|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
     RewriteCond %{REQUEST_URI} ^/([^/]+)/([^/]+)/?$
     RewriteCond %{REQUEST_URI} !^/([^/]+)/placeholder(/|$)
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -51,7 +51,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} ^/([^/]+)/?$
-    RewriteCond %{REQUEST_URI} !^/(api|admin|ideas|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
+    RewriteCond %{REQUEST_URI} !^/(api|admin|galeria|carrito|wishlist|mis-pedidos|index\.html|\.well-known)/
     RewriteCond %{REQUEST_URI} !^/placeholder
     # Excluir categorías estáticas existentes (tienen sus propias páginas)
     RewriteCond %{REQUEST_URI} !^/(productos|souvenirs|navidad)/?$

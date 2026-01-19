@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $category = getCategoryBySlug($linkValue);
                         $link = $category ? '/' . $linkValue : '';
                     } elseif ($linkType === 'ideas' && !empty($linkValue)) {
-                        $link = '/ideas';
+                        $link = '/galeria';
                     }
                     
                     $carouselData[] = [
@@ -152,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $category = getCategoryBySlug($linkValue);
                                 $link = $category ? '/' . $linkValue : '';
                             } elseif ($linkType === 'ideas' && !empty($linkValue)) {
-                                $link = '/ideas';
+                                $link = '/galeria';
                             }
                             
                             $carouselData[] = [
@@ -281,7 +281,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $galeriaData = [
             'title' => sanitize($_POST['galeria_title'] ?? ''),
             'description' => sanitize($_POST['galeria_description'] ?? ''),
-            'link' => sanitize($_POST['galeria_link'] ?? '/ideas'),
+            'link' => '/galeria', // Link fijo a la galería
             'visible' => isset($_POST['galeria_visible']) ? 1 : 0,
             'badge' => sanitize($_POST['galeria_badge'] ?? '✨ Inspiración'),
             'features' => $featuresData,
@@ -458,15 +458,15 @@ require_once '_inc/header.php';
                                 <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Link:</label>
                                 <select name="carousel_link_type[]" class="carousel-link-type" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem;">
                                     <option value="none" <?= empty($item['link']) ? 'selected' : '' ?>>Sin link</option>
-                                    <option value="category" <?= !empty($item['link']) && $item['link'] !== '/ideas' && !empty(str_replace('/', '', $item['link'])) ? 'selected' : '' ?>>Categoría</option>
-                                    <option value="ideas" <?= !empty($item['link']) && $item['link'] === '/ideas' ? 'selected' : '' ?>>Galería de Ideas</option>
+                                    <option value="category" <?= !empty($item['link']) && $item['link'] !== '/galeria' && !empty(str_replace('/', '', $item['link'])) ? 'selected' : '' ?>>Categoría</option>
+                                    <option value="ideas" <?= !empty($item['link']) && $item['link'] === '/galeria' ? 'selected' : '' ?>>Galería de Ideas</option>
                                 </select>
-                                <select name="carousel_link_value[]" class="carousel-link-category" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; display: <?= !empty($item['link']) && $item['link'] !== '/ideas' && !empty(str_replace('/', '', $item['link'])) ? 'block' : 'none'; ?>;">
+                                <select name="carousel_link_value[]" class="carousel-link-category" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; display: <?= !empty($item['link']) && $item['link'] !== '/galeria' && !empty(str_replace('/', '', $item['link'])) ? 'block' : 'none'; ?>;">
                                     <option value="">Seleccionar categoría</option>
                                     <?php foreach ($categories as $cat): ?>
                                         <?php 
                                         $slug = '';
-                                        if (!empty($item['link']) && $item['link'] !== '/ideas') {
+                                        if (!empty($item['link']) && $item['link'] !== '/galeria') {
                                             $slug = ltrim($item['link'], '/');
                                         }
                                         ?>
@@ -475,7 +475,7 @@ require_once '_inc/header.php';
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <input type="text" name="carousel_link_value[]" class="carousel-link-ideas" value="/ideas" style="display: none;">
+                                <input type="hidden" name="carousel_link_value[]" class="carousel-link-ideas" value="/galeria">
                             </div>
                             <div>
                                 <button type="button" class="btn-remove-carousel" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Eliminar</button>
@@ -657,10 +657,8 @@ require_once '_inc/header.php';
             <?php endif; ?>
         </div>
         
-        <div class="form-group">
-            <label for="galeria_link">Link</label>
-            <input type="text" id="galeria_link" name="galeria_link" value="<?= htmlspecialchars($settings['galeria_link'] ?? '/ideas') ?>" placeholder="/ideas">
-            <small>URL de destino (ej: /ideas)</small>
+        <div style="padding: 1rem; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px; margin-bottom: 1rem;">
+            <strong>ℹ️ Link:</strong> Esta sección siempre enviará a la galería (<code>/galeria</code>). No es configurable.
         </div>
         
         <div class="form-group">
@@ -782,7 +780,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <option value="<?= htmlspecialchars($cat['slug']) ?>"><?= htmlspecialchars($cat['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="hidden" name="new_carousel_link_value[]" class="new-carousel-link-ideas" value="/ideas">
+                    <input type="hidden" name="new_carousel_link_value[]" class="new-carousel-link-ideas" value="/galeria">
                 </div>
                 <div>
                     <button type="button" class="btn-remove-new-carousel" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Eliminar</button>

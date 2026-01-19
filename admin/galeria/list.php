@@ -5,6 +5,34 @@
 $pageTitle = 'Galería de Ideas';
 require_once '../../config.php';
 require_once '../_inc/header.php';
+require_once '../../helpers/auth.php';
+
+$error = '';
+$success = '';
+
+// Obtener título actual de la galería
+$landingSettings = fetchOne("SELECT galeria_title FROM landing_page_settings WHERE id = 1 LIMIT 1");
+$currentTitle = $landingSettings['galeria_title'] ?? 'Galería de ideas';
+
+// Procesar actualización del título
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_title'])) {
+    if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Token de seguridad inválido. Por favor, recarga la página.';
+    } else {
+        $newTitle = sanitize($_POST['galeria_title'] ?? '');
+        if (!empty($newTitle)) {
+            $updateSql = "UPDATE landing_page_settings SET galeria_title = :title WHERE id = 1";
+            if (executeQuery($updateSql, ['title' => $newTitle])) {
+                $success = 'Título actualizado correctamente';
+                $currentTitle = $newTitle;
+            } else {
+                $error = 'Error al actualizar el título';
+            }
+        } else {
+            $error = 'El título no puede estar vacío';
+        }
+    }
+}
 
 // Obtener todas las imágenes
 $sql = "SELECT * FROM galeria ORDER BY orden ASC, id ASC";
@@ -15,6 +43,42 @@ $items = fetchAll($sql, []);
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <h2>Galería de Ideas</h2>
         <a href="add.php" class="btn btn-primary">➕ Agregar Imagen</a>
+    </div>
+    
+    <?php if ($error): ?>
+        <div class="alert alert-error">
+            ❌ <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if ($success): ?>
+        <div class="alert alert-success">
+            ✅ <?= htmlspecialchars($success) ?>
+        </div>
+    <?php endif; ?>
+    
+    <!-- Formulario para editar título -->
+    <div style="background: #f9f9f9; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #ddd;">
+        <h3 style="margin-bottom: 1rem; color: #333;">Configuración de la Galería</h3>
+        <form method="POST" action="" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+            <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+            <input type="hidden" name="update_title" value="1">
+            <div style="flex: 1; min-width: 250px;">
+                <label for="galeria_title" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Título de la Galería:</label>
+                <input 
+                    type="text" 
+                    id="galeria_title" 
+                    name="galeria_title" 
+                    value="<?= htmlspecialchars($currentTitle) ?>" 
+                    placeholder="Galería de ideas"
+                    style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                    required>
+                <small style="display: block; margin-top: 0.25rem; color: #666;">Este título aparecerá en la página pública de la galería</small>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">💾 Guardar Título</button>
+            </div>
+        </form>
     </div>
     
     <!-- Grid de imágenes -->
