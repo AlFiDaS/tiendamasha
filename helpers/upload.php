@@ -12,6 +12,199 @@ if (!defined('LUME_ADMIN')) {
     die('Acceso directo no permitido');
 }
 
+// Constantes de optimización (dimensiones máx. y calidad)
+if (!defined('OPTIMIZE_PRODUCT_MAX_DIM')) {
+    define('OPTIMIZE_PRODUCT_MAX_DIM', 600);
+}
+if (!defined('OPTIMIZE_GALERIA_MAX_DIM')) {
+    define('OPTIMIZE_GALERIA_MAX_DIM', 800);
+}
+if (!defined('OPTIMIZE_QUALITY')) {
+    define('OPTIMIZE_QUALITY', 80);
+}
+
+/**
+ * Comprueba si GD y WebP están disponibles para optimización
+ * @return array ['gd' => bool, 'webp' => bool]
+ */
+function canOptimizeImages() {
+    $gd = extension_loaded('gd');
+    $webp = $gd && function_exists('imagewebp');
+    return ['gd' => $gd, 'webp' => $webp];
+}
+
+/**
+ * Optimiza una imagen: redimensiona (manteniendo proporción), convierte a WebP o JPEG y comprime.
+ * Si la imagen resultante es más grande que la original, se conserva la original.
+ *
+ * @param string $rutaOriginal Ruta física del archivo ya subido (ej. IMAGES_PATH . '/productos/slug/main.jpg')
+ * @param int $maxDimension Lado máximo en píxeles (ej. 600 para productos, 800 para galería)
+ * @param int $calidad Calidad de compresión 0-100 (ej. 80)
+ * @return array ['success' => bool, 'relativePath' => string|null, 'error' => string|null, 'savedBytes' => int]
+ */
+function optimizeImage($rutaOriginal, $maxDimension = 600, $calidad = 80) {
+    $result = ['success' => false, 'relativePath' => null, 'error' => null, 'savedBytes' => 0];
+
+    if (!file_exists($rutaOriginal) || !is_readable($rutaOriginal)) {
+        $result['error'] = 'Archivo no existe o no se puede leer';
+        return $result;
+    }
+
+    $capabilities = canOptimizeImages();
+    if (!$capabilities['gd']) {
+        $result['error'] = 'Extensión GD no disponible';
+        return $result;
+    }
+
+    $imageInfo = @getimagesize($rutaOriginal);
+    if ($imageInfo === false) {
+        $result['error'] = 'No se pudo leer la imagen';
+        return $result;
+    }
+
+    $mime = $imageInfo['mime'] ?? '';
+    $width = (int)($imageInfo[0] ?? 0);
+    $height = (int)($imageInfo[1] ?? 0);
+    if ($width <= 0 || $height <= 0) {
+        $result['error'] = 'Dimensiones inválidas';
+        return $result;
+    }
+
+    switch ($mime) {
+        case 'image/jpeg':
+        case 'image/jpg':
+            $source = @imagecreatefromjpeg($rutaOriginal);
+            break;
+        case 'image/png':
+            $source = @imagecreatefrompng($rutaOriginal);
+            if ($source) {
+                imagealphablending($source, true);
+                imagesavealpha($source, true);
+            }
+            break;
+        case 'image/webp':
+            $source = function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($rutaOriginal) : null;
+            break;
+        default:
+            $result['error'] = 'Tipo de imagen no soportado: ' . $mime;
+            return $result;
+    }
+
+    if (!$source) {
+        $result['error'] = 'No se pudo crear el recurso de imagen';
+        return $result;
+    }
+
+    // Calcular nuevas dimensiones manteniendo proporción
+    if ($width <= $maxDimension && $height <= $maxDimension) {
+        $newWidth = $width;
+        $newHeight = $height;
+    } else {
+        $ratio = min($maxDimension / $width, $maxDimension / $height);
+        $newWidth = (int)round($width * $ratio);
+        $newHeight = (int)round($height * $ratio);
+        $newWidth = max(1, $newWidth);
+        $newHeight = max(1, $newHeight);
+    }
+
+    $dest = imagecreatetruecolor($newWidth, $newHeight);
+    if (!$dest) {
+        imagedestroy($source);
+        $result['error'] = 'No se pudo crear la imagen de destino';
+        return $result;
+    }
+
+    // Preservar transparencia en PNG
+    if ($mime === 'image/png') {
+        imagealphablending($dest, false);
+        imagesavealpha($dest, true);
+        $transparent = imagecolorallocatealpha($dest, 255, 255, 255, 127);
+        imagefilledrectangle($dest, 0, 0, $newWidth, $newHeight, $transparent);
+    }
+
+    if (!imagecopyresampled($dest, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height)) {
+        imagedestroy($source);
+        imagedestroy($dest);
+        $result['error'] = 'Error al redimensionar';
+        return $result;
+    }
+
+    imagedestroy($source);
+
+    $dir = dirname($rutaOriginal);
+    $baseName = pathinfo($rutaOriginal, PATHINFO_FILENAME);
+    $useWebp = $capabilities['webp'];
+    $extDest = $useWebp ? 'webp' : 'jpg';
+    $rutaDestino = $dir . '/' . $baseName . '.' . $extDest;
+
+    // Escribir a archivo temporal primero para comparar tamaño
+    $tempDest = $dir . '/' . $baseName . '_opt.' . $extDest;
+    $written = false;
+    if ($useWebp) {
+        $written = @imagewebp($dest, $tempDest, $calidad);
+    }
+    if (!$written) {
+        $written = @imagejpeg($dest, $tempDest, $calidad);
+        $extDest = 'jpg';
+        $rutaDestino = $dir . '/' . $baseName . '.jpg';
+    }
+    imagedestroy($dest);
+
+    if (!$written || !file_exists($tempDest)) {
+        @unlink($tempDest);
+        $result['error'] = 'No se pudo guardar la imagen optimizada';
+        return $result;
+    }
+
+    $sizeOriginal = filesize($rutaOriginal);
+    $sizeOptimized = filesize($tempDest);
+
+    if ($tempDest === $rutaDestino || $rutaDestino === $rutaOriginal) {
+        @unlink($tempDest);
+        $result['success'] = true;
+        $result['relativePath'] = pathToRelativeImagePath($rutaOriginal);
+        return $result;
+    }
+
+    // Si el optimizado es más grande, conservar original
+    if ($sizeOptimized >= $sizeOriginal) {
+        @unlink($tempDest);
+        $result['success'] = true;
+        $result['relativePath'] = pathToRelativeImagePath($rutaOriginal);
+        return $result;
+    }
+
+    // Reemplazar: eliminar original y mover temp al nombre final
+    $extOriginal = strtolower(pathinfo($rutaOriginal, PATHINFO_EXTENSION));
+    if ($rutaDestino !== $rutaOriginal && file_exists($rutaOriginal)) {
+        @unlink($rutaOriginal);
+    }
+    if ($tempDest !== $rutaDestino) {
+        @rename($tempDest, $rutaDestino);
+    }
+    $result['success'] = true;
+    $result['relativePath'] = pathToRelativeImagePath($rutaDestino);
+    $result['savedBytes'] = $sizeOriginal - $sizeOptimized;
+    return $result;
+}
+
+/**
+ * Convierte ruta física (IMAGES_PATH + relativo) a ruta relativa para BD (/images/...)
+ * @param string $fullPath Ruta física del archivo
+ * @return string Ruta relativa /images/categoria/...
+ */
+function pathToRelativeImagePath($fullPath) {
+    $fullPath = str_replace('\\', '/', $fullPath);
+    $base = str_replace('\\', '/', rtrim(IMAGES_PATH, '/'));
+    if (strpos($fullPath, $base . '/') === 0) {
+        return '/images/' . substr($fullPath, strlen($base) + 1);
+    }
+    if ($fullPath === $base) {
+        return '/images/';
+    }
+    return '/images/' . ltrim($fullPath, '/');
+}
+
 /**
  * Validar archivo subido
  * @param array $file ($_FILES['campo'])
@@ -156,8 +349,11 @@ function uploadProductImage($file, $slug, $categoria, $filename = 'main') {
     // Asegurar permisos
     chmod($destination, 0644);
     
-    // Retornar ruta relativa para la BD: /images/categoria/slug/filename.ext
-    $relativePath = '/images/' . $categoria . '/' . $slug . '/' . $newFilename;
+    // Optimizar imagen (redimensionar, WebP/JPEG, comprimir)
+    $optimized = optimizeImage($destination, OPTIMIZE_PRODUCT_MAX_DIM, OPTIMIZE_QUALITY);
+    $relativePath = ($optimized['success'] && !empty($optimized['relativePath']))
+        ? $optimized['relativePath']
+        : '/images/' . $categoria . '/' . $slug . '/' . $newFilename;
     
     return ['success' => true, 'path' => $relativePath, 'error' => null];
 }
@@ -425,8 +621,11 @@ function uploadGaleriaImage($file, $nombre) {
     // Asegurar permisos
     chmod($destination, 0644);
     
-    // Retornar ruta relativa para la BD
-    $relativePath = '/images/0_galeria/' . $newFilename;
+    // Optimizar imagen (redimensionar, WebP/JPEG, comprimir)
+    $optimized = optimizeImage($destination, OPTIMIZE_GALERIA_MAX_DIM, OPTIMIZE_QUALITY);
+    $relativePath = ($optimized['success'] && !empty($optimized['relativePath']))
+        ? $optimized['relativePath']
+        : '/images/0_galeria/' . $newFilename;
     
     return ['success' => true, 'path' => $relativePath, 'error' => null];
 }
