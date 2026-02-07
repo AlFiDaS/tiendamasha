@@ -9,6 +9,12 @@ if (!defined('LUME_ADMIN')) {
 requireAuth();
 $currentUser = getCurrentUser();
 
+// Notificaciones de stock (para la campana)
+require_once __DIR__ . '/../../helpers/stock.php';
+$lowStockProducts = getLowStockProducts();
+$outOfStockProducts = getOutOfStockProducts();
+$stockNotificationsCount = count($lowStockProducts) + count($outOfStockProducts);
+
 // Obtener configuración de la tienda
 require_once __DIR__ . '/../../helpers/shop-settings.php';
 $shopSettings = getShopSettings();
@@ -60,121 +66,356 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             --primary-color-light: <?= htmlspecialchars($primaryColorLight) ?>;
         }
         
-        .admin-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            border-bottom: 3px solid var(--primary-color);
-        }
-        
-        .admin-header-content {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* === LAYOUT: Sidebar izquierda + Topbar + Contenido === */
+        .admin-layout {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
+            min-height: 100vh;
         }
         
-        .admin-header-nav-left,
-        .admin-header-nav-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .admin-header-nav {
-            display: none;
-        }
-        
-        .admin-header-nav-left {
-            flex: 1;
-        }
-        
-        .admin-header-nav-right {
-            flex: 1;
-            justify-content: flex-end;
-        }
-        
-        .admin-header-nav-left a,
-        .admin-header-nav-right a,
-        .admin-header-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        
-        .admin-header-nav-left a:hover,
-        .admin-header-nav-right a:hover,
-        .admin-header-nav a:hover {
-            background: rgba(255,255,255,0.1);
-            color: var(--primary-color-light);
-        }
-        
-        .admin-header-nav-left .logout-btn,
-        .admin-header-nav-right .logout-btn,
-        .admin-header-nav .logout-btn {
-            background: var(--primary-color);
-            font-weight: 600;
-            border: 2px solid var(--primary-color);
-            padding: 0.5rem 1.25rem;
-        }
-        
-        .admin-header-nav-left .logout-btn:hover,
-        .admin-header-nav-right .logout-btn:hover,
-        .admin-header-nav .logout-btn:hover {
-            background: var(--primary-color-hover);
-            border-color: var(--primary-color-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .admin-header-center {
+        /* Sidebar izquierda - estilo Xtreme Admin */
+        .admin-nav-sidebar {
+            width: 260px;
+            min-width: 260px;
+            background: linear-gradient(180deg, #1e2746 0%, #252d4a 50%, #1a2142 100%);
+            color: rgba(255,255,255,0.9);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
             display: flex;
             flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+        
+        .admin-nav-sidebar.collapsed {
+            transform: translateX(-260px);
+        }
+        
+        .admin-nav-brand {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
             align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            gap: 0.75rem;
         }
         
-        .admin-header-center h1 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 0;
+        .admin-nav-brand-text {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+        
+        .admin-nav-menu {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+        
+        .admin-nav-menu section {
+            margin-bottom: 1rem;
+        }
+        
+        .admin-nav-menu .menu-label {
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 0.25rem;
         }
         
-        .admin-header-center .admin-logo {
-            max-width: 100px;
-            max-height: 40px;
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            margin-top: 0.25rem;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px;
-            border-radius: 4px;
+        .admin-nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
         }
         
-        .admin-menu-toggle {
-            display: none;
-            font-size: 1.5rem;
+        .admin-nav-menu a:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+        
+        .admin-nav-menu a.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+            border-left-color: var(--primary-color);
+        }
+        
+        .admin-nav-menu .nav-icon {
+            font-size: 1.15rem;
+            width: 24px;
+            text-align: center;
+            opacity: 0.9;
+        }
+        
+        .admin-nav-menu .nav-badge {
+            margin-left: auto;
+            background: #7c3aed;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        /* Topbar superior */
+        .admin-topbar {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .admin-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .admin-sidebar-toggle {
             background: none;
             border: none;
-            color: white;
+            font-size: 1.35rem;
             cursor: pointer;
+            color: #6b7280;
             padding: 0.5rem;
-            z-index: 1002;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: none;
+        }
+        
+        .admin-sidebar-toggle:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .admin-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+        
+        .admin-notifications {
+            position: relative;
+        }
+        
+        .admin-notifications-btn {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .admin-notifications-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .admin-notifications-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-notifications-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .admin-notifications-dropdown.open {
+            display: block;
+        }
+        
+        .admin-notifications-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .admin-notification-item {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #f3f4f6;
+            color: #4b5563;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: block;
+            transition: background 0.2s;
+        }
+        
+        .admin-notification-item:hover {
+            background: #f9fafb;
+        }
+        
+        .admin-notification-item .notif-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .admin-notification-item .notif-desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .admin-notification-item.stock-low .notif-title { color: #d97706; }
+        .admin-notification-item.stock-out .notif-title { color: #dc2626; }
+        
+        .admin-user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            position: relative;
+        }
+        
+        .admin-user-menu:hover {
+            background: #f3f4f6;
+        }
+        
+        .admin-user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-hover) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .admin-user-name {
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.95rem;
+        }
+        
+        .admin-user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 1001;
+            display: none;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+        
+        .admin-user-dropdown.open {
+            display: block;
+        }
+        
+        .admin-user-dropdown a {
+            display: block;
+            padding: 0.75rem 1.25rem;
+            color: #4b5563;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        .admin-user-dropdown a:hover {
+            background: #f9fafb;
+        }
+        
+        .admin-main-wrapper {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .admin-main-wrapper.sidebar-collapsed {
+            margin-left: 0;
         }
         
         .admin-container {
+            flex: 1;
             max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .page-welcome {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .page-desc {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        
+        .page-breadcrumb {
+            font-size: 0.9rem;
+            color: #9ca3af;
         }
         
         .admin-sidebar {
@@ -635,101 +876,25 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         }
         
         /* 📱 RESPONSIVE STYLES */
+        @media (max-width: 992px) {
+            .admin-sidebar-toggle {
+                display: flex;
+            }
+            
+            .admin-nav-sidebar {
+                transform: translateX(-260px);
+            }
+            
+            .admin-nav-sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .admin-main-wrapper {
+                margin-left: 0;
+            }
+        }
+        
         @media (max-width: 768px) {
-            .admin-header {
-                padding: 1rem;
-            }
-            
-            .admin-header-content {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                position: relative;
-            }
-            
-            .admin-header h1 {
-                font-size: 1.25rem;
-            }
-            
-            .admin-menu-toggle {
-                display: block;
-            }
-            
-            .admin-header-nav-left,
-            .admin-header-nav-right {
-                display: none !important;
-            }
-            
-            .admin-header-nav {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-                border-bottom: 2px solid var(--primary-color);
-                width: 100%;
-                padding: 1rem;
-                gap: 0.5rem;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                z-index: 1001;
-                margin-top: 0.5rem;
-                border-radius: 8px;
-            }
-            
-            .admin-header-nav.open {
-                display: flex !important;
-            }
-            
-            .admin-header-center {
-                flex: 1;
-                text-align: center;
-                order: -1;
-            }
-            
-            .admin-header-center h1 {
-                font-size: 0.75rem;
-            }
-            
-            .admin-header-center .admin-logo {
-                max-width: 70px;
-                max-height: 35px;
-            }
-            
-            .admin-header-content {
-                flex-wrap: wrap;
-            }
-            
-            .admin-menu-toggle {
-                order: -1;
-            }
-            
-            .admin-header-nav a {
-                width: 100%;
-                text-align: left;
-                padding: 0.75rem 1rem;
-                border-radius: 4px;
-            }
-            
-            .admin-header-nav a:hover {
-                background: rgba(255,255,255,0.2);
-            }
-            
-            .admin-header-nav .logout-btn {
-                background: rgba(255,255,255,0.25);
-                font-weight: 600;
-                border: 2px solid rgba(255,255,255,0.5);
-                margin-top: 0.5rem;
-                width: 100%;
-                text-align: center;
-            }
-            
-            .admin-header-nav .logout-btn:hover {
-                background: rgba(255,255,255,0.35);
-                border-color: rgba(255,255,255,0.7);
-            }
-            
             .admin-container {
                 margin: 1rem auto;
                 padding: 0 1rem;
@@ -1057,89 +1222,97 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
     </style>
 </head>
 <body>
-    <header class="admin-header">
-        <div class="admin-header-content">
-            <nav class="admin-header-nav-left">
-                <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
-                <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
-                <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
-                <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
+    <div class="admin-layout">
+        <!-- Sidebar izquierda -->
+        <aside class="admin-nav-sidebar" id="admin-nav-sidebar">
+            <div class="admin-nav-brand">
+                <span class="admin-nav-brand-text"><?= htmlspecialchars($shopName) ?></span>
+            </div>
+            
+            <nav class="admin-nav-menu">
+                <section>
+                    <div class="menu-label">Principal</div>
+                    <a href="<?= ADMIN_URL ?>/index.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'index.php' && empty($_GET)) ? 'active' : '' ?>">
+                        <span class="nav-icon">📊</span> Dashboard
+                        <?php if ($stockNotificationsCount > 0): ?><span class="nav-badge"><?= $stockNotificationsCount ?></span><?php endif; ?>
+                    </a>
+                    <a href="<?= ADMIN_URL ?>/list.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'list.php') ? 'active' : '' ?>">
+                        <span class="nav-icon">📦</span> Productos
+                    </a>
+                    <a href="<?= ADMIN_URL ?>/add.php"><span class="nav-icon">➕</span> Agregar Producto</a>
+                    <a href="<?= ADMIN_URL ?>/ordenar.php"><span class="nav-icon">📋</span> Ordenar Productos</a>
+                </section>
+                <section>
+                    <div class="menu-label">Gestión</div>
+                    <a href="<?= ADMIN_URL ?>/galeria/list.php" class="<?= (strpos($_SERVER['REQUEST_URI'] ?? '', 'galeria') !== false) ? 'active' : '' ?>">
+                        <span class="nav-icon">🖼️</span> Galería
+                    </a>
+                    <a href="<?= ADMIN_URL ?>/ordenes/list.php" class="<?= (strpos($_SERVER['REQUEST_URI'] ?? '', 'ordenes') !== false) ? 'active' : '' ?>">
+                        <span class="nav-icon">🛒</span> Pedidos
+                    </a>
+                    <a href="<?= ADMIN_URL ?>/categorias/list.php"><span class="nav-icon">📁</span> Categorías</a>
+                    <a href="<?= ADMIN_URL ?>/cupones/list.php"><span class="nav-icon">🎟️</span> Cupones</a>
+                </section>
+                <section>
+                    <div class="menu-label">Configuración</div>
+                    <a href="<?= ADMIN_URL ?>/landing-page.php"><span class="nav-icon">🏠</span> Landing Page</a>
+                    <a href="<?= ADMIN_URL ?>/tienda.php"><span class="nav-icon">⚙️</span> Tienda</a>
+                    <a href="<?= ADMIN_URL ?>/reports/list.php"><span class="nav-icon">📈</span> Reportes</a>
+                    <a href="<?= ADMIN_URL ?>/backup/list.php"><span class="nav-icon">💾</span> Backups</a>
+                </section>
             </nav>
-            
-                    <div class="admin-header-center">
-                        <h1>Panel Administrativo</h1>
-                        <?php if (!empty($shopSettings['shop_logo'])): ?>
-                            <?php 
-                            // Cache busting: agregar timestamp de última modificación
-                            $logoPath = $shopSettings['shop_logo'];
-                            $logoFullPath = str_replace(BASE_URL, '', $logoPath);
-                            $logoFullPath = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($logoFullPath, '/');
-                            $logoTime = file_exists($logoFullPath) ? filemtime($logoFullPath) : time();
-                            $logoUrl = $logoPath . '?v=' . $logoTime;
-                            ?>
-                            <img 
-                                src="<?= htmlspecialchars($logoUrl) ?>" 
-                                alt="<?= htmlspecialchars($shopName) ?>" 
-                                class="admin-logo"
-                                onerror="this.style.display='none';"
-                            >
-                        <?php endif; ?>
+        </aside>
+        
+        <!-- Área principal -->
+        <div class="admin-main-wrapper" id="admin-main-wrapper">
+            <!-- Barra superior -->
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-sidebar-toggle" id="admin-sidebar-toggle" aria-label="Alternar menú">☰</button>
+                </div>
+                <div class="admin-topbar-right">
+                    <div class="admin-notifications">
+                        <button class="admin-notifications-btn" id="admin-notifications-btn" aria-label="Notificaciones">
+                            🔔
+                            <?php if ($stockNotificationsCount > 0): ?>
+                                <span class="admin-notifications-badge"><?= $stockNotificationsCount ?></span>
+                            <?php endif; ?>
+                        </button>
+                        <div class="admin-notifications-dropdown" id="admin-notifications-dropdown">
+                            <div class="admin-notifications-header">Notificaciones de Stock</div>
+                            <?php if ($stockNotificationsCount > 0): ?>
+                                <?php foreach (array_slice($outOfStockProducts, 0, 5) as $p): ?>
+                                    <a href="<?= ADMIN_URL ?>/edit.php?id=<?= htmlspecialchars($p['id']) ?>" class="admin-notification-item stock-out">
+                                        <span class="notif-title">⚠️ Sin stock: <?= htmlspecialchars($p['name']) ?></span>
+                                        <span class="notif-desc">Stock agotado - Actualizar ahora</span>
+                                    </a>
+                                <?php endforeach; ?>
+                                <?php foreach (array_slice($lowStockProducts, 0, 5) as $p): ?>
+                                    <a href="<?= ADMIN_URL ?>/edit.php?id=<?= htmlspecialchars($p['id']) ?>" class="admin-notification-item stock-low">
+                                        <span class="notif-title">📉 Stock bajo: <?= htmlspecialchars($p['name']) ?></span>
+                                        <span class="notif-desc">Quedan <?= $p['stock'] ?> (mín: <?= $p['stock_minimo'] ?>)</span>
+                                    </a>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="admin-notification-item" style="cursor:default;">
+                                    <span class="notif-desc">No hay alertas de stock</span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
+                    <div class="admin-user-menu" id="admin-user-menu">
+                        <div class="admin-user-avatar"><?= strtoupper(substr($currentUser['username'] ?? 'A', 0, 1)) ?></div>
+                        <span class="admin-user-name"><?= htmlspecialchars($currentUser['username'] ?? 'Admin') ?></span>
+                        <span style="font-size:0.7rem;color:#9ca3af;">▼</span>
+                        <div class="admin-user-dropdown" id="admin-user-dropdown">
+                            <a href="<?= ADMIN_URL ?>/perfil.php">👤 Mi Perfil</a>
+                            <a href="<?= ADMIN_URL ?>/logout.php">🚪 Cerrar sesión</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
             
-                    <nav class="admin-header-nav-right">
-                        <a href="<?= ADMIN_URL ?>/landing-page.php">Landing Page</a>
-                        <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
-                        <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
-                        <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
-                    </nav>
-            
-            <button id="admin-menu-toggle" class="admin-menu-toggle" aria-label="Abrir menú">
-                ☰
-            </button>
-            
-                    <nav class="admin-header-nav" id="admin-header-nav">
-                        <a href="<?= ADMIN_URL ?>/index.php">Dashboard</a>
-                        <a href="<?= ADMIN_URL ?>/list.php">Productos</a>
-                        <a href="<?= ADMIN_URL ?>/galeria/list.php">Galería</a>
-                        <a href="<?= ADMIN_URL ?>/ordenes/list.php">Pedidos</a>
-                        <a href="<?= ADMIN_URL ?>/landing-page.php">Landing Page</a>
-                        <a href="<?= ADMIN_URL ?>/tienda.php">Tienda</a>
-                        <a href="<?= ADMIN_URL ?>/perfil.php">Perfil</a>
-                        <a href="<?= ADMIN_URL ?>/logout.php" class="logout-btn">Salir</a>
-                    </nav>
-        </div>
-    </header>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggle = document.getElementById('admin-menu-toggle');
-            const nav = document.getElementById('admin-header-nav');
-            
-            if (toggle && nav) {
-                toggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    nav.classList.toggle('open');
-                    if (nav.classList.contains('open')) {
-                        toggle.textContent = '✕';
-                    } else {
-                        toggle.textContent = '☰';
-                    }
-                });
-                
-                document.addEventListener('click', function(e) {
-                    if (nav.classList.contains('open') && 
-                        !nav.contains(e.target) && 
-                        e.target.id !== 'admin-menu-toggle' &&
-                        !toggle.contains(e.target)) {
-                        nav.classList.remove('open');
-                        toggle.textContent = '☰';
-                    }
-                });
-            }
-        });
-    </script>
-    
-    <div class="admin-container">
+            <main class="admin-container">
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success">
                 <?= htmlspecialchars($_SESSION['success_message']) ?>

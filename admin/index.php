@@ -31,21 +31,16 @@ $salesByDay = getSalesByDay();
 ?>
 
 <div class="admin-content">
-    <h2>Dashboard</h2>
-    <p style="color: #666; margin-bottom: 2rem;">Bienvenido al panel de administración de <?= htmlspecialchars($shopName) ?></p>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-welcome">Hola, bienvenido</h1>
+            <p class="page-desc">Panel de administración de <?= htmlspecialchars($shopName) ?></p>
+        </div>
+        <div class="page-breadcrumb">Dashboard / Inicio</div>
+    </div>
     
     <!-- Estadísticas de Ventas -->
-    <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <span>📊 Ventas</span>
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <a href="<?= ADMIN_URL ?>/reports/list.php" class="btn btn-primary" style="font-size: 0.95rem; padding: 0.75rem 1.5rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(224, 164, 206, 0.3);">
-                📊 Reportes Mensuales
-            </a>
-            <a href="<?= ADMIN_URL ?>/backup/list.php" class="btn btn-secondary" style="font-size: 0.95rem; padding: 0.75rem 1.5rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);">
-                💾 Backups
-            </a>
-        </div>
-    </div>
+    <h3 class="section-title">📊 Ventas</h3>
     <div class="stats-grid">
         <div class="stat-card stat-sales">
             <div class="stat-number">$<?= number_format($dashboardStats['today']['total_revenue'], 2, ',', '.') ?></div>
@@ -73,12 +68,7 @@ $salesByDay = getSalesByDay();
     </div>
     
     <!-- Estadísticas de Productos -->
-    <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <span>📦 Productos</span>
-        <a href="<?= ADMIN_URL ?>/cupones/list.php" class="btn btn-primary" style="font-size: 0.95rem; padding: 0.75rem 1.5rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(224, 164, 206, 0.3);">
-            🎟️ Cupones
-        </a>
-    </div>
+    <h3 class="section-title">📦 Productos</h3>
     <div class="stats-grid">
         <div class="stat-card stat-total">
             <div class="stat-number"><?= $dashboardStats['total_products'] ?></div>
@@ -98,36 +88,6 @@ $salesByDay = getSalesByDay();
         <div class="stat-card stat-avg">
             <div class="stat-number">$<?= number_format($dashboardStats['month']['avg_order_value'], 2, ',', '.') ?></div>
             <div class="stat-label">Ticket Promedio</div>
-        </div>
-    </div>
-    
-    <!-- Accesos rápidos -->
-    <div class="quick-actions">
-        <h3 class="section-title">Accesos Rápidos</h3>
-        <div class="actions-grid">
-            <a href="add.php" class="action-card">
-                <div class="action-icon">➕</div>
-                <div class="action-title">Agregar Productos</div>
-                <div class="action-desc">Crear un nuevo producto</div>
-            </a>
-            
-            <a href="ordenar.php" class="action-card">
-                <div class="action-icon">📋</div>
-                <div class="action-title">Ordenar Productos</div>
-                <div class="action-desc">Reordenar productos arrastrando</div>
-            </a>
-            
-            <a href="galeria/list.php" class="action-card">
-                <div class="action-icon">🖼️</div>
-                <div class="action-title">Galería de Ideas</div>
-                <div class="action-desc">Gestionar imágenes</div>
-            </a>
-            
-            <a href="ordenes/list.php" class="action-card">
-                <div class="action-icon">📦</div>
-                <div class="action-title">Pedidos</div>
-                <div class="action-desc">Ver y gestionar pedidos</div>
-            </a>
         </div>
     </div>
     
@@ -187,18 +147,12 @@ $salesByDay = getSalesByDay();
     if (!empty($categorias)):
     ?>
     <div class="category-summary">
-        <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <span>📁 Productos por Categoría</span>
-            <a href="<?= ADMIN_URL ?>/categorias/list.php" class="btn btn-primary" style="font-size: 0.95rem; padding: 0.75rem 1.5rem; border-radius: 6px; box-shadow: 0 2px 4px rgba(224, 164, 206, 0.3);">
-                ✏️ Editar Categorías
-            </a>
-        </div>
+        <h3 class="section-title">📁 Productos por Categoría</h3>
         <div class="category-grid">
             <?php foreach ($categorias as $cat): ?>
                 <div class="category-item">
                     <div class="category-name"><?= ucfirst(htmlspecialchars($cat['categoria'])) ?></div>
                     <div class="category-count"><?= $cat['count'] ?> productos</div>
-                    <a href="list.php?categoria=<?= htmlspecialchars($cat['categoria']) ?>" class="category-link">Ver →</a>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -437,49 +391,8 @@ $salesByDay = getSalesByDay();
         color: #333;
     }
     
-    .quick-actions {
-        margin-top: 3rem;
-    }
-    
-    .actions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .action-card {
-        background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        text-decoration: none;
-        color: #333;
-        transition: all 0.3s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .action-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-3px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    
-    .action-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-    }
-    
-    .action-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    
-    .action-desc {
-        font-size: 0.9rem;
-        color: #666;
+    .section-title:first-of-type {
+        margin-top: 0;
     }
     
     .category-summary {
@@ -512,20 +425,6 @@ $salesByDay = getSalesByDay();
         font-size: 1.5rem;
         font-weight: bold;
         color: var(--primary-color);
-        margin-bottom: 0.75rem;
-    }
-    
-    .category-link {
-        display: inline-block;
-        color: var(--primary-color);
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: color 0.3s;
-    }
-    
-    .category-link:hover {
-        color: var(--primary-color-hover);
-        text-decoration: underline;
     }
     
     /* Responsive para mobile */
@@ -553,23 +452,6 @@ $salesByDay = getSalesByDay();
             font-size: 1.25rem;
         }
         
-        .actions-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .action-card {
-            padding: 1.5rem 1rem;
-        }
-        
-        .action-icon {
-            font-size: 2.5rem;
-        }
-        
-        .action-title {
-            font-size: 1.1rem;
-        }
-        
         .category-grid {
             grid-template-columns: repeat(2, 1fr);
         }
@@ -590,10 +472,6 @@ $salesByDay = getSalesByDay();
         
         .stat-label {
             font-size: 0.75rem;
-        }
-        
-        .actions-grid {
-            grid-template-columns: 1fr;
         }
         
         .category-grid {
