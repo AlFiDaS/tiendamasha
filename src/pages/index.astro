@@ -6,18 +6,18 @@ import HeroSlider from '../components/HeroSlider.astro';
 <Layout>
   <HeroSlider />
 
-  <!-- Productos más vendidos -->
+  <!-- Productos más vendidos (título, descripción y botón editables desde landing page) -->
   <section class="productos">
     <div class="section-header">
-      <h2>Más Vendidos</h2>
-      <p>Descubre nuestros productos más populares, elegidos por nuestros clientes</p>
+      <h2 id="productos-title">Más Vendidos</h2>
+      <p id="productos-description">Descubre nuestros productos más populares, elegidos por nuestros clientes</p>
     </div>
     <!-- Contenedor para productos destacados desde la BD -->
     <div class="grid desktop-grid products-grid" data-destacados="true" data-limit="5">
       <!-- Los productos destacados se cargarán aquí automáticamente desde la API -->
     </div>
     <div class="section-footer">
-      <a href="/productos" class="btn-ver-todos">Ver todos los productos</a>
+      <a href="/productos" class="btn-ver-todos" id="productos-button-link"><span id="productos-button-text">Ver todos los productos</span></a>
     </div>
   </section>
 
@@ -244,6 +244,7 @@ import HeroSlider from '../components/HeroSlider.astro';
        margin-right: auto;
        padding: 0 var(--space-md);
        justify-items: center;
+       align-items: start;
      }
      
      /* Ajustar columnas según cantidad de testimonials */
@@ -284,8 +285,8 @@ import HeroSlider from '../components/HeroSlider.astro';
        text-align: center;
        display: flex;
        flex-direction: column;
-       min-height: 180px;
-       max-width: 300px;
+       min-height: 160px;
+       max-width: 320px;
        width: 100%;
        justify-content: space-between;
      }
@@ -431,9 +432,7 @@ import HeroSlider from '../components/HeroSlider.astro';
       margin-bottom: var(--space-xs);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1;
-      word-break: break-word;
-      overflow-wrap: break-word;
-      hyphens: auto;
+      white-space: nowrap;
     }
     
     /* Ajustar tamaño para números largos (más de 5 caracteres) */
@@ -784,21 +783,26 @@ import HeroSlider from '../components/HeroSlider.astro';
         font-size: 2.2rem;
       }
       
-                           .testimonials-grid {
+      .stat {
+        padding: var(--space-xs);
+      }
+      
+          :global(.testimonials-grid) {
            grid-template-columns: repeat(2, 1fr);
            max-width: 100%;
-           padding: 0 var(--space-sm);
-           gap: var(--space-sm);
+           padding: 0 var(--space-md);
+           gap: var(--space-md);
+           align-items: start;
          }
-         
-         /* El 5to testimonio se ve normal en tablet */
         
-        .testimonial-card {
-          min-height: 170px;
+        :global(.testimonial-card) {
+          min-height: auto;
+          padding: var(--space-xs);
         }
         
-        .testimonial-text {
-          font-size: var(--font-size-sm);
+        :global(.testimonial-text) {
+          font-size: var(--font-size-xs);
+          line-height: 1.5;
         }
     }
     
@@ -883,16 +887,20 @@ import HeroSlider from '../components/HeroSlider.astro';
         }
       
       .sobre-stats {
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-sm);
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
       }
       
       .stat-number {
-        font-size: 2rem;
+        font-size: 2.2rem;
       }
       
       .stat-label {
         font-size: var(--font-size-sm);
+      }
+      
+      .stat {
+        padding: var(--space-xs);
       }
       
              .btn-primary,
@@ -902,9 +910,12 @@ import HeroSlider from '../components/HeroSlider.astro';
          font-size: var(--font-size-md);
        }
       
-                           :global(.testimonials-grid) {
-          gap: var(--space-sm);
-          padding: 0 var(--space-sm);
+          :global(.testimonials-grid) {
+          grid-template-columns: 1fr !important;
+          gap: var(--space-md);
+          padding: 0 var(--space-md);
+          align-items: start;
+          justify-items: center;
         }
         
         :global(.testimonials-grid[data-count="1"]),
@@ -912,26 +923,28 @@ import HeroSlider from '../components/HeroSlider.astro';
         :global(.testimonials-grid[data-count="3"]),
         :global(.testimonials-grid[data-count="4"]),
         :global(.testimonials-grid[data-count="5"]) {
-          grid-template-columns: repeat(2, 1fr) !important;
+          grid-template-columns: 1fr !important;
           max-width: 100%;
         }
       
-      .testimonial-card {
-        padding: var(--space-sm);
-        min-height: 160px;
+      :global(.testimonial-card) {
+        padding: var(--space-xs);
+        min-height: auto;
+        max-width: min(100%, 400px);
+        width: 100%;
       }
       
-      .testimonial-text {
+      :global(.testimonial-text) {
         font-size: var(--font-size-xs);
-        line-height: 1.3;
+        line-height: 1.5;
       }
       
-      .client-name {
+      :global(.client-name) {
         font-size: var(--font-size-sm);
       }
       
-      .stars {
-        font-size: 0.7rem;
+      :global(.stars) {
+        font-size: 0.85rem;
       }
     }
   </style>
@@ -980,6 +993,16 @@ import HeroSlider from '../components/HeroSlider.astro';
                 }
               }, 100);
             }
+          }
+          
+          // Cargar sección Productos (título, descripción, botón)
+          if (data.productos) {
+            const p = data.productos;
+            if (document.getElementById('productos-title')) document.getElementById('productos-title').textContent = p.title;
+            if (document.getElementById('productos-description')) document.getElementById('productos-description').textContent = p.description;
+            const btnLink = document.getElementById('productos-button-link');
+            if (btnLink && p.button_link) btnLink.href = p.button_link;
+            if (document.getElementById('productos-button-text')) document.getElementById('productos-button-text').textContent = p.button_text || 'Ver todos los productos';
           }
           
           // Cargar sección Sobre
@@ -1127,6 +1150,42 @@ import HeroSlider from '../components/HeroSlider.astro';
     </script>
 
 <style>
+    /* Móvil: testimonios en 1 columna, cards compactas y legibles */
+    @media (max-width: 640px) {
+      :global(.testimonials-grid) {
+        grid-template-columns: 1fr !important;
+        gap: var(--space-lg);
+        padding: 0 var(--space-md);
+        justify-items: center;
+      }
+      
+      :global(.testimonial-card) {
+        max-width: min(100%, 380px);
+        width: 100%;
+        min-height: auto;
+        padding: var(--space-xs);
+        text-align: center;
+      }
+      
+      :global(.testimonial-text) {
+        font-size: var(--font-size-xs);
+        line-height: 1.5;
+        margin-bottom: var(--space-xs);
+      }
+      
+      :global(.client-name) {
+        font-size: var(--font-size-xs);
+      }
+      
+      :global(.testimonial-card::before) {
+        left: var(--space-md);
+      }
+      
+      :global(.stars) {
+        font-size: 0.95rem;
+      }
+    }
+    
     @media (max-width: 600px) {
       .mobile-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -1178,16 +1237,17 @@ import HeroSlider from '../components/HeroSlider.astro';
         }
       
              .sobre-stats {
-         grid-template-columns: repeat(3, 1fr);
-         gap: var(--space-xs);
+         grid-template-columns: 1fr;
+         gap: var(--space-md);
        }
        
        .stat {
-         padding: var(--space-sm);
+         padding: var(--space-xs);
+         min-width: 0;
        }
        
        .stat-number {
-         font-size: 1.5rem;
+         font-size: 2rem;
        }
        
        .stat-label {
@@ -1201,45 +1261,6 @@ import HeroSlider from '../components/HeroSlider.astro';
         font-size: var(--font-size-xs);
       }
       
-                                                                                                               .testimonials-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: var(--space-xs);
-            padding: 0 var(--space-xs);
-          }
-          
-          .mobile-wide {
-            grid-column: span 2;
-          }
-          
-          .mobile-wide .testimonial-card {
-            padding: var(--space-md);
-          }
-          
-          .mobile-wide .testimonial-text {
-            font-size: var(--font-size-sm);
-            line-height: 1.4;
-          }
-         
-
-        
-        :global(.testimonial-card) {
-          padding: var(--space-xs);
-          min-height: 140px;
-        }
-        
-        :global(.testimonial-text) {
-          font-size: var(--font-size-xs);
-          line-height: 1.2;
-          margin-bottom: var(--space-sm);
-        }
-        
-        .client-name {
-          font-size: var(--font-size-xs);
-        }
-        
-        .stars {
-          font-size: 0.6rem;
-        }
       
       .features-grid,
       .process-grid {

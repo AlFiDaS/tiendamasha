@@ -60,6 +60,12 @@ $testimonials = !empty($settings['testimonials']) ? json_decode($settings['testi
 // Preparar respuesta
 $response = [
     'carousel' => $carouselImages,
+    'productos' => [
+        'title' => $settings['productos_title'] ?? 'Más Vendidos',
+        'description' => $settings['productos_description'] ?? 'Descubre nuestros productos más populares, elegidos por nuestros clientes',
+        'button_text' => $settings['productos_button_text'] ?? 'Ver todos los productos',
+        'button_link' => $settings['productos_button_link'] ?? '/productos'
+    ],
     'sobre' => [
         'title' => $settings['sobre_title'] ?? 'Sobre LUME',
         'text_1' => $settings['sobre_text_1'] ?? '',
