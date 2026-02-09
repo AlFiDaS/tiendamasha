@@ -26,13 +26,13 @@ require_once '../_inc/header.php';
 ?>
 
 <div class="admin-content">
-    <div style="margin-bottom: 1.5rem;">
-        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al Dashboard</a>
-    </div>
     <div class="page-header">
-        <h2>Gestionar Categorías</h2>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="../ordenar.php" class="btn btn-secondary">📋 Ordenar Productos</a>
+        <div class="page-header-left">
+            <h1 class="page-title">Categorías</h1>
+            <p class="page-desc">Gestiona las categorías de tu catálogo</p>
+        </div>
+        <div class="page-header-actions">
+            <a href="../ordenar.php" class="btn btn-secondary">📋 Ordenar</a>
             <a href="add.php" class="btn btn-primary">➕ Agregar Categoría</a>
         </div>
     </div>
@@ -42,7 +42,7 @@ require_once '../_inc/header.php';
             No hay categorías creadas. <a href="add.php">Agregar primera categoría</a>
         </div>
     <?php else: ?>
-        <table class="categories-table">
+        <table class="categories-table data-table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -102,8 +102,8 @@ require_once '../_inc/header.php';
             </tbody>
         </table>
         
-        <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-            <h3 style="margin-bottom: 1rem;">💡 Notas importantes:</h3>
+        <div class="content-card" style="margin-top: 2rem;">
+            <h3 class="section-title">Notas importantes</h3>
             <ul style="margin-left: 1.5rem; color: #666;">
                 <li>Las categorías <strong>visibles</strong> aparecen en el sitio web y en el selector al agregar productos.</li>
                 <li>Las categorías <strong>ocultas</strong> no aparecen en el sitio web, pero sí en el selector del admin (para crear productos antes de hacerlas visibles).</li>
@@ -115,14 +115,6 @@ require_once '../_inc/header.php';
 </div>
 
 <style>
-/* Header de página */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
 /* Ocultar información extra en desktop */
 .mobile-extra-info {
     display: none;

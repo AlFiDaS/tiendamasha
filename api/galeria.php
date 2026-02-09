@@ -77,8 +77,20 @@ try {
         ];
     }
     
+    // Título de la galería (editable desde admin) - siempre enviar para que la web lo muestre
+    $title = 'Galería de ideas';
+    try {
+        $landing = fetchOne("SELECT galeria_title FROM landing_page_settings WHERE id = 1 LIMIT 1");
+        if (!empty($landing['galeria_title'])) {
+            $title = $landing['galeria_title'];
+        }
+    } catch (Exception $e) {
+        // Mantener título por defecto si falla la consulta
+    }
+    
     echo json_encode([
         'success' => true,
+        'title' => $title,
         'galeria' => $galeria
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     

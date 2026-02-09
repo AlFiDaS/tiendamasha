@@ -160,11 +160,12 @@ require_once '../_inc/header.php';
 }
 
 .ordenes-table th {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #1e2746 0%, #252d4a 100%);
+    color: white;
     padding: 1rem;
     text-align: left;
     font-weight: 600;
-    border-bottom: 2px solid #dee2e6;
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .ordenes-table td {
@@ -234,17 +235,17 @@ require_once '../_inc/header.php';
 }
 
 .btn-view {
-    background: #007bff;
+    background: var(--primary-color);
     color: white;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 6px;
     text-decoration: none;
     display: inline-block;
     font-size: 0.875rem;
 }
 
 .btn-view:hover {
-    background: #0056b3;
+    background: var(--primary-color-hover);
 }
 
 .items-preview {
@@ -513,8 +514,11 @@ require_once '../_inc/header.php';
 </style>
 
 <div class="admin-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2>Pedidos</h2>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">Pedidos</h1>
+            <p class="page-desc">Gestiona los pedidos de tu tienda</p>
+        </div>
     </div>
 
     <!-- Estadísticas -->

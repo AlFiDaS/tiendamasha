@@ -147,14 +147,14 @@ $csrfToken = generateCSRFToken();
 ?>
 
 <div class="admin-content add-product-page">
-    <div class="page-header-edit">
-        <div>
-            <h2>➕ Agregar Nuevo Producto</h2>
-            <p class="page-subtitle">Crea un nuevo producto para tu catálogo</p>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">Agregar Producto</h1>
+            <p class="page-desc">Crea un nuevo producto para tu catálogo</p>
         </div>
-        <a href="list.php" class="btn-back">
-            ← Volver a la lista
-        </a>
+        <div class="page-header-actions">
+            <a href="list.php" class="btn btn-secondary">← Volver a lista</a>
+        </div>
     </div>
     
     <?php if ($error): ?>
@@ -168,7 +168,7 @@ $csrfToken = generateCSRFToken();
         
         <!-- Sección: Información Básica -->
         <div class="form-section">
-            <h3 class="section-title">📝 Información Básica</h3>
+            <h3 class="section-title">Información Básica</h3>
             
             <div class="form-group">
                 <label for="name">Nombre del Producto *</label>
@@ -466,49 +466,6 @@ function updateStockFields() {
     margin: 0 auto;
 }
 
-.page-header-edit {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid #e0e0e0;
-}
-
-.page-header-edit h2 {
-    margin: 0;
-    font-size: 2rem;
-    color: #333;
-    font-weight: 700;
-}
-
-.page-subtitle {
-    margin: 0.5rem 0 0 0;
-    color: #666;
-    font-size: 0.95rem;
-}
-
-.btn-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: #f5f5f5;
-    color: #333;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s;
-    border: 1px solid #e0e0e0;
-}
-
-.btn-back:hover {
-    background: #e0a4ce;
-    color: white;
-    border-color: #e0a4ce;
-    transform: translateX(-3px);
-}
-
 .add-product-form {
     display: flex;
     flex-direction: column;
@@ -516,20 +473,21 @@ function updateStockFields() {
 }
 
 .form-section {
-    background: #fafafa;
-    border-radius: 12px;
-    padding: 2rem;
-    border: 1px solid #e8e8e8;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
 }
 
-.section-title {
-    font-size: 1.5rem;
+.add-product-form .section-title {
+    font-size: 1.15rem;
     font-weight: 600;
-    color: #333;
-    margin: 0 0 1.5rem 0;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid #e0a4ce;
+    color: #374151;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--primary-color);
 }
 
 .section-subtitle {
@@ -576,8 +534,8 @@ function updateStockFields() {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #e0a4ce;
-    box-shadow: 0 0 0 3px rgba(224, 164, 206, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb, 224, 164, 206), 0.2);
 }
 
 .form-group textarea {
@@ -710,17 +668,17 @@ function updateStockFields() {
     gap: 0.75rem;
     padding: 1rem 1.5rem;
     background: white;
-    border: 2px dashed #e0a4ce;
+    border: 2px dashed var(--primary-color);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
-    color: #e0a4ce;
+    color: var(--primary-color);
     font-weight: 500;
 }
 
 .file-input-label:hover {
     background: #fef5fc;
-    border-color: #d89bc0;
+    border-color: var(--primary-color-hover);
     transform: translateY(-2px);
 }
 
@@ -759,9 +717,9 @@ function updateStockFields() {
 }
 
 .radio-option:hover {
-    border-color: #e0a4ce;
+    border-color: var(--primary-color);
     background: #fef5fc;
-    box-shadow: 0 2px 8px rgba(224, 164, 206, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .radio-option input[type="radio"] {
@@ -784,8 +742,8 @@ function updateStockFields() {
 }
 
 .radio-option input[type="radio"]:checked + .radio-checkmark {
-    background: #e0a4ce;
-    border-color: #e0a4ce;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .radio-option input[type="radio"]:checked + .radio-checkmark::after {
@@ -820,14 +778,14 @@ function updateStockFields() {
 }
 
 .radio-option input[type="radio"]:checked ~ .radio-content .radio-icon {
-    background: #e0a4ce;
+    background: var(--primary-color);
     color: white;
 }
 
 .radio-option:has(input[type="radio"]:checked) {
-    border-color: #e0a4ce;
+    border-color: var(--primary-color);
     background: #fef5fc;
-    box-shadow: 0 2px 8px rgba(224, 164, 206, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .radio-content strong {
@@ -870,13 +828,13 @@ function updateStockFields() {
 }
 
 .checkbox-modern:hover {
-    border-color: #e0a4ce;
+    border-color: var(--primary-color);
     background: #fef5fc;
-    box-shadow: 0 2px 8px rgba(224, 164, 206, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .checkbox-modern:has(input[type="checkbox"]:checked) {
-    border-color: #e0a4ce;
+    border-color: var(--primary-color);
     background: #fef5fc;
 }
 
@@ -900,8 +858,8 @@ function updateStockFields() {
 }
 
 .checkbox-modern input[type="checkbox"]:checked + .checkmark {
-    background: #e0a4ce;
-    border-color: #e0a4ce;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 .checkbox-modern input[type="checkbox"]:checked + .checkmark::after {
@@ -954,14 +912,14 @@ function updateStockFields() {
 }
 
 .btn-primary.btn-large {
-    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
     color: white;
-    box-shadow: 0 4px 12px rgba(224, 164, 206, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary.btn-large:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(224, 164, 206, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .btn-secondary.btn-large {
@@ -977,16 +935,6 @@ function updateStockFields() {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .page-header-edit {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .btn-back {
-        width: 100%;
-        justify-content: center;
-    }
-    
     .form-section {
         padding: 1.5rem;
     }
@@ -1023,10 +971,6 @@ function updateStockFields() {
 }
 
 @media (max-width: 480px) {
-    .page-header-edit h2 {
-        font-size: 1.5rem;
-    }
-    
     .form-section {
         padding: 1rem;
     }

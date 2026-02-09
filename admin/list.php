@@ -96,10 +96,13 @@ if (!empty($buscar)) {
 ?>
 
 <div class="admin-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <h2>Lista de Productos</h2>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="ordenar.php" class="btn btn-secondary">📋 Ordenar Productos</a>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">Productos</h1>
+            <p class="page-desc">Gestiona tu catálogo de productos</p>
+        </div>
+        <div class="page-header-actions">
+            <a href="ordenar.php" class="btn btn-secondary">📋 Ordenar</a>
             <a href="add.php" class="btn btn-primary">➕ Agregar Producto</a>
         </div>
     </div>

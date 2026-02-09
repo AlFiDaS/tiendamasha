@@ -20,12 +20,14 @@ $coupons = getAllCoupons(false);
 ?>
 
 <div class="admin-content">
-    <div style="margin-bottom: 1.5rem;">
-        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al Dashboard</a>
-    </div>
     <div class="page-header">
-        <h2>Cupones y Descuentos</h2>
-        <a href="add.php" class="btn btn-primary">➕ Nuevo Cupón</a>
+        <div class="page-header-left">
+            <h1 class="page-title">Cupones y Descuentos</h1>
+            <p class="page-desc">Gestiona los códigos de descuento de tu tienda</p>
+        </div>
+        <div class="page-header-actions">
+            <a href="add.php" class="btn btn-primary">➕ Nuevo Cupón</a>
+        </div>
     </div>
     
     <?php if (empty($coupons)): ?>
@@ -101,11 +103,11 @@ $coupons = getAllCoupons(false);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="action-buttons">
-                                    <a href="edit.php?id=<?= $coupon['id'] ?>" class="btn btn-sm btn-primary">✏️ Editar</a>
+                                <div class="actions">
+                                    <a href="edit.php?id=<?= $coupon['id'] ?>" class="btn-edit">Editar</a>
                                     <a href="delete.php?id=<?= $coupon['id'] ?>" 
-                                       class="btn btn-sm btn-danger" 
-                                       onclick="return confirm('¿Estás seguro de eliminar este cupón?')">🗑️ Eliminar</a>
+                                       class="btn-delete" 
+                                       onclick="return confirm('¿Estás seguro de eliminar este cupón?')">Eliminar</a>
                                 </div>
                             </td>
                         </tr>
@@ -117,13 +119,6 @@ $coupons = getAllCoupons(false);
 </div>
 
 <style>
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-    
     .badge {
         display: inline-block;
         padding: 0.25rem 0.5rem;

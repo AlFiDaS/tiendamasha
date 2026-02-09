@@ -43,6 +43,12 @@
                 throw new Error(data.error || 'Error desconocido al cargar la galería');
             }
             
+            // Actualizar título de la galería (editable desde admin)
+            const titleEl = document.getElementById('galeria-title');
+            if (titleEl && data.title !== undefined) {
+                titleEl.textContent = data.title || 'Galería de ideas';
+            }
+            
             return data.galeria || [];
         } catch (error) {
             console.error('Error al cargar galería:', error);

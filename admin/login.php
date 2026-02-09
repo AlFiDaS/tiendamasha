@@ -10,7 +10,7 @@ startSecureSession();
 // Obtener configuración de la tienda
 $shopSettings = getShopSettings();
 $shopName = $shopSettings['shop_name'] ?? SITE_NAME;
-$primaryColor = $shopSettings['primary_color'] ?? '#FF6B35';
+$primaryColor = '#5672E1'; // Color fijo del panel admin
 
 $error = '';
 

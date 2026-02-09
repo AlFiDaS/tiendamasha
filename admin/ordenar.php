@@ -69,13 +69,16 @@ foreach ($products as $index => $product) {
 ?>
 
 <div class="admin-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-        <h2>Ordenar Productos</h2>
-        <div>
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">Ordenar Productos</h1>
+            <p class="page-desc">Arrastra las imágenes para cambiar el orden de visualización</p>
+        </div>
+        <div class="page-header-actions">
             <button type="button" id="btn-guardar-orden" class="btn btn-primary" style="display: none;">
                 💾 Guardar Orden
             </button>
-            <a href="list.php" class="btn btn-secondary">← Volver a Lista</a>
+            <a href="list.php" class="btn btn-secondary">← Volver a lista</a>
         </div>
     </div>
     
@@ -198,7 +201,8 @@ foreach ($products as $index => $product) {
     background: white;
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    border: 1px solid #e5e7eb;
     overflow: hidden;
 }
 
@@ -240,8 +244,8 @@ foreach ($products as $index => $product) {
 
 .tab.active {
     background: white;
-    color: #e0a4ce;
-    border-top-color: #e0a4ce;
+    color: var(--primary-color);
+    border-top-color: var(--primary-color);
     border-bottom: 1px solid white;
     margin-bottom: -1px;
     z-index: 1;
@@ -249,7 +253,7 @@ foreach ($products as $index => $product) {
 
 .tab.active:hover {
     background: white;
-    color: #d89bc0;
+    color: var(--primary-color-hover);
 }
 
 .tabs-content {
@@ -312,7 +316,7 @@ foreach ($products as $index => $product) {
 }
 
 .btn-move {
-    background: rgba(224, 164, 206, 0.9);
+    background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 50%;
@@ -331,7 +335,7 @@ foreach ($products as $index => $product) {
 }
 
 .btn-move:hover:not(:disabled) {
-    background: rgba(216, 155, 192, 1);
+    background: var(--primary-color-hover);
     transform: scale(1.1);
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
@@ -348,20 +352,20 @@ foreach ($products as $index => $product) {
 }
 
 .product-sortable-card:hover {
-    border-color: #e0a4ce;
-    box-shadow: 0 4px 12px rgba(224, 164, 206, 0.2);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transform: translateY(-2px);
 }
 
 .product-sortable-card.dragging {
     opacity: 0.5;
-    border-color: #e0a4ce;
-    box-shadow: 0 8px 16px rgba(224, 164, 206, 0.4);
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 .product-sortable-card.drag-over {
-    border-color: #e0a4ce;
-    background: #f8f0f5;
+    border-color: var(--primary-color);
+    background: #f8f9fa;
 }
 
 .product-sortable-card img {

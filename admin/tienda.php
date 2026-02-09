@@ -26,26 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
     } else {
-        // Obtener y normalizar el color
-        $primaryColor = '#FF6B35'; // Valor por defecto
-        
-        // Priorizar el input de texto si está completo y es válido
-        if (!empty($_POST['primary_color_text'])) {
-            $colorText = trim($_POST['primary_color_text']);
-            if (!str_starts_with($colorText, '#')) {
-                $colorText = '#' . $colorText;
-            }
-            if (preg_match('/^#[0-9A-Fa-f]{6}$/i', $colorText)) {
-                $primaryColor = strtoupper($colorText);
-            }
-        } elseif (!empty($_POST['primary_color'])) {
-            // Si no hay texto, usar el color picker
-            $colorPicker = trim($_POST['primary_color']);
-            if (preg_match('/^#[0-9A-Fa-f]{6}$/i', $colorPicker)) {
-                $primaryColor = strtoupper($colorPicker);
-            }
-        }
-        
         $formData = [
             'shop_name' => sanitize($_POST['shop_name'] ?? ''),
             'whatsapp_number' => sanitize($_POST['whatsapp_number'] ?? ''),
@@ -56,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email' => sanitize($_POST['email'] ?? ''),
             'phone' => sanitize($_POST['phone'] ?? ''),
             'description' => sanitize($_POST['description'] ?? ''),
-            'primary_color' => $primaryColor,
             'footer_description' => sanitize($_POST['footer_description'] ?? ''),
             'footer_copyright' => sanitize($_POST['footer_copyright'] ?? ''),
             'creation_year' => !empty($_POST['creation_year']) ? (int)$_POST['creation_year'] : null
@@ -305,33 +284,6 @@ require_once '_inc/header.php';
         
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
         
-        <h3 style="margin-bottom: 1rem; color: #333;">Personalización del Panel</h3>
-        
-        <div class="form-group">
-            <label for="primary_color">Color Primario del Panel</label>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <input 
-                    type="color" 
-                    id="primary_color" 
-                    name="primary_color" 
-                    value="<?= htmlspecialchars(strtoupper($settings['primary_color'] ?? '#FF6B35')) ?>"
-                    style="width: 80px; height: 40px; border: 2px solid #ddd; border-radius: 4px; cursor: pointer;"
-                >
-                <input 
-                    type="text" 
-                    id="primary_color_text" 
-                    name="primary_color_text"
-                    value="<?= htmlspecialchars(strtoupper($settings['primary_color'] ?? '#FF6B35')) ?>"
-                    placeholder="#FF6B35"
-                    pattern="^#[0-9A-Fa-f]{6}$"
-                    style="flex: 1; padding: 0.75rem; border: 2px solid #ddd; border-radius: 4px; font-family: monospace;"
-                >
-            </div>
-            <small>Color que se usará en botones, enlaces y elementos destacados del panel administrativo. Formato: #RRGGBB (ej: #FF6B35 para naranja)</small>
-        </div>
-        
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
-        
         <h3 style="margin-bottom: 1rem; color: #333;">Información General</h3>
         
         <div class="form-group">
@@ -393,23 +345,7 @@ require_once '_inc/header.php';
 </div>
 
 <script>
-// Sincronizar el input de color con el input de texto
 document.addEventListener('DOMContentLoaded', function() {
-    const colorInput = document.getElementById('primary_color');
-    const colorText = document.getElementById('primary_color_text');
-    
-    if (colorInput && colorText) {
-        colorInput.addEventListener('input', function() {
-            colorText.value = this.value.toUpperCase();
-        });
-        
-        colorText.addEventListener('input', function() {
-            if (this.value.match(/^#[0-9A-Fa-f]{6}$/i)) {
-                colorInput.value = this.value.toUpperCase();
-            }
-        });
-    }
-    
     // Previsualizar logo al cambiar
     const shopLogoInput = document.getElementById('shop_logo');
     if (shopLogoInput) {

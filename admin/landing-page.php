@@ -327,7 +327,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (executeQuery($sql, $params)) {
             $success = 'Configuración actualizada correctamente';
-            $_SESSION['success_message'] = $success;
             header('Location: ' . $_SERVER['PHP_SELF'] . '?updated=1');
             exit;
         } else {
@@ -1156,6 +1155,13 @@ require_once '_inc/header.php';
 @media (max-width: 500px) {
   .landing-editor-preview .stat-number { font-size: 2rem; }
 }
+
+.landing-section-divider {
+  margin: 2rem 0;
+  border: none;
+  border-top: 2px solid #e0e0e0;
+  max-width: 100%;
+}
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css" />
@@ -1172,11 +1178,11 @@ require_once '_inc/header.php';
     <?php if ($error): ?>
         <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
-    <?php if ($success): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
 
     <form method="POST" action="" enctype="multipart/form-data" id="landing-form">
+        <script>
+        (function(){var f=document.getElementById('landing-form');if(f)f.addEventListener('submit',function(){sessionStorage.setItem('landing_scroll_y',String(window.scrollY||document.documentElement.scrollTop));});})();
+        </script>
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
         <div class="landing-editor-preview">
@@ -1240,6 +1246,8 @@ require_once '_inc/header.php';
                 </details>
             </div>
 
+            <hr class="landing-section-divider">
+
             <!-- PRODUCTOS MÁS VENDIDOS (título, descripción y botón editables; grid cargado desde API) -->
             <section class="productos">
                 <div class="section-header">
@@ -1291,6 +1299,8 @@ require_once '_inc/header.php';
                     </label>
                 </div>
             </section>
+
+            <hr class="landing-section-divider">
 
             <!-- SOBRE -->
             <section class="sobre" id="sobre-section">
@@ -1348,6 +1358,8 @@ require_once '_inc/header.php';
                 </div>
             </section>
 
+            <hr class="landing-section-divider">
+
             <!-- TESTIMONIALS - Máx 5 comentarios. Estrellas: solo 1-5. Agregar/Eliminar. -->
             <?php
             $starOptions = ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'];
@@ -1402,9 +1414,17 @@ require_once '_inc/header.php';
             </section>
             <div id="new-testimonials-container"></div>
 
+            <hr class="landing-section-divider">
+
             <!-- CTA GALERÍA - Orden igual que index. En el editor siempre visible; "Mostrar sección" solo afecta al index público. -->
             <section class="cta" id="galeria-section">
                 <div class="container">
+                    <div class="section-header" style="display: flex; align-items: center; justify-content: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" title="Solo afecta a la página principal (index). En el editor la sección siempre está visible.">
+                            <input type="checkbox" name="galeria_visible" value="1" <?= ($settings['galeria_visible'] ?? 1) ? 'checked' : '' ?>>
+                            <span>Mostrar esta sección en la página principal (index)</span>
+                        </label>
+                    </div>
                     <div class="cta-content">
                         <div class="cta-text">
                             <!-- 1) Badge arriba (como en el index) -->
@@ -1477,20 +1497,11 @@ require_once '_inc/header.php';
                             </div>
                         </div>
                     </div>
-                    <!-- "Mostrar sección" solo afecta al index (página pública), no al editor -->
-                    <details style="margin-top: 1rem; padding: 0.5rem 0; border-top: 1px solid #eee;">
-                        <summary style="cursor: pointer; font-size: 0.9rem; color: #666;">Opciones de sección</summary>
-                        <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 0.5rem;">
-                            <input type="checkbox" name="galeria_visible" value="1" <?= ($settings['galeria_visible'] ?? 1) ? 'checked' : '' ?>>
-                            <span>Mostrar esta sección en la página principal (index)</span>
-                        </label>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #888;">Si está desmarcado, la sección no se verá en el index; aquí en el editor siempre podés editarla.</p>
-                    </details>
                 </div>
             </section>
 
             <!-- COLORES -->
-            <section style="padding: var(--space-xl) 0; background: #f5f5f5; border-radius: var(--radius-lg); margin: 2rem auto; max-width: 1200px; padding: 2rem;">
+            <section id="landing-save-area" style="padding: var(--space-xl) 0; background: #f5f5f5; border-radius: var(--radius-lg); margin: 2rem auto; max-width: 1200px; padding: 2rem;">
                 <h3 style="margin-bottom: 1rem; color: #333;">Configuración de colores</h3>
                 <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.9rem;">Estos colores se aplican en la página principal (modo claro y modo oscuro).</p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
@@ -1509,9 +1520,14 @@ require_once '_inc/header.php';
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
-                    <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary" style="text-decoration: none;">Cancelar</a>
+                <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <?php if (!empty($success) && isset($_GET['updated'])): ?>
+                    <div id="landing-success-msg" class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
+                    <?php endif; ?>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+                        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary" style="text-decoration: none;">Cancelar</a>
+                    </div>
                 </div>
             </section>
         </div>
@@ -1523,6 +1539,23 @@ require_once '_inc/header.php';
 <script>
 var carouselCategories = <?= json_encode($categories ?? []) ?>;
 document.addEventListener('DOMContentLoaded', function() {
+  // Tras guardar: restaurar posición del scroll (evitar salto arriba/abajo) y ocultar mensaje tras 5s
+  if (window.location.search.indexOf('updated=1') !== -1) {
+    var savedY = sessionStorage.getItem('landing_scroll_y');
+    if (savedY !== null) {
+      sessionStorage.removeItem('landing_scroll_y');
+      window.scrollTo(0, parseInt(savedY, 10));
+    }
+    var successEl = document.getElementById('landing-success-msg');
+    if (successEl) {
+      setTimeout(function() {
+        successEl.style.transition = 'opacity 0.4s';
+        successEl.style.opacity = '0';
+        setTimeout(function() { successEl.remove(); }, 400);
+      }, 5000);
+    }
+  }
+
   var heroSlider = document.getElementById('hero-slider');
   var splideInstance = null;
   function mountCarousel() {

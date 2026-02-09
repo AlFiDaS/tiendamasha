@@ -19,7 +19,7 @@ $stockNotificationsCount = count($lowStockProducts) + count($outOfStockProducts)
 require_once __DIR__ . '/../../helpers/shop-settings.php';
 $shopSettings = getShopSettings();
 $shopName = $shopSettings['shop_name'] ?? SITE_NAME;
-$primaryColor = $shopSettings['primary_color'] ?? '#FF6B35';
+$primaryColor = '#5672E1'; // Color fijo del panel admin
 
 // Función para ajustar brillo de color (para hover states)
 function adjustBrightness($hex, $percent) {
@@ -64,6 +64,13 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             --primary-color: <?= htmlspecialchars($primaryColor) ?>;
             --primary-color-hover: <?= htmlspecialchars($primaryColorHover) ?>;
             --primary-color-light: <?= htmlspecialchars($primaryColorLight) ?>;
+            <?php 
+            $hex = ltrim($primaryColor, '#');
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+            ?>
+            --primary-color-rgb: <?= $r ?>, <?= $g ?>, <?= $b ?>;
         }
         
         /* === LAYOUT: Sidebar izquierda + Topbar + Contenido === */
@@ -418,6 +425,44 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             color: #9ca3af;
         }
         
+        .page-header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+        
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin: 0.25rem 0 0 0;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
         .admin-sidebar {
             background: white;
             border-radius: 8px;
@@ -450,10 +495,12 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         
         /* Filtros - Desktop */
         .filters-container {
-            background: #f8f9fa;
+            background: white;
             padding: 1.5rem;
             border-radius: 8px;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .filters-form {
@@ -634,10 +681,31 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             display: table-cell;
         }
         
-        table {
+        table, .admin-content table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .admin-content table th,
+        .admin-content table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .admin-content table thead th {
+            background: linear-gradient(135deg, #1e2746 0%, #252d4a 100%);
+            color: white;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .admin-content table tbody tr:hover {
+            background: #f8f9fa;
         }
         
         table th,
@@ -698,14 +766,14 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         }
         
         .actions .btn-edit {
-            background: #007bff;
+            background: var(--primary-color);
             color: white;
         }
         
         .actions .btn-edit:hover {
-            background: #0056b3;
+            background: var(--primary-color-hover);
             transform: translateY(-2px);
-            box-shadow: 0 2px 4px rgba(0,123,255,0.3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .actions .btn-delete {
