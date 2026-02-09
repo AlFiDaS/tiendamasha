@@ -77,19 +77,25 @@ try {
         ];
     }
     
-    // Título de la galería (editable desde admin) - siempre enviar para que la web lo muestre
+    // Nombre, slug y título desde gallery_info (editable en admin/galeria/list.php)
+    $galleryName = 'Galeria de Ideas';
+    $gallerySlug = 'galeria';
     $title = 'Galería de ideas';
     try {
-        $landing = fetchOne("SELECT galeria_title FROM landing_page_settings WHERE id = 1 LIMIT 1");
-        if (!empty($landing['galeria_title'])) {
-            $title = $landing['galeria_title'];
+        $info = fetchOne("SELECT name, slug, title FROM gallery_info WHERE id = 1 LIMIT 1");
+        if ($info) {
+            $galleryName = $info['name'] ?? $galleryName;
+            $gallerySlug = $info['slug'] ?? $gallerySlug;
+            $title = $info['title'] ?? $title;
         }
     } catch (Exception $e) {
-        // Mantener título por defecto si falla la consulta
+        // Mantener valores por defecto
     }
     
     echo json_encode([
         'success' => true,
+        'name' => $galleryName,
+        'slug' => $gallerySlug,
         'title' => $title,
         'galeria' => $galeria
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

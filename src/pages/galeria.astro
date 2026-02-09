@@ -1,12 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Breadcrumb from "../components/Breadcrumb.astro";
 ---
 <Layout>
-  <Breadcrumb items={[
-    { text: "Inicio", href: "/" },
-    { text: "Galería de ideas" }
-  ]} />
+  <div class="breadcrumb">
+    <div class="container">
+      <a href="/">Inicio</a>
+      <span class="separator">/</span>
+      <span id="galeria-breadcrumb-name">Galería de ideas</span>
+    </div>
+  </div>
 
   <section class="galeria">
     <h1 id="galeria-title">Galería de ideas</h1>

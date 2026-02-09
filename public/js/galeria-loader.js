@@ -48,6 +48,11 @@
             if (titleEl && data.title !== undefined) {
                 titleEl.textContent = data.title || 'Galería de ideas';
             }
+            // Actualizar nombre en breadcrumb (Inicio / ...)
+            const breadcrumbEl = document.getElementById('galeria-breadcrumb-name');
+            if (breadcrumbEl && data.name !== undefined) {
+                breadcrumbEl.textContent = data.name || 'Galería de ideas';
+            }
             
             return data.galeria || [];
         } catch (error) {

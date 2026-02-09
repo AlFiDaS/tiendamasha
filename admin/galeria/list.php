@@ -1,37 +1,61 @@
 <?php
 /**
  * Lista de imágenes de la galería - Vista idéntica a Galería de ideas con controles de edición
+ * Incluye edición de nombre (navbar) y título de la galería (tabla gallery_info). La URL es siempre /galeria/
  */
 $pageTitle = 'Galería de Ideas';
 require_once '../../config.php';
 require_once '../_inc/header.php';
 require_once '../../helpers/auth.php';
+require_once '../../helpers/shop-settings.php';
 
 $error = '';
 $success = '';
 
-// Obtener título de la galería (editable)
-$landingSettings = fetchOne("SELECT galeria_title FROM landing_page_settings WHERE id = 1 LIMIT 1");
-$currentTitle = $landingSettings['galeria_title'] ?? 'Galería de ideas';
+// Cargar datos de gallery_info (nombre y título; slug siempre es galeria)
+$galleryInfo = ['name' => 'Galeria de Ideas', 'title' => 'Galería de ideas'];
+try {
+    $row = fetchOne("SELECT name, title FROM gallery_info WHERE id = 1 LIMIT 1");
+    if ($row) {
+        $galleryInfo = $row;
+    }
+} catch (Throwable $e) {
+    // Tabla gallery_info puede no existir aún
+}
+$currentTitle = $galleryInfo['title'];
+$currentName = $galleryInfo['name'];
 
 // Subtítulo fijo (no editable)
 $subtitleFijo = 'Tocá una imagen para verla en grande. Usá flechas o deslizá para avanzar.';
 
-// Procesar actualización del título
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_title'])) {
+// Procesar actualización de nombre y título (gallery_info); slug siempre galeria
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gallery_info'])) {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
     } else {
-        $newTitle = sanitize($_POST['galeria_title'] ?? '');
-        if (!empty($newTitle)) {
-            if (executeQuery("UPDATE landing_page_settings SET galeria_title = :title WHERE id = 1", ['title' => $newTitle])) {
-                $success = 'Título actualizado correctamente';
-                $currentTitle = $newTitle;
-            } else {
-                $error = 'Error al actualizar el título';
-            }
-        } else {
+        $newName = trim(sanitize($_POST['galeria_name'] ?? ''));
+        $newTitle = trim(sanitize($_POST['galeria_title'] ?? ''));
+        if (empty($newName)) {
+            $error = 'El nombre no puede estar vacío';
+        } elseif (empty($newTitle)) {
             $error = 'El título no puede estar vacío';
+        } else {
+            try {
+                $updated = executeQuery(
+                    "UPDATE gallery_info SET name = :name, title = :title, slug = 'galeria' WHERE id = 1",
+                    ['name' => $newName, 'title' => $newTitle]
+                );
+                if ($updated) {
+                    $success = 'Datos de la galería actualizados correctamente';
+                    $currentName = $newName;
+                    $currentTitle = $newTitle;
+                    $galleryInfo = ['name' => $currentName, 'title' => $currentTitle];
+                } else {
+                    $error = 'Error al actualizar. ¿Ejecutaste database-gallery-info.sql?';
+                }
+            } catch (Throwable $e) {
+                $error = 'Error al guardar. Asegúrate de tener la tabla gallery_info (ejecuta database-gallery-info.sql).';
+            }
         }
     }
 }
@@ -39,6 +63,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_title'])) {
 // Obtener todas las imágenes (incluidas ocultas para el admin)
 $sql = "SELECT * FROM galeria ORDER BY orden ASC, id ASC";
 $items = fetchAll($sql, []);
+
+// Logo de la tienda para el preview del navbar (mismo que "Logo actual" en tienda.php)
+$settings = getShopSettings();
+$logoUrl = '';
+if (!empty($settings['shop_logo'])) {
+    $logoPath = $settings['shop_logo'];
+    $logoFullPath = str_replace(BASE_URL, '', $logoPath);
+    $logoFullPath = $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($logoFullPath, '/');
+    $logoTime = file_exists($logoFullPath) ? filemtime($logoFullPath) : time();
+    $logoUrl = $logoPath . '?v=' . $logoTime;
+}
 ?>
 
 <div class="admin-content">
@@ -54,28 +89,51 @@ $items = fetchAll($sql, []);
         <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
-    <!-- Vista idéntica a Galería de ideas con controles de edición -->
-    <section class="galeria galeria-admin-preview">
-        <!-- Título editable; subtítulo fijo -->
-        <div class="galeria-header-edit">
-            <form method="POST" action="" id="form-titulo" style="display: inline;">
-                <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
-                <input type="hidden" name="update_title" value="1">
-                <h1 class="galeria-h1">
-                    <span class="editable-wrap">
-                        <span class="text-display"><?= htmlspecialchars($currentTitle) ?></span>
-                        <button type="button" class="btn-edit-pencil" title="Editar título">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                        </button>
-                        <span class="edit-inline" style="display: none;">
-                            <input type="text" name="galeria_title" value="<?= htmlspecialchars($currentTitle) ?>" placeholder="Título">
-                            <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.5rem;">Guardar</button>
-                        </span>
+    <form method="POST" action="" id="galeria-form">
+        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+        <input type="hidden" name="update_gallery_info" value="1">
+        <input type="hidden" name="galeria_name" value="<?= htmlspecialchars($currentName) ?>">
+        <input type="hidden" name="galeria_title" value="<?= htmlspecialchars($currentTitle) ?>">
+
+        <!-- Mini navbar: réplica del navbar de la web, solo link galería editable -->
+        <div class="content-card galeria-admin-navbar-preview" style="margin-bottom: 1.5rem;">
+            <h3 class="section-title">Nombre en el menú</h3>
+            <p style="color: #666; margin-bottom: 1rem;">Así se verá en la barra de navegación. El enlace es siempre <strong>/galeria/</strong>.</p>
+            <nav class="navbar-preview-fake">
+                <div class="nav-container-fake">
+                    <span class="logo-preview-wrap">
+                    <?php if ($logoUrl): ?>
+                        <img src="<?= htmlspecialchars($logoUrl) ?>" alt="<?= htmlspecialchars($settings['shop_name'] ?? 'Logo') ?>" class="logo-preview-img" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
+                        <span class="logo-fake logo-fallback" style="display:none"><?= htmlspecialchars($settings['shop_name'] ?? 'Logo') ?></span>
+                    <?php else: ?>
+                        <span class="logo-fake"><?= htmlspecialchars($settings['shop_name'] ?? 'Logo') ?></span>
+                    <?php endif; ?>
                     </span>
-                </h1>
-            </form>
-            <p class="sub"><?= htmlspecialchars($subtitleFijo) ?></p>
+                    <ul class="nav-links-fake">
+                        <li><span class="nav-item-fake disabled">Inicio</span></li>
+                        <li>
+                            <div class="editable-text editable-nav-link" data-input="galeria_name">
+                                <a href="/galeria" class="nav-item-fake active"><span class="text-display"><?= htmlspecialchars($currentName) ?></span></a>
+                                <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+                                <span class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentName) ?>" placeholder="Ej: Galeria de Ideas"></span>
+                            </div>
+                        </li>
+                    </ul>
+                    <span class="nav-icons-fake">❤️ 🛒</span>
+                </div>
+            </nav>
         </div>
+
+        <!-- Vista idéntica a Galería de ideas con controles de edición -->
+        <section class="galeria galeria-admin-preview">
+            <div class="galeria-header-edit">
+                <div class="editable-text editable-galeria-title" data-input="galeria_title" style="display: block;">
+                    <h1 class="galeria-h1"><span class="text-display"><?= htmlspecialchars($currentTitle) ?></span></h1>
+                    <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+                    <div class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentTitle) ?>" placeholder="Ej: Fotos de Clientes"></div>
+                </div>
+                <p class="sub"><?= htmlspecialchars($subtitleFijo) ?></p>
+            </div>
 
         <?php if (empty($items)): ?>
             <div style="text-align: center; padding: 3rem; color: #666;">
@@ -126,10 +184,136 @@ $items = fetchAll($sql, []);
             </div>
             <div id="save-message" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
         <?php endif; ?>
+        <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
     </section>
+    </form>
 </div>
 
 <style>
+/* Mini navbar preview: réplica del navbar real de la web */
+.galeria-admin-navbar-preview .navbar-preview-fake {
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.galeria-admin-navbar-preview .nav-container-fake {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.6rem 2rem;
+}
+.galeria-admin-navbar-preview .logo-fake,
+.galeria-admin-navbar-preview .logo-fallback {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+}
+.galeria-admin-navbar-preview .logo-preview-wrap {
+    display: flex;
+    align-items: center;
+}
+.galeria-admin-navbar-preview .logo-preview-img {
+    max-height: 40px;
+    max-width: 120px;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+.galeria-admin-navbar-preview .nav-links-fake {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.galeria-admin-navbar-preview .nav-item-fake {
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+.galeria-admin-navbar-preview .nav-item-fake.disabled {
+    color: #999;
+    cursor: default;
+}
+.galeria-admin-navbar-preview .nav-item-fake.active {
+    color: #333;
+}
+.galeria-admin-navbar-preview .nav-item-fake.active:hover {
+    color: var(--primary-color);
+}
+.galeria-admin-navbar-preview .nav-icons-fake {
+    font-size: 1.4rem;
+    color: #333;
+}
+.galeria-admin-navbar-preview .editable-nav-link {
+    position: relative;
+    display: inline-block;
+}
+.galeria-admin-preview .editable-galeria-title {
+    position: relative;
+    display: block;
+}
+.galeria-admin-preview .editable-text {
+    position: relative;
+    display: inline-block;
+}
+.galeria-admin-navbar-preview .btn-edit-pencil,
+.galeria-admin-preview .btn-edit-pencil {
+    position: absolute;
+    top: 2px;
+    right: -28px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    background: var(--primary-color);
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+.galeria-admin-navbar-preview .btn-edit-pencil svg,
+.galeria-admin-preview .btn-edit-pencil svg {
+    width: 14px;
+    height: 14px;
+}
+.galeria-admin-navbar-preview .btn-edit-pencil:hover,
+.galeria-admin-preview .btn-edit-pencil:hover { opacity: 1; }
+.galeria-admin-navbar-preview .editable-text.edit-mode .text-display,
+.galeria-admin-preview .editable-text.edit-mode .text-display { display: none; }
+.galeria-admin-navbar-preview .editable-text.edit-mode .edit-inline,
+.galeria-admin-preview .editable-text.edit-mode .edit-inline { display: block; }
+.galeria-admin-preview .editable-galeria-title.edit-mode .galeria-h1 { display: none; }
+.galeria-admin-navbar-preview .edit-inline,
+.galeria-admin-preview .edit-inline { display: none; margin-top: 4px; }
+.galeria-admin-navbar-preview .edit-inline input,
+.galeria-admin-navbar-preview .edit-inline input {
+    padding: 6px 8px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: inherit;
+    min-width: 200px;
+}
+.galeria-admin-preview .edit-inline input {
+    padding: 6px 8px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: inherit;
+    width: 100%;
+    max-width: 400px;
+}
+
 /* Estilos idénticos a la Galería de ideas (public) */
 .galeria-admin-preview.galeria {
     padding: 2rem 1rem;
@@ -271,39 +455,6 @@ $items = fetchAll($sql, []);
     background: #f8f9fa;
 }
 
-/* Editable título */
-.galeria-admin-preview .editable-wrap {
-    position: relative;
-    display: inline-block;
-}
-.galeria-admin-preview .btn-edit-pencil {
-    position: absolute;
-    top: 2px;
-    right: -32px;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: none;
-    background: var(--primary-color);
-    color: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-.galeria-admin-preview .btn-edit-pencil svg {
-    width: 12px;
-    height: 12px;
-}
-.galeria-admin-preview .edit-inline input {
-    padding: 0.5rem;
-    border: 2px solid var(--primary-color);
-    border-radius: 4px;
-    width: 100%;
-    max-width: 400px;
-}
-
 /* Controles móvil para ordenar */
 .mobile-move-controls {
     display: none;
@@ -341,6 +492,70 @@ $items = fetchAll($sql, []);
 
 <script>
 (function() {
+    // Editar texto inline (lápiz) - como landing-page.php
+    var editables = document.querySelectorAll('#galeria-form .editable-text');
+    function closeEditable(wrap) {
+        var inputName = wrap.getAttribute('data-input');
+        var form = document.getElementById('galeria-form');
+        if (!form || !inputName) return;
+        var hidden = form.querySelector('input[name="' + inputName + '"]');
+        var display = wrap.querySelector('.text-display');
+        var editBlock = wrap.querySelector('.edit-inline');
+        var inputEl = editBlock && (editBlock.querySelector('input') || editBlock.querySelector('textarea'));
+        if (!hidden || !display || !inputEl) return;
+        var val = inputEl.value.trim();
+        if (val) hidden.value = val;
+        display.textContent = val || hidden.value;
+        wrap.classList.remove('edit-mode');
+    }
+    // Usar capture: true para recibir el clic antes de stopPropagation en overlays/cards
+    document.addEventListener('click', function closeEditOnClickOutside(e) {
+        editables.forEach(function(wrap) {
+            if (!wrap.classList.contains('edit-mode')) return;
+            if (wrap.contains(e.target)) return;
+            closeEditable(wrap);
+        });
+    }, true);
+    document.addEventListener('touchstart', function closeEditOnTouchOutside(e) {
+        editables.forEach(function(wrap) {
+            if (!wrap.classList.contains('edit-mode')) return;
+            if (wrap.contains(e.target)) return;
+            closeEditable(wrap);
+        });
+    }, { passive: true, capture: true });
+    editables.forEach(function(wrap) {
+        var inputName = wrap.getAttribute('data-input');
+        if (!inputName) return;
+        var form = document.getElementById('galeria-form');
+        if (!form) return;
+        var hidden = form.querySelector('input[name="' + inputName + '"]');
+        var display = wrap.querySelector('.text-display');
+        var pencil = wrap.querySelector('.btn-edit-pencil');
+        var editBlock = wrap.querySelector('.edit-inline');
+        var inputEl = editBlock && (editBlock.querySelector('input') || editBlock.querySelector('textarea'));
+        if (!display || !pencil || !editBlock || !inputEl || !hidden) return;
+
+        pencil.addEventListener('click', function(e) {
+            e.stopPropagation();
+            wrap.classList.add('edit-mode');
+            inputEl.value = hidden.value;
+            setTimeout(function() { inputEl.focus(); }, 10);
+        });
+        function saveAndClose() {
+            var val = inputEl.value.trim();
+            if (val) hidden.value = val;
+            if (display) display.textContent = val || hidden.value;
+            wrap.classList.remove('edit-mode');
+        }
+        inputEl.addEventListener('blur', function() {
+            setTimeout(saveAndClose, 200);
+        });
+        inputEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && inputEl.tagName !== 'TEXTAREA') { e.preventDefault(); saveAndClose(); }
+            if (e.key === 'Escape') { e.preventDefault(); inputEl.value = hidden.value; wrap.classList.remove('edit-mode'); }
+        });
+    });
+
     const grid = document.getElementById('galeria-grid');
     if (!grid) return;
 
@@ -485,17 +700,6 @@ $items = fetchAll($sql, []);
         });
     }
 
-    // Editable título (pencil)
-    const pencil = document.querySelector('.galeria-admin-preview .btn-edit-pencil');
-    const textDisplay = document.querySelector('.galeria-admin-preview .text-display');
-    const editInline = document.querySelector('.galeria-admin-preview .edit-inline');
-    if (pencil && textDisplay && editInline) {
-        pencil.addEventListener('click', function() {
-            textDisplay.style.display = 'none';
-            editInline.style.display = 'block';
-            pencil.style.display = 'none';
-        });
-    }
 })();
 </script>
 

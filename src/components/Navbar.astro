@@ -4,8 +4,9 @@ const staticLinksBefore = [
   { href: '/', text: 'Inicio' },
 ];
 
+// Galería: nombre y href se actualizan con /api/gallery-info.php
 const staticLinksAfter = [
-  { href: '/galeria', text: 'Galeria de Ideas' },
+  { href: '/galeria', text: 'Galeria de Ideas', id: 'nav-gallery-link' },
 ];
 ---
 
@@ -28,7 +29,7 @@ const staticLinksAfter = [
         ))}
         <!-- Las categorías se cargarán dinámicamente aquí -->
         {staticLinksAfter.map((link) => (
-          <li><a href={link.href}>{link.text}</a></li>
+          <li><a href={link.href} id={link.id || undefined}>{link.text}</a></li>
         ))}
       </ul>
 
@@ -58,7 +59,7 @@ const staticLinksAfter = [
     ))}
     <!-- Las categorías se cargarán dinámicamente aquí -->
     {staticLinksAfter.map((link) => (
-      <li><a href={link.href}>{link.text}</a></li>
+      <li><a href={link.href} id={link.id ? 'nav-gallery-link-mobile' : undefined}>{link.text}</a></li>
     ))}
   </ul>
 </nav>
@@ -161,6 +162,28 @@ const staticLinksAfter = [
         console.error('Error al cargar configuración de la tienda:', error);
       }
     })();
+  })();
+  
+  // Galería: actualizar nombre y enlace desde gallery_info
+  (function() {
+    fetch('/api/gallery-info.php')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.name && data.slug) {
+          const href = '/' + data.slug.replace(/^\//, '');
+          const desktopLink = document.getElementById('nav-gallery-link');
+          const mobileLink = document.getElementById('nav-gallery-link-mobile');
+          if (desktopLink) {
+            desktopLink.href = href;
+            desktopLink.textContent = data.name;
+          }
+          if (mobileLink) {
+            mobileLink.href = href;
+            mobileLink.textContent = data.name;
+          }
+        }
+      })
+      .catch(() => {});
   })();
   
   // Cargar categorías dinámicamente (solo una vez)
