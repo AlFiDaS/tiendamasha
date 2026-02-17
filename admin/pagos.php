@@ -132,7 +132,7 @@ require_once '_inc/header.php';
             <code><?= htmlspecialchars(BASE_URL) ?>/api/mercadopago/webhook.php</code></p>
             <p><strong>7. Tarjetas de prueba:</strong> Visa 4509 9535 6623 3704, CVV 123, cualquier fecha futura → pago aprobado.</p>
             <p><strong>8. Pasar a producción:</strong> Cuando estés listo, usá las credenciales de producción (APP_USR-...) y desmarcá "Modo prueba".</p>
-            <p><a href="<?= ADMIN_URL ?>/pagos/guia-mercadopago.php" target="_blank">Ver guía completa en nueva pestaña →</a></p>
+            <p><a href="<?= ADMIN_URL ?>/pagos/guia-mercadopago.php">Ver guía completa →</a></p>
         </div>
     </div>
 </div>

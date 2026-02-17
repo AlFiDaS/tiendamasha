@@ -12,6 +12,45 @@ require_once '../_inc/header.php';
 
 // Obtener reportes guardados
 $reports = getSavedReports();
+$availableMonths = getAvailableReportMonths();
+
+// Generar reporte manualmente
+if (isset($_POST['generate_report']) && isset($_POST['csrf_token'])) {
+    if (!validateCSRFToken($_POST['csrf_token'])) {
+        die('Token CSRF inválido');
+    }
+    
+    $period = $_POST['month_year'] ?? '';
+    if (preg_match('/^(\d{4})-(\d{2})$/', $period, $m)) {
+        $year = (int)$m[1];
+        $month = (int)$m[2];
+        
+        // Verificar que el mes esté disponible
+        $isValid = false;
+        foreach ($availableMonths as $opt) {
+            if ($opt['year'] === $year && $opt['month'] === $month) {
+                $isValid = true;
+                break;
+            }
+        }
+        
+        if ($isValid) {
+            $saved = generateClosingMonthReport($month, $year);
+            if ($saved) {
+                $mesesEs = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                $success = "Reporte de " . $mesesEs[$month] . " $year generado correctamente";
+                $reports = getSavedReports();
+            } else {
+                $error = "Error al generar el reporte";
+            }
+        } else {
+            $error = "Mes no disponible para generar reporte";
+        }
+    } else {
+        $error = "Selecciona un mes válido";
+    }
+}
 
 // Eliminar reporte
 if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
@@ -43,8 +82,9 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
     <div style="margin-bottom: 1.5rem;">
         <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al Dashboard</a>
     </div>
-    <div style="margin-bottom: 2rem;">
-        <h2>📊 Reportes Mensuales</h2>
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <h2 style="margin: 0;">📊 Reportes Mensuales</h2>
+        <a href="<?= ADMIN_URL ?>/reports/view-test.php" class="btn btn-secondary">Ver reporte de ejemplo</a>
     </div>
     
     <?php if (isset($success)): ?>
@@ -55,13 +95,30 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
         <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     
-    <!-- Información sobre generación automática -->
-    <div class="card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #e0a4ce15 0%, #f7d4ed15 100%); border-left: 4px solid #e0a4ce;">
-        <h3 style="color: #e0a4ce; margin-bottom: 0.5rem;">ℹ️ Generación Automática</h3>
-        <p style="color: #666; margin: 0;">
-            Los reportes mensuales se generan automáticamente el último día de cada mes a las 2:00 AM. 
-            No es posible generar reportes manualmente para mantener la integridad de los datos.
+    <!-- Generar reporte manualmente -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3>Generar Reporte Manualmente</h3>
+        <p style="color: #666; margin-bottom: 1rem;">
+            Solo podés generar reportes de meses completos. El mes actual recién está disponible a partir del día 1 del mes siguiente.
+            Los meses disponibles van desde tu primera venta hasta el mes pasado.
         </p>
+        <?php if (!empty($availableMonths)): ?>
+        <form method="POST" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(generateCSRFToken()) ?>">
+            <div class="form-group" style="margin: 0; min-width: 200px;">
+                <label for="month_year">Mes / Año</label>
+                <select name="month_year" id="month_year" required>
+                    <option value="">Seleccionar mes...</option>
+                    <?php foreach ($availableMonths as $opt): ?>
+                        <option value="<?= htmlspecialchars($opt['value']) ?>"><?= htmlspecialchars($opt['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <button type="submit" name="generate_report" class="btn btn-primary">Generar Reporte</button>
+        </form>
+        <?php else: ?>
+        <p style="color: #999;">Aún no hay ventas registradas. Los meses estarán disponibles después de tu primera venta aprobada.</p>
+        <?php endif; ?>
     </div>
     
     <!-- Lista de reportes -->

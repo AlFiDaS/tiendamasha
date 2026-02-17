@@ -55,7 +55,7 @@ require_once '../_inc/header.php';
         <h3>Cuotas sin interés</h3>
         <p>MercadoPago → Tu negocio → Costos y cuotas → Cuotas sin interés → Ofrecer 3 cuotas.</p>
         
-        <p style="margin-top: 2rem;"><a href="https://www.mercadopago.com.ar/developers/es/docs/checkout-pro" target="_blank" rel="noopener">Documentación oficial de MercadoPago</a></p>
+        <p style="margin-top: 2rem;"><a href="https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/overview" target="_blank" rel="noopener">Documentación oficial de MercadoPago</a></p>
     </div>
 </div>
 

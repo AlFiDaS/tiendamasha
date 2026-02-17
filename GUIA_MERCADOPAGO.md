@@ -180,7 +180,7 @@ El recargo del 25% se aplica automáticamente tanto a los productos como al cost
 
 ## 📞 Soporte
 
-- **Documentación oficial**: https://www.mercadopago.com.ar/developers/es/docs/checkout-pro
+- **Documentación oficial**: https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/overview
 - **Soporte de MercadoPago**: Desde el panel de desarrolladores
 
 ---

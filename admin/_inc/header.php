@@ -81,8 +81,8 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         
         /* Sidebar izquierda - estilo Xtreme Admin */
         .admin-nav-sidebar {
-            width: 260px;
-            min-width: 260px;
+            width: 340px;
+            min-width: 340px;
             background: linear-gradient(180deg, #1e2746 0%, #252d4a 50%, #1a2142 100%);
             color: rgba(255,255,255,0.9);
             position: fixed;
@@ -97,7 +97,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         }
         
         .admin-nav-sidebar.collapsed {
-            transform: translateX(-260px);
+            transform: translateX(-340px);
         }
         
         .admin-nav-brand {
@@ -129,15 +129,16 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: rgba(255,255,255,0.4);
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             margin-bottom: 0.25rem;
         }
         
         .admin-nav-menu a {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
+            gap: 0.6rem;
+            padding: 0.6rem 1.2rem;
+            white-space: nowrap;
             color: rgba(255,255,255,0.8);
             text-decoration: none;
             transition: all 0.2s ease;
@@ -378,7 +379,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         
         .admin-main-wrapper {
             flex: 1;
-            margin-left: 260px;
+            margin-left: 340px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -950,7 +951,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             }
             
             .admin-nav-sidebar {
-                transform: translateX(-260px);
+                transform: translateX(-340px);
             }
             
             .admin-nav-sidebar.open {
@@ -1299,7 +1300,6 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             
             <nav class="admin-nav-menu">
                 <section>
-                    <div class="menu-label">Principal</div>
                     <a href="<?= ADMIN_URL ?>/index.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'index.php' && empty($_GET)) ? 'active' : '' ?>">
                         <span class="nav-icon">📊</span> Dashboard
                         <?php if ($stockNotificationsCount > 0): ?><span class="nav-badge"><?= $stockNotificationsCount ?></span><?php endif; ?>
@@ -1307,27 +1307,33 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                     <a href="<?= ADMIN_URL ?>/list.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'list.php') ? 'active' : '' ?>">
                         <span class="nav-icon">📦</span> Productos
                     </a>
-                    <a href="<?= ADMIN_URL ?>/add.php"><span class="nav-icon">➕</span> Agregar Producto</a>
-                    <a href="<?= ADMIN_URL ?>/ordenar.php"><span class="nav-icon">📋</span> Ordenar Productos</a>
-                </section>
-                <section>
-                    <div class="menu-label">Gestión</div>
-                    <a href="<?= ADMIN_URL ?>/galeria/list.php" class="<?= (strpos($_SERVER['REQUEST_URI'] ?? '', 'galeria') !== false) ? 'active' : '' ?>">
-                        <span class="nav-icon">🖼️</span> Galería
-                    </a>
                     <a href="<?= ADMIN_URL ?>/ordenes/list.php" class="<?= (strpos($_SERVER['REQUEST_URI'] ?? '', 'ordenes') !== false) ? 'active' : '' ?>">
                         <span class="nav-icon">🛒</span> Pedidos
+                    </a>
+                </section>
+                <section>
+                    <div class="menu-label">Accesos rápidos</div>
+                    <a href="<?= ADMIN_URL ?>/add.php"><span class="nav-icon">➕</span> Agregar producto</a>
+                    <a href="<?= ADMIN_URL ?>/ordenar.php"><span class="nav-icon">📋</span> Ordenar productos</a>
+                </section>
+                <section>
+                    <div class="menu-label">Catálogo</div>
+                    <a href="<?= ADMIN_URL ?>/galeria/list.php" class="<?= (strpos($_SERVER['REQUEST_URI'] ?? '', 'galeria') !== false) ? 'active' : '' ?>">
+                        <span class="nav-icon">🖼️</span> Galería
                     </a>
                     <a href="<?= ADMIN_URL ?>/categorias/list.php"><span class="nav-icon">📁</span> Categorías</a>
                     <a href="<?= ADMIN_URL ?>/cupones/list.php"><span class="nav-icon">🎟️</span> Cupones</a>
                 </section>
                 <section>
                     <div class="menu-label">Configuración</div>
-                    <a href="<?= ADMIN_URL ?>/landing-page.php"><span class="nav-icon">🏠</span> Landing Page</a>
-                    <a href="<?= ADMIN_URL ?>/tienda.php"><span class="nav-icon">⚙️</span> Tienda</a>
+                    <a href="<?= ADMIN_URL ?>/landing-page.php"><span class="nav-icon">🏠</span> Página de inicio</a>
+                    <a href="<?= ADMIN_URL ?>/tienda.php"><span class="nav-icon">⚙️</span> Datos de la tienda</a>
                     <a href="<?= ADMIN_URL ?>/pagos.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'pagos.php' || strpos($_SERVER['REQUEST_URI'] ?? '', 'pagos') !== false) ? 'active' : '' ?>"><span class="nav-icon">💳</span> Configurar pagos</a>
-                    <a href="<?= ADMIN_URL ?>/notificaciones.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'notificaciones.php') ? 'active' : '' ?>"><span class="nav-icon">📱</span> Configurar notificaciones</a>
-                    <a href="<?= ADMIN_URL ?>/reports/list.php"><span class="nav-icon">📈</span> Reportes</a>
+                    <a href="<?= ADMIN_URL ?>/notificaciones.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'notificaciones.php') ? 'active' : '' ?>"><span class="nav-icon">📱</span> Notificaciones</a>
+                </section>
+                <section>
+                    <div class="menu-label">Información</div>
+                    <a href="<?= ADMIN_URL ?>/reports/list.php"><span class="nav-icon">📈</span> Reportes mensuales</a>
                     <a href="<?= ADMIN_URL ?>/backup/list.php"><span class="nav-icon">💾</span> Backups</a>
                 </section>
             </nav>

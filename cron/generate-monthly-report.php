@@ -28,8 +28,10 @@ require_once __DIR__ . '/../helpers/reports.php';
 $result = checkAndGenerateMonthlyReport();
 
 if ($result) {
-    echo "✅ Reporte mensual generado exitosamente\n";
+    $month = date('m');
+    $year = date('Y');
+    echo "✅ Reporte mensual generado exitosamente (reporte-$year-$month.json)\n";
 } else {
-    echo "ℹ️ No es el último día del mes o ya se generó el reporte\n";
+    echo "ℹ️ No es el último día del mes - no se genera reporte\n";
 }
 
