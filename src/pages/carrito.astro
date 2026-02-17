@@ -174,8 +174,9 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                   <div class="form-group">
                     <label>Datos para transferencia:</label>
                     <div class="datos-transferencia">
-                      <p><strong>Alias:</strong> <span>lume.co.mp</span></p>
-                      <p><strong>Titular:</strong> <span>Gisela Gabriela Guerra</span></p>
+                      <p><strong>Alias:</strong> <span id="transfer-alias">-</span></p>
+                      <p id="transfer-cbu-row" style="display: none;"><strong>CBU:</strong> <span id="transfer-cbu">-</span></p>
+                      <p><strong>Titular:</strong> <span id="transfer-titular">-</span></p>
                       <p><strong>Total a transferir:</strong> <span id="total-transferir">$0</span></p>
                     </div>
                   </div>
@@ -244,6 +245,37 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       const getCarrito = window.getCarrito;
       const saveCarrito = window.saveCarrito;
       const updateCartCount = window.updateCartCount || (() => {});
+
+      // Cargar datos de transferencia desde la API de la tienda
+      (async function cargarDatosTransferencia() {
+        try {
+          let shop = null;
+          const cached = localStorage.getItem('shop_settings');
+          if (cached) {
+            try { shop = JSON.parse(cached); } catch (e) {}
+          }
+          if (!shop || !shop.transfer_alias) {
+            const res = await fetch('/api/shop.php');
+            const data = await res.json();
+            if (data.success && data.shop) {
+              shop = data.shop;
+              localStorage.setItem('shop_settings', JSON.stringify(shop));
+            }
+          }
+          if (shop) {
+            const aliasEl = document.getElementById('transfer-alias');
+            const cbuEl = document.getElementById('transfer-cbu');
+            const cbuRow = document.getElementById('transfer-cbu-row');
+            const titularEl = document.getElementById('transfer-titular');
+            if (aliasEl) aliasEl.textContent = shop.transfer_alias || '-';
+            if (titularEl) titularEl.textContent = shop.transfer_titular || '-';
+            if (cbuEl && shop.transfer_cbu) {
+              cbuEl.textContent = shop.transfer_cbu;
+              if (cbuRow) cbuRow.style.display = 'block';
+            }
+          }
+        } catch (e) { console.warn('No se pudieron cargar datos de transferencia:', e); }
+      })();
 
       const contenedor = document.querySelector("#carrito-lista");
       const totalEl = document.querySelector("#total");

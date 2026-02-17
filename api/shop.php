@@ -62,7 +62,10 @@ try {
         'description' => $settings['description'] ?? '',
         'footer_description' => $settings['footer_description'] ?? '',
         'footer_copyright' => $settings['footer_copyright'] ?? '',
-        'creation_year' => $settings['creation_year'] ?? null
+        'creation_year' => $settings['creation_year'] ?? null,
+        'transfer_alias' => $settings['transfer_alias'] ?? '',
+        'transfer_cbu' => $settings['transfer_cbu'] ?? '',
+        'transfer_titular' => $settings['transfer_titular'] ?? ''
     ];
     
     // Respuesta exitosa

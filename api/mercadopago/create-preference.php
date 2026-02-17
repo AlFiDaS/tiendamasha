@@ -38,8 +38,9 @@ require_once '../../config.php';
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
-// Cargar helpers de órdenes (db.php ya está cargado por config.php)
+// Cargar helpers
 require_once '../../helpers/orders.php';
+require_once '../../helpers/shop-settings.php';
 
 try {
     // Solo aceptar POST
@@ -63,11 +64,12 @@ try {
         throw new Exception('No se encontraron items en el carrito');
     }
 
-    // Obtener credenciales de MercadoPago desde config
-    $accessToken = defined('MERCADOPAGO_ACCESS_TOKEN') ? MERCADOPAGO_ACCESS_TOKEN : '';
+    // Obtener credenciales de MercadoPago: primero desde BD (Configurar pagos), luego config.php
+    $settings = getShopSettings();
+    $accessToken = !empty($settings['mercadopago_access_token']) ? $settings['mercadopago_access_token'] : (defined('MERCADOPAGO_ACCESS_TOKEN') ? MERCADOPAGO_ACCESS_TOKEN : '');
     
     if (empty($accessToken)) {
-        throw new Exception('MercadoPago no está configurado. Por favor, configura MERCADOPAGO_ACCESS_TOKEN en config.php');
+        throw new Exception('MercadoPago no está configurado. Ir a Admin → Configurar pagos para agregar el Access Token.');
     }
 
     // Construir URL de retorno
@@ -100,8 +102,11 @@ try {
         ];
     }
 
-    // Generar referencia externa única
-    $externalReference = uniqid('lume_', true);
+    // Generar referencia externa única (prefijo basado en el nombre de la tienda)
+    $shopName = $settings['shop_name'] ?? (defined('SITE_NAME') ? SITE_NAME : 'shop');
+    $prefix = strtolower(preg_replace('/[^a-z0-9]/', '', $shopName));
+    $prefix = substr($prefix, 0, 10) ?: 'shop';
+    $externalReference = uniqid($prefix . '_', true);
     
     // Calcular total
     $totalAmount = 0;

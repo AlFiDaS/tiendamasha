@@ -41,6 +41,7 @@ ini_set('log_errors', 1);
 // Cargar helpers
 require_once '../../helpers/orders.php';
 require_once '../../helpers/upload.php';
+require_once '../../helpers/shop-settings.php';
 
 try {
     // Solo aceptar POST
@@ -88,8 +89,12 @@ try {
         throw new Exception('El monto total debe ser mayor a 0');
     }
     
-    // Generar referencia externa única
-    $externalReference = uniqid('lume_direct_', true);
+    // Generar referencia externa única (prefijo basado en el nombre de la tienda)
+    $settings = getShopSettings();
+    $shopName = $settings['shop_name'] ?? (defined('SITE_NAME') ? SITE_NAME : 'shop');
+    $prefix = strtolower(preg_replace('/[^a-z0-9]/', '', $shopName));
+    $prefix = substr($prefix, 0, 10) ?: 'shop';
+    $externalReference = uniqid($prefix . '_direct_', true);
     
     // Obtener cupón si existe
     $couponCode = $formData['coupon_code'] ?? null;

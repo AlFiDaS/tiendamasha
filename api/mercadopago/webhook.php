@@ -19,6 +19,7 @@ require_once '../../config.php';
 require_once '../../helpers/db.php';
 require_once '../../helpers/auth.php';
 require_once '../../helpers/orders.php';
+require_once '../../helpers/shop-settings.php';
 
 // Log para debugging (opcional)
 function logWebhook($message) {
@@ -108,8 +109,9 @@ try {
         exit;
     }
 
-    // Obtener credenciales
-    $accessToken = defined('MERCADOPAGO_ACCESS_TOKEN') ? MERCADOPAGO_ACCESS_TOKEN : '';
+    // Obtener credenciales: primero desde BD (Configurar pagos), luego config.php
+    $settings = getShopSettings();
+    $accessToken = !empty($settings['mercadopago_access_token']) ? $settings['mercadopago_access_token'] : (defined('MERCADOPAGO_ACCESS_TOKEN') ? MERCADOPAGO_ACCESS_TOKEN : '');
     
     if (empty($accessToken)) {
         throw new Exception('MercadoPago no está configurado');

@@ -1325,6 +1325,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                     <div class="menu-label">Configuración</div>
                     <a href="<?= ADMIN_URL ?>/landing-page.php"><span class="nav-icon">🏠</span> Landing Page</a>
                     <a href="<?= ADMIN_URL ?>/tienda.php"><span class="nav-icon">⚙️</span> Tienda</a>
+                    <a href="<?= ADMIN_URL ?>/pagos.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'pagos.php' || strpos($_SERVER['REQUEST_URI'] ?? '', 'pagos') !== false) ? 'active' : '' ?>"><span class="nav-icon">💳</span> Configurar pagos</a>
                     <a href="<?= ADMIN_URL ?>/reports/list.php"><span class="nav-icon">📈</span> Reportes</a>
                     <a href="<?= ADMIN_URL ?>/backup/list.php"><span class="nav-icon">💾</span> Backups</a>
                 </section>

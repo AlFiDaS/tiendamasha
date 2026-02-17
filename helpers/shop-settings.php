@@ -48,7 +48,9 @@ function updateShopSettings($data) {
     
     // Campos adicionales que pueden no existir si no se ejecutaron las migraciones
     $optionalFields = [
-        'footer_description', 'footer_copyright', 'creation_year'
+        'footer_description', 'footer_copyright', 'creation_year',
+        'transfer_alias', 'transfer_cbu', 'transfer_titular',
+        'mercadopago_access_token', 'mercadopago_public_key', 'mercadopago_test_mode'
     ];
     
     // Obtener columnas existentes de la tabla para verificar qué campos podemos actualizar
