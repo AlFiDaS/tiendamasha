@@ -49,7 +49,8 @@
   }
 
   // Función global para agregar al carrito
-  async function agregarAlCarrito(name, price, image, slug, categoria) {
+  // stock: número disponible (null/undefined = ilimitado, no validar)
+  async function agregarAlCarrito(name, price, image, slug, categoria, stock) {
     let carrito = getCarrito();
 
     const index = carrito.findIndex(
@@ -60,8 +61,21 @@
     const minQuantity = await getCategoryMinQuantity(categoria);
     const cantidadInicial = minQuantity ? minQuantity : 1;
 
+    // Validar stock limitado: si stock es número, verificar que no excedamos
+    const stockNum = stock === 'null' || stock === '' ? null : (parseInt(stock, 10));
+    if (stockNum !== null && !isNaN(stockNum) && stockNum > 0) {
+      const cantidadEnCarrito = index !== -1 ? carrito[index].cantidad : 0;
+      const cantidadAAgregar = index !== -1 ? 1 : cantidadInicial;
+      const totalDespues = cantidadEnCarrito + cantidadAAgregar;
+      if (totalDespues > stockNum) {
+        mostrarToast(`Solo contamos con ${stockNum} unidad${stockNum === 1 ? '' : 'es'} de este producto`);
+        return;
+      }
+    }
+
     if (index !== -1) {
       carrito[index].cantidad++;
+      if (stockNum !== null && !isNaN(stockNum)) carrito[index].stock = stockNum;
     } else {
       carrito.push({ 
         name, 
@@ -70,7 +84,8 @@
         slug, 
         categoria,
         min_quantity: minQuantity, // Guardar min_quantity en el item
-        cantidad: cantidadInicial
+        cantidad: cantidadInicial,
+        stock: (stockNum !== null && !isNaN(stockNum)) ? stockNum : null
       });
     }
 

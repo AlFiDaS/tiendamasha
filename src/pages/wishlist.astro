@@ -149,7 +149,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                   ${priceHtml}
                   <button 
                     class="btn-agregar" 
-                    onclick="agregarAlCarrito('${escapeHtml(product.name).replace(/'/g, "\\'")}', '${escapeHtml(product.price)}', '${escapeHtml(imageSrc)}', '${escapeHtml(product.slug)}', '${escapeHtml(product.categoria)}')"
+                    onclick="agregarAlCarrito('${escapeHtml(product.name).replace(/'/g, "\\'")}', '${escapeHtml(product.price)}', '${escapeHtml(imageSrc)}', '${escapeHtml(product.slug)}', '${escapeHtml(product.categoria)}', ${product.stock != null ? product.stock : 'null'})"
                     ${stockDisabled}
                   >
                     ${stockText}

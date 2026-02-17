@@ -38,7 +38,7 @@ function decreaseStock($productId, $quantity, $orderId = null) {
         // Registrar movimiento para auditoría pero no descontar
         if ($orderId) {
             $movementSql = "INSERT INTO stock_movements (product_id, type, quantity, order_id, notes) 
-                           VALUES (:product_id, 'sale', :quantity, :order_id, 'Venta - Stock Ilimitado - Orden #' || :order_id)";
+                           VALUES (:product_id, 'sale', :quantity, :order_id, CONCAT('Venta - Stock Ilimitado - Orden #', :order_id))";
             executeQuery($movementSql, [
                 'product_id' => $productId,
                 'quantity' => -$quantity,
@@ -59,7 +59,7 @@ function decreaseStock($productId, $quantity, $orderId = null) {
         // Registrar movimiento de stock
         if ($orderId) {
             $movementSql = "INSERT INTO stock_movements (product_id, type, quantity, order_id, notes) 
-                           VALUES (:product_id, 'sale', :quantity, :order_id, 'Venta - Orden #' || :order_id)";
+                           VALUES (:product_id, 'sale', :quantity, :order_id, CONCAT('Venta - Orden #', :order_id))";
             executeQuery($movementSql, [
                 'product_id' => $productId,
                 'quantity' => -$quantity,
@@ -89,6 +89,11 @@ function restoreStock($productId, $quantity, $orderId) {
         return ['success' => false, 'new_stock' => 0, 'error' => 'Producto no encontrado'];
     }
     
+    // Si stock es NULL (ilimitado), no se descontó nada - no hay que restaurar
+    if ($product['stock'] === null) {
+        return ['success' => true, 'new_stock' => null, 'error' => null];
+    }
+    
     $currentStock = (int)$product['stock'];
     $newStock = $currentStock + $quantity;
     
@@ -99,7 +104,7 @@ function restoreStock($productId, $quantity, $orderId) {
     if ($result) {
         // Registrar movimiento de stock
         $movementSql = "INSERT INTO stock_movements (product_id, type, quantity, order_id, notes) 
-                       VALUES (:product_id, 'return', :quantity, :order_id, 'Devolución - Orden #' || :order_id)";
+                       VALUES (:product_id, 'return', :quantity, :order_id, CONCAT('Devolución - Orden #', :order_id))";
         executeQuery($movementSql, [
             'product_id' => $productId,
             'quantity' => $quantity,
@@ -111,6 +116,97 @@ function restoreStock($productId, $quantity, $orderId) {
     
     return ['success' => false, 'new_stock' => $currentStock, 'error' => 'Error al actualizar stock'];
 }
+
+/**
+ * Descontar stock cuando una orden es aprobada (solo si no se descontó antes)
+ * @param int $orderId ID de la orden
+ * @return array ['success' => bool, 'processed' => bool, 'errors' => array]
+ */
+function processOrderStockOnApproval($orderId) {
+    if (!function_exists('fetchOne')) {
+        require_once __DIR__ . '/db.php';
+    }
+    
+    // Verificar si ya se procesó el stock para esta orden
+    $existing = fetchOne("SELECT id FROM stock_movements WHERE order_id = :oid AND type = 'sale' LIMIT 1", ['oid' => $orderId]);
+    if ($existing) {
+        return ['success' => true, 'processed' => false, 'errors' => []];
+    }
+    
+    $order = fetchOne("SELECT items FROM orders WHERE id = :id", ['id' => $orderId]);
+    if (!$order || empty($order['items'])) {
+        return ['success' => false, 'processed' => false, 'errors' => ['Orden no encontrada o sin items']];
+    }
+    
+    $items = is_array($order['items']) ? $order['items'] : json_decode($order['items'], true);
+    $errors = [];
+    
+    if ($items && is_array($items)) {
+        foreach ($items as $item) {
+            $slug = $item['slug'] ?? '';
+            $quantity = (int)($item['cantidad'] ?? $item['quantity'] ?? 0);
+            if (empty($slug) || $quantity <= 0) continue;
+            
+            $product = fetchOne("SELECT id FROM products WHERE slug = :slug", ['slug' => $slug]);
+            if ($product && isset($product['id'])) {
+                $result = decreaseStock($product['id'], $quantity, $orderId);
+                if (!$result['success']) {
+                    $errors[] = ($result['error'] ?? 'Error') . ' para ' . $slug;
+                }
+            }
+        }
+    }
+    
+    return ['success' => empty($errors), 'processed' => true, 'errors' => $errors];
+}
+
+/**
+ * Restaurar stock cuando una orden aprobada pasa a cualquier otro estado
+ * Usa stock_movements (ventas) para obtener las cantidades exactas descontadas
+ * y restaurar correctamente, sumando por producto por si hay múltiples líneas
+ * @param int $orderId ID de la orden
+ * @return array ['success' => bool, 'processed' => bool, 'errors' => array]
+ */
+function processOrderStockOnRejection($orderId) {
+    if (!function_exists('fetchOne')) {
+        require_once __DIR__ . '/db.php';
+    }
+    
+    // Verificar si ya se restauró el stock para esta orden
+    $existing = fetchOne("SELECT id FROM stock_movements WHERE order_id = :oid AND type = 'return' LIMIT 1", ['oid' => $orderId]);
+    if ($existing) {
+        return ['success' => true, 'processed' => false, 'errors' => []];
+    }
+    
+    // Obtener TODAS las ventas de esta orden, agrupadas por producto (sumar cantidades)
+    $sales = fetchAll(
+        "SELECT product_id, SUM(ABS(quantity)) as total_quantity 
+         FROM stock_movements 
+         WHERE order_id = :oid AND type = 'sale' 
+         GROUP BY product_id",
+        ['oid' => $orderId]
+    );
+    
+    if (!$sales || !is_array($sales)) {
+        // Si no hay movimientos de venta, no se descontó nada - no restaurar
+        return ['success' => true, 'processed' => false, 'errors' => []];
+    }
+    
+    $errors = [];
+    foreach ($sales as $sale) {
+        $productId = $sale['product_id'] ?? '';
+        $quantity = (int)($sale['total_quantity'] ?? 0);
+        if (empty($productId) || $quantity <= 0) continue;
+        
+        $result = restoreStock($productId, $quantity, $orderId);
+        if (!$result['success']) {
+            $errors[] = ($result['error'] ?? 'Error') . ' para producto ' . $productId;
+        }
+    }
+    
+    return ['success' => empty($errors), 'processed' => true, 'errors' => $errors];
+}
+
 
 /**
  * Verificar disponibilidad de stock para una orden

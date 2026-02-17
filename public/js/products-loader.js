@@ -240,7 +240,7 @@
                     ${priceHtml}
                     <button 
                         class="btn-agregar" 
-                        onclick="agregarAlCarrito('${escapeHtml(product.name)}', '${escapeHtml(hasDiscount && discountPrice ? discountPrice : product.price)}', '${product.image}', '${product.slug}', '${product.categoria}')"
+                        onclick="agregarAlCarrito('${escapeHtml(product.name)}', '${escapeHtml(hasDiscount && discountPrice ? discountPrice : product.price)}', '${product.image}', '${product.slug}', '${product.categoria}', ${product.stock != null ? product.stock : 'null'})"
                         ${disabledAttr}
                     >
                         ${stockText}

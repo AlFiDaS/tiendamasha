@@ -108,8 +108,8 @@ function saveOrder($orderData) {
             }
         }
         
-        // Descontar stock automáticamente si la orden se crea con status 'approved' o 'a_confirmar'
-        if ($orderId && in_array($orderData['status'] ?? '', ['approved', 'a_confirmar'])) {
+        // Descontar stock solo cuando la orden se crea con status 'approved' (no en a_confirmar)
+        if ($orderId && ($orderData['status'] ?? '') === 'approved') {
             try {
                 require_once __DIR__ . '/stock.php';
                 $items = is_array($orderData['items']) ? $orderData['items'] : json_decode($orderData['items'] ?? '[]', true);

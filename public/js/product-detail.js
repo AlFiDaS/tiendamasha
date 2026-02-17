@@ -142,7 +142,7 @@
         const stockButton = hasStock ? 
             `<button 
                 class="btn-agregar" 
-                onclick="agregarAlCarrito('${escapeHtml(product.name)}', '${escapeHtml(priceToUse)}', '${escapeHtml(imageSrc)}', '${escapeHtml(product.slug)}', '${escapeHtml(product.categoria)}')"
+                onclick="agregarAlCarrito('${escapeHtml(product.name)}', '${escapeHtml(priceToUse)}', '${escapeHtml(imageSrc)}', '${escapeHtml(product.slug)}', '${escapeHtml(product.categoria)}', ${product.stock != null ? product.stock : 'null'})"
             >
                 Agregar al carrito
             </button>` :

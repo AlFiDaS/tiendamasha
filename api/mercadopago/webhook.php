@@ -19,6 +19,7 @@ require_once '../../config.php';
 require_once '../../helpers/db.php';
 require_once '../../helpers/auth.php';
 require_once '../../helpers/orders.php';
+require_once '../../helpers/stock.php';
 require_once '../../helpers/shop-settings.php';
 
 // Log para debugging (opcional)
@@ -174,9 +175,26 @@ try {
                     
                     // Verificar si el estado cambió a 'approved' (pago aprobado)
                     $wasApproved = ($updateData['status'] ?? '') === 'approved' && ($order['status'] ?? '') !== 'approved';
+                    $wasRejected = ($order['status'] ?? '') === 'approved' && ($updateData['status'] ?? '') !== 'approved';
                     
                     updateOrder($order['id'], $updateData);
                     logWebhook("Orden #" . $order['id'] . " actualizada con status: " . $updateData['status']);
+                    
+                    // Restaurar stock cuando el pago es rechazado/cancelado después de haber sido aprobado
+                    if ($wasRejected) {
+                        $stockResult = processOrderStockOnRejection($order['id']);
+                        if (!$stockResult['success'] && !empty($stockResult['errors'])) {
+                            logWebhook("Error al restaurar stock para orden #" . $order['id'] . ": " . implode('; ', $stockResult['errors']));
+                        }
+                    }
+                    
+                    // Descontar stock cuando el pago es aprobado
+                    if ($wasApproved) {
+                        $stockResult = processOrderStockOnApproval($order['id']);
+                        if (!$stockResult['success'] && !empty($stockResult['errors'])) {
+                            logWebhook("Error al descontar stock para orden #" . $order['id'] . ": " . implode('; ', $stockResult['errors']));
+                        }
+                    }
                     
                     // Enviar notificación a Telegram si el pago fue aprobado
                     if ($wasApproved) {

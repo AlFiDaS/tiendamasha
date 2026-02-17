@@ -234,6 +234,30 @@ require_once '../_inc/header.php';
     color: #0c5460;
 }
 
+.status-select {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid rgba(0,0,0,0.1);
+    cursor: pointer;
+    min-width: 130px;
+    appearance: auto;
+}
+
+.status-select.status-approved { background: #d4edda; color: #155724; }
+.status-select.status-pending { background: #fff3cd; color: #856404; }
+.status-select.status-rejected { background: #f8d7da; color: #721c24; }
+.status-select.status-cancelled { background: #e2e3e5; color: #383d41; }
+.status-select.status-a_confirmar { background: #ffeaa7; color: #6c5700; }
+.status-select.status-finalizado { background: #d1ecf1; color: #0c5460; }
+
+.status-select:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
 .btn-view {
     background: var(--primary-color);
     color: white;
@@ -654,9 +678,17 @@ require_once '../_inc/header.php';
                                 <strong>$<?= number_format($orden['total_amount'] ?? 0, 2, ',', '.') ?></strong>
                             </td>
                             <td data-label="Estado" class="status-cell">
-                                <span class="status-badge <?= $statusClass ?>">
-                                    <?= $statusLabel ?>
-                                </span>
+                                <select class="status-select <?= $statusClass ?>" 
+                                        data-order-id="<?= (int)$orden['id'] ?>" 
+                                        data-current="<?= htmlspecialchars($orden['status'] ?? '') ?>"
+                                        title="Cambiar estado">
+                                    <option value="a_confirmar" <?= ($orden['status'] ?? '') === 'a_confirmar' ? 'selected' : '' ?>>A Confirmar</option>
+                                    <option value="approved" <?= ($orden['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Aprobada</option>
+                                    <option value="pending" <?= ($orden['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pendiente</option>
+                                    <option value="rejected" <?= ($orden['status'] ?? '') === 'rejected' ? 'selected' : '' ?>>Rechazada</option>
+                                    <option value="cancelled" <?= ($orden['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelada</option>
+                                    <option value="finalizado" <?= ($orden['status'] ?? '') === 'finalizado' ? 'selected' : '' ?>>Finalizada</option>
+                                </select>
                             </td>
                             <td data-label="Acciones">
                                 <a href="detail.php?id=<?= $orden['id'] ?>" class="btn-view">Ver Detalle</a>
@@ -668,6 +700,79 @@ require_once '../_inc/header.php';
         </table>
     </div>
 </div>
+
+<script>
+(function() {
+    const statusLabels = {
+        'a_confirmar': 'A Confirmar',
+        'approved': 'Aprobada',
+        'pending': 'Pendiente',
+        'rejected': 'Rechazada',
+        'cancelled': 'Cancelada',
+        'finalizado': 'Finalizada'
+    };
+    const statusClasses = {
+        'a_confirmar': 'status-a_confirmar',
+        'approved': 'status-approved',
+        'pending': 'status-pending',
+        'rejected': 'status-rejected',
+        'cancelled': 'status-cancelled',
+        'finalizado': 'status-finalizado'
+    };
+
+    document.querySelectorAll('.status-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            const orderId = this.dataset.orderId;
+            const newStatus = this.value;
+            const currentStatus = this.dataset.current;
+            if (newStatus === currentStatus) return;
+
+            this.disabled = true;
+
+            const formData = new FormData();
+            formData.append('order_id', orderId);
+            formData.append('status', newStatus);
+
+            fetch('update-status.php', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    select.dataset.current = newStatus;
+                    select.className = 'status-select ' + (statusClasses[newStatus] || '');
+                    select.value = newStatus;
+                    const totalTd = select.closest('tr').querySelector('td[data-label="Total"]');
+                    if (totalTd) {
+                        totalTd.dataset.estado = statusLabels[newStatus];
+                        totalTd.dataset.statusClass = 'status-' + newStatus;
+                    }
+                    const toast = document.createElement('div');
+                    toast.textContent = 'Estado actualizado';
+                    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#28a745;color:white;padding:0.75rem 1.25rem;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+                    document.body.appendChild(toast);
+                    setTimeout(function() { toast.remove(); }, 2500);
+                } else {
+                    select.value = currentStatus;
+                    alert(data.error || 'Error al actualizar');
+                }
+            })
+            .catch(function(err) {
+                select.value = currentStatus;
+                alert('Error de conexión. Intenta de nuevo.');
+                console.error(err);
+            })
+            .finally(function() {
+                select.disabled = false;
+            });
+        });
+    });
+})();
+</script>
 
 <?php require_once '../_inc/footer.php'; ?>
 
