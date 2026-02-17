@@ -11,17 +11,26 @@ if (!defined('LUME_ADMIN')) {
     die('Acceso directo no permitido');
 }
 
+if (!function_exists('getShopSettings')) {
+    require_once __DIR__ . '/shop-settings.php';
+}
+
 /**
  * Enviar mensaje a Telegram
  * @param string $message Mensaje a enviar
  * @return bool True si se envió correctamente, false en caso contrario
  */
 function sendTelegramNotification($message) {
-    // Obtener configuración
-    $botToken = defined('TELEGRAM_BOT_TOKEN') ? TELEGRAM_BOT_TOKEN : '';
-    $chatId = defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '';
+    // Obtener configuración: primero desde BD (Configurar notificaciones), luego config.php
+    $settings = function_exists('getShopSettings') ? getShopSettings() : [];
+    $botToken = !empty($settings['telegram_bot_token']) ? $settings['telegram_bot_token'] : (defined('TELEGRAM_BOT_TOKEN') ? TELEGRAM_BOT_TOKEN : '');
+    $chatId = !empty($settings['telegram_chat_id']) ? $settings['telegram_chat_id'] : (defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '');
     
-    // Si no está configurado, no hacer nada
+    // Si está desactivado en BD (Configurar notificaciones), no enviar
+    if (isset($settings['telegram_enabled']) && empty($settings['telegram_enabled'])) {
+        return false;
+    }
+    
     if (empty($botToken) || empty($chatId)) {
         error_log('Telegram no está configurado. Bot Token o Chat ID faltante.');
         return false;

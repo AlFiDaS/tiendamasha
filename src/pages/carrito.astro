@@ -692,7 +692,17 @@ import Breadcrumb from '../components/Breadcrumb.astro';
         metodoPagoTexto = 'Mercadopago o tarjeta - Mismo precio hasta en 3 cuotas';
       }
       
-      const texto = encodeURIComponent(`Hola *Lume*, me gustaría hacer un pedido de:
+      let shopName = 'Tienda';
+      let whatsappPhone = '';
+      try {
+        const cached = localStorage.getItem('shop_settings');
+        if (cached) {
+          const s = JSON.parse(cached);
+          if (s) { shopName = s.shop_name || shopName; whatsappPhone = (s.whatsapp_number || '').replace(/\D/g, ''); }
+        }
+      } catch (e) {}
+      
+      const texto = encodeURIComponent(`Hola *${shopName}*, me gustaría hacer un pedido de:
 ${carrito.map(p => `• ${p.name} - ${p.price} x${p.cantidad}`).join("\n")}
 Forma de pago: ${metodoPagoTexto}
 Aclaraciones: ${get('aclaraciones') || 'Ninguna'}
@@ -704,10 +714,10 @@ ${datosCliente}
 
 Gracias!`);
 
-      // Actualizar link de WhatsApp (alternativa)
+      // Actualizar link de WhatsApp (alternativa) - usa datos de la tienda configurada
       const whatsappBtn = document.querySelector('#btn-whatsapp');
-      if (whatsappBtn) {
-        whatsappBtn.href = `https://wa.me/5493795330156?text=${texto}`;
+      if (whatsappBtn && whatsappPhone) {
+        whatsappBtn.href = `https://wa.me/${whatsappPhone}?text=${texto}`;
       }
       
       updateCartCount();

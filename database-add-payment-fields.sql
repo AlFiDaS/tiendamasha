@@ -6,7 +6,7 @@
 -- ============================================
 
 ALTER TABLE `shop_settings` 
-ADD COLUMN IF NOT EXISTS `transfer_alias` VARCHAR(100) DEFAULT NULL COMMENT 'Alias para transferencia (ej: lume.co.mp)',
+ADD COLUMN IF NOT EXISTS `transfer_alias` VARCHAR(100) DEFAULT NULL COMMENT 'Alias para transferencia (ej: tienda.mp)',
 ADD COLUMN IF NOT EXISTS `transfer_cbu` VARCHAR(22) DEFAULT NULL COMMENT 'CBU para transferencia (22 dígitos)',
 ADD COLUMN IF NOT EXISTS `transfer_titular` VARCHAR(255) DEFAULT NULL COMMENT 'Nombre del titular de la cuenta',
 ADD COLUMN IF NOT EXISTS `mercadopago_access_token` VARCHAR(500) DEFAULT NULL COMMENT 'Access Token de MercadoPago',

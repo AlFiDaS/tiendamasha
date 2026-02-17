@@ -37,9 +37,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
             <input 
               type="tel" 
               id="order-phone" 
-              placeholder="Ej: 3794123456"
+              placeholder="Ej: 3794123456 o 4262568"
               class="form-input"
             />
+            <small style="display: block; margin-top: 0.25rem; color: var(--text-secondary); font-size: 0.85rem;">Podés usar el número completo o los últimos dígitos</small>
           </div>
           
           <button onclick="verifyAndSearch()" class="btn-search">Buscar Pedido</button>
@@ -152,13 +153,13 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
   .form-input:focus {
     outline: none;
-    border-color: #e0a4ce;
+    border-color: var(--primary, #ff8c00);
   }
 
   .btn-search {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, #e0a4ce, #d89bc0);
+    background: var(--primary-gradient, linear-gradient(135deg, #ff8c00, #ffb84d));
     color: white;
     border: none;
     border-radius: 8px;
@@ -171,7 +172,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
   .btn-search:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(224, 164, 206, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
   }
 
   .btn-secondary {
@@ -330,13 +331,13 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
   .item-price {
     font-weight: 600;
-    color: #e0a4ce;
+    color: var(--primary, #ff8c00);
   }
 
   .order-total {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 2px solid #e0a4ce;
+    border-top: 2px solid var(--primary, #ff8c00);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -350,14 +351,14 @@ import Breadcrumb from '../components/Breadcrumb.astro';
   .total-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #e0a4ce;
+    color: var(--primary, #ff8c00);
   }
 
   .spinner {
     width: 50px;
     height: 50px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #e0a4ce;
+    border-top: 4px solid var(--primary, #ff8c00);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 1rem;
@@ -445,8 +446,17 @@ let pollingInterval = null;
 let verifiedPhone = null; // Guardar el teléfono verificado para poder hacer polling
 
 function normalizePhone(phone) {
-  // Eliminar espacios, guiones, paréntesis y el prefijo +54 si existe
-  return phone.replace(/\s+/g, '').replace(/-/g, '').replace(/\(/g, '').replace(/\)/g, '').replace(/^\+54/, '');
+  // Eliminar todo excepto dígitos para comparación flexible
+  return (phone || '').replace(/\D/g, '');
+}
+
+// Verifica si el teléfono ingresado coincide con el del pedido (coincidencia flexible)
+function phoneMatches(inputPhone, orderPhone) {
+  const inputDigits = normalizePhone(inputPhone);
+  const orderDigits = normalizePhone(orderPhone);
+  if (inputDigits.length < 6) return false; // Mínimo 6 dígitos para seguridad
+  // OK si el ingresado está contenido en el del pedido, o viceversa
+  return orderDigits.includes(inputDigits) || inputDigits.includes(orderDigits);
 }
 
 // Función para verificar si el estado del pedido cambió
@@ -460,10 +470,7 @@ async function checkOrderStatus() {
     const data = await response.json();
     
     if (data.success && data.orders && data.orders.length > 0) {
-      const order = data.orders.find(o => {
-        const orderPhone = normalizePhone(o.phone || '');
-        return orderPhone === verifiedPhone;
-      });
+      const order = data.orders.find(o => phoneMatches(verifiedPhone, o.phone || ''));
       
       if (order && order.status !== currentOrderStatus) {
         // El estado cambió, actualizar la vista
@@ -558,11 +565,8 @@ async function verifyAndSearch() {
     const data = await response.json();
     
     if (data.success && data.orders && data.orders.length > 0) {
-      // Buscar el pedido que coincida con el teléfono
-      const order = data.orders.find(o => {
-        const orderPhone = normalizePhone(o.phone || '');
-        return orderPhone === phone;
-      });
+      // Buscar el pedido que coincida con el teléfono (coincidencia flexible: 3794262568, 4262568, etc.)
+      const order = data.orders.find(o => phoneMatches(phone, o.phone || ''));
       
       if (order) {
         // Verificación exitosa, mostrar el pedido
@@ -682,11 +686,23 @@ function resetSearch() {
   verifiedPhone = null;
 }
 
-function openWhatsApp() {
+async function openWhatsApp() {
+  let shop = null;
+  try {
+    const cached = localStorage.getItem('shop_settings');
+    if (cached) { const s = JSON.parse(cached); if (s && s.whatsapp_number) shop = s; }
+    if (!shop) {
+      const res = await fetch('/api/shop.php');
+      const data = await res.json();
+      if (data.success && data.shop) shop = data.shop;
+    }
+  } catch (e) {}
   const orderId = currentOrderId || document.getElementById('order-id')?.value?.replace(/^#/, '') || '';
-  const message = encodeURIComponent(`Hola Lume, me comunico por el pedido #${orderId}.`);
-  const whatsappUrl = `https://wa.me/5493795330156?text=${message}`;
-  window.open(whatsappUrl, '_blank');
+  const name = shop?.shop_name || 'Tienda';
+  const message = encodeURIComponent(`Hola ${name}, me comunico por el pedido #${orderId}.`);
+  const phone = shop?.whatsapp_number ? (shop.whatsapp_number + '').replace(/\D/g, '') : '';
+  if (!phone) { alert('No hay WhatsApp configurado. Contactá al administrador.'); return; }
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
 }
 
 function escapeHtml(text) {
