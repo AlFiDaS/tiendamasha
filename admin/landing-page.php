@@ -2139,3 +2139,4 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<?php require_once '_inc/footer.php'; ?>
