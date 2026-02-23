@@ -42,7 +42,7 @@ function generateMonthlyReport($month, $year) {
             FROM orders 
             WHERE MONTH(created_at) = :month 
             AND YEAR(created_at) = :year
-            AND status IN ('approved', 'a_confirmar')
+            AND status IN ('approved', 'a_confirmar', 'finalizado')
             ORDER BY created_at DESC";
     
     $orders = fetchAll($sql, ['month' => $month, 'year' => $year]);
@@ -231,7 +231,7 @@ function getAvailableReportMonths() {
     
     // Primer mes con ventas
     $first = fetchOne(
-        "SELECT MIN(created_at) as first_date FROM orders WHERE status IN ('approved', 'a_confirmar')"
+        "SELECT MIN(created_at) as first_date FROM orders WHERE status IN ('approved', 'a_confirmar', 'finalizado')"
     );
     
     if (!$first || empty($first['first_date'])) {

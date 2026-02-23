@@ -455,6 +455,11 @@ $salesByDay = getSalesByDay();
         .category-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+        
+        .top-products-list,
+        .low-stock-list {
+            padding: 0;
+        }
     }
     
     @media (max-width: 480px) {

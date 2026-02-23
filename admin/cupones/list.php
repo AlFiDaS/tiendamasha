@@ -26,7 +26,7 @@ $coupons = getAllCoupons(false);
             <p class="page-desc">Gestiona los códigos de descuento de tu tienda</p>
         </div>
         <div class="page-header-actions">
-            <a href="add.php" class="btn btn-primary">➕ Nuevo Cupón</a>
+            <a href="add.php" class="btn btn-primary"><span style="color:white;font-weight:bold;">+</span> Nuevo Cupón</a>
         </div>
     </div>
     

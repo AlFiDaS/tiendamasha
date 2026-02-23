@@ -28,7 +28,7 @@ $currentName = $galleryInfo['name'];
 // Subtítulo fijo (no editable)
 $subtitleFijo = 'Tocá una imagen para verla en grande. Usá flechas o deslizá para avanzar.';
 
-// Procesar actualización de nombre y título (gallery_info); slug siempre galeria
+// Procesar actualización de nombre y título (gallery_info) - solo para envío tradicional (ya no usado; se usa API)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_gallery_info'])) {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
@@ -79,7 +79,7 @@ if (!empty($settings['shop_logo'])) {
 <div class="admin-content">
     <div class="galeria-admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
         <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary" style="text-decoration: none;">← Volver al panel</a>
-        <a href="add.php" class="btn btn-primary">➕ Agregar Imagen</a>
+        <a href="add.php" class="btn btn-primary"><span style="color:white;font-weight:bold;">+</span> Agregar Imagen</a>
     </div>
 
     <?php if ($error): ?>
@@ -98,7 +98,7 @@ if (!empty($settings['shop_logo'])) {
         <!-- Mini navbar: réplica del navbar de la web, solo link galería editable -->
         <div class="content-card galeria-admin-navbar-preview" style="margin-bottom: 1.5rem;">
             <h3 class="section-title">Nombre en el menú</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Así se verá en la barra de navegación. El enlace es siempre <strong>/galeria/</strong>.</p>
+            <p style="color: #666; margin-bottom: 1rem;">Así se verá en la barra de navegación.</p>
             <nav class="navbar-preview-fake">
                 <div class="nav-container-fake">
                     <span class="logo-preview-wrap">
@@ -115,7 +115,7 @@ if (!empty($settings['shop_logo'])) {
                             <div class="editable-text editable-nav-link" data-input="galeria_name">
                                 <a href="/galeria" class="nav-item-fake active"><span class="text-display"><?= htmlspecialchars($currentName) ?></span></a>
                                 <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-                                <span class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentName) ?>" placeholder="Ej: Galeria de Ideas"></span>
+                                <span class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentName) ?>" placeholder="Ej: Galeria de Ideas"><button type="button" class="btn-edit-ok" title="Guardar">✓</button><button type="button" class="btn-edit-cancel" title="Cancelar">✗</button></span>
                             </div>
                         </li>
                     </ul>
@@ -127,10 +127,12 @@ if (!empty($settings['shop_logo'])) {
         <!-- Vista idéntica a Galería de ideas con controles de edición -->
         <section class="galeria galeria-admin-preview">
             <div class="galeria-header-edit">
-                <div class="editable-text editable-galeria-title" data-input="galeria_title" style="display: block;">
-                    <h1 class="galeria-h1"><span class="text-display"><?= htmlspecialchars($currentTitle) ?></span></h1>
-                    <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-                    <div class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentTitle) ?>" placeholder="Ej: Fotos de Clientes"></div>
+                <div class="editable-text editable-galeria-title" data-input="galeria_title">
+                    <div class="galeria-title-row">
+                        <h1 class="galeria-h1"><span class="text-display"><?= htmlspecialchars($currentTitle) ?></span></h1>
+                        <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+                    </div>
+                    <div class="edit-inline"><input type="text" value="<?= htmlspecialchars($currentTitle) ?>" placeholder="Ej: Fotos de Clientes"><button type="button" class="btn-edit-ok" title="Guardar">✓</button><button type="button" class="btn-edit-cancel" title="Cancelar">✗</button></div>
                 </div>
                 <p class="sub"><?= htmlspecialchars($subtitleFijo) ?></p>
             </div>
@@ -165,12 +167,6 @@ if (!empty($settings['shop_logo'])) {
                                  class="thumb"
                                  loading="lazy"
                                  onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'250\'%3E%3Crect fill=\'%23f0f0f0\' width=\'200\' height=\'250\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\' font-size=\'14\'%3ESin img%3C/text%3E%3C/svg%3E';">
-                            <div class="edit-overlay" onmousedown="event.stopPropagation()" onclick="event.stopPropagation()">
-                                <a href="edit.php?id=<?= $item['id'] ?>" class="btn-overlay btn-change-img">✏️ Editar</a>
-                                <a href="delete.php?id=<?= $item['id'] ?>" 
-                                   class="btn-overlay btn-eliminar" 
-                                   onclick="return confirm('¿Eliminar esta imagen?')">🗑️ Eliminar</a>
-                            </div>
                             <?php if (!$item['visible']): ?>
                                 <span class="badge-oculta">Oculta</span>
                             <?php endif; ?>
@@ -184,9 +180,6 @@ if (!empty($settings['shop_logo'])) {
             </div>
             <div id="save-message" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; text-align: center;"></div>
         <?php endif; ?>
-        <div style="margin-top: 1.5rem;">
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
-        </div>
     </section>
     </form>
 </div>
@@ -258,7 +251,20 @@ if (!empty($settings['shop_logo'])) {
 }
 .galeria-admin-preview .editable-galeria-title {
     position: relative;
-    display: block;
+}
+.galeria-admin-preview .galeria-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    margin-bottom: 0.5rem;
+}
+.galeria-admin-preview .galeria-header-edit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 .galeria-admin-preview .editable-text {
     position: relative;
@@ -290,11 +296,19 @@ if (!empty($settings['shop_logo'])) {
 }
 .galeria-admin-navbar-preview .btn-edit-pencil:hover,
 .galeria-admin-preview .btn-edit-pencil:hover { opacity: 1; }
+.galeria-admin-preview .editable-galeria-title .btn-edit-pencil {
+    position: static;
+    margin-left: 0;
+    flex-shrink: 0;
+}
 .galeria-admin-navbar-preview .editable-text.edit-mode .text-display,
 .galeria-admin-preview .editable-text.edit-mode .text-display { display: none; }
+.galeria-admin-navbar-preview .editable-text.edit-mode .btn-edit-pencil,
+.galeria-admin-preview .editable-text.edit-mode .btn-edit-pencil { display: none !important; }
 .galeria-admin-navbar-preview .editable-text.edit-mode .edit-inline,
 .galeria-admin-preview .editable-text.edit-mode .edit-inline { display: block; }
-.galeria-admin-preview .editable-galeria-title.edit-mode .galeria-h1 { display: none; }
+.galeria-admin-preview .editable-galeria-title.edit-mode .galeria-title-row { display: none; }
+.galeria-admin-preview .editable-galeria-title.edit-mode .edit-inline { width: 100%; }
 .galeria-admin-navbar-preview .edit-inline,
 .galeria-admin-preview .edit-inline { display: none; margin-top: 4px; }
 .galeria-admin-navbar-preview .edit-inline input,
@@ -313,14 +327,60 @@ if (!empty($settings['shop_logo'])) {
     width: 100%;
     max-width: 400px;
 }
+.galeria-admin-navbar-preview .editable-text.edit-mode .edit-inline,
+.galeria-admin-preview .editable-text.edit-mode .edit-inline {
+    display: flex !important;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+.galeria-admin-navbar-preview .editable-text.edit-mode .edit-inline input,
+.galeria-admin-preview .editable-text.edit-mode .edit-inline input {
+    flex: 1;
+    min-width: 120px;
+}
+.galeria-admin-navbar-preview .btn-edit-ok,
+.galeria-admin-navbar-preview .btn-edit-cancel,
+.galeria-admin-preview .btn-edit-ok,
+.galeria-admin-preview .btn-edit-cancel {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.galeria-admin-navbar-preview .btn-edit-ok,
+.galeria-admin-preview .btn-edit-ok {
+    background: #22c55e;
+    color: white;
+}
+.galeria-admin-navbar-preview .btn-edit-ok:hover,
+.galeria-admin-preview .btn-edit-ok:hover { background: #16a34a; }
+.galeria-admin-navbar-preview .btn-edit-cancel,
+.galeria-admin-preview .btn-edit-cancel {
+    background: #dc3545;
+    color: white;
+}
+.galeria-admin-navbar-preview .btn-edit-cancel:hover,
+.galeria-admin-preview .btn-edit-cancel:hover { background: #c82333; }
 
 /* Estilos idénticos a la Galería de ideas (public) */
 .galeria-admin-preview.galeria {
     padding: 2rem 1rem;
 }
+.galeria-admin-preview .editable-galeria-title .galeria-h1 {
+    margin: 0;
+    flex: 0 1 auto;
+    min-width: 0; /* permite que título y botón queden en línea en desktop */
+}
 .galeria-admin-preview .galeria-h1 {
     text-align: center;
-    margin: 0 0 0.5rem;
+    margin: 0;
     font-size: clamp(1.6rem, 2.8vw, 2.2rem);
     font-family: 'Playfair Display', Georgia, serif;
 }
@@ -375,48 +435,6 @@ if (!empty($settings['shop_logo'])) {
     filter: brightness(0.98);
 }
 
-/* Edit overlay (como landing-page) */
-.galeria-admin-preview .edit-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    opacity: 0;
-    transition: opacity 0.25s;
-    z-index: 2;
-}
-.galeria-admin-preview .card:hover .edit-overlay {
-    opacity: 1;
-}
-.galeria-admin-preview .btn-overlay {
-    background: #fff;
-    color: #333;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.galeria-admin-preview .btn-overlay:hover {
-    background: #f0f0f0;
-}
-.galeria-admin-preview .btn-eliminar {
-    background: #dc3545;
-    color: #fff !important;
-}
-.galeria-admin-preview .btn-eliminar:hover {
-    background: #c82333 !important;
-}
 .galeria-admin-preview .badge-oculta {
     position: absolute;
     top: 0.5rem;
@@ -488,51 +506,133 @@ if (!empty($settings['shop_logo'])) {
     .galeria-admin-preview .card { cursor: default; }
     .mobile-move-controls { display: flex; }
 }
+
+/* Responsive: galería admin en mobile */
+@media (max-width: 768px) {
+    .galeria-admin-header {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    .galeria-admin-header .btn { width: 100%; text-align: center; }
+    .galeria-admin-navbar-preview {
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    .galeria-admin-navbar-preview .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    .galeria-admin-navbar-preview p {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem !important;
+    }
+    .galeria-admin-navbar-preview .nav-container-fake {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+    .galeria-admin-navbar-preview .nav-links-fake {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .galeria-admin-navbar-preview .logo-preview-wrap {
+        justify-content: center;
+    }
+    .galeria-admin-navbar-preview .nav-icons-fake {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    .galeria-admin-navbar-preview .btn-edit-pencil,
+    .galeria-admin-preview .btn-edit-pencil {
+        position: static;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+    }
+    .galeria-admin-navbar-preview .editable-text {
+        display: inline-flex !important;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+    .galeria-admin-navbar-preview .edit-inline input,
+    .galeria-admin-preview .edit-inline input {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+    .galeria-admin-preview .galeria-toolbar {
+        justify-content: stretch !important;
+    }
+    .galeria-admin-preview .galeria-toolbar .btn {
+        width: 100%;
+    }
+    /* Guardar orden: fijo abajo centrado en mobile */
+    #btn-guardar-orden {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 900;
+        width: auto;
+        min-width: 200px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .galeria-admin-preview .galeria-toolbar {
+        min-height: 0;
+        margin-bottom: 0;
+    }
+    .galeria-admin-preview #galeria-grid {
+        padding-bottom: 5rem;
+    }
+}
 </style>
 
 <script>
 (function() {
-    // Editar texto inline (lápiz) - como landing-page.php
+    // Editar texto inline con OK (guardar) y X (cancelar)
     var editables = document.querySelectorAll('#galeria-form .editable-text');
-    function closeEditable(wrap) {
+    var form = document.getElementById('galeria-form');
+
+    function cancelEditable(wrap) {
         var inputName = wrap.getAttribute('data-input');
-        var form = document.getElementById('galeria-form');
         if (!form || !inputName) return;
         var hidden = form.querySelector('input[name="' + inputName + '"]');
         var display = wrap.querySelector('.text-display');
         var editBlock = wrap.querySelector('.edit-inline');
         var inputEl = editBlock && (editBlock.querySelector('input') || editBlock.querySelector('textarea'));
         if (!hidden || !display || !inputEl) return;
-        var val = inputEl.value.trim();
-        if (val) hidden.value = val;
-        display.textContent = val || hidden.value;
+        inputEl.value = hidden.value;
+        display.textContent = hidden.value;
         wrap.classList.remove('edit-mode');
     }
-    // Usar capture: true para recibir el clic antes de stopPropagation en overlays/cards
-    document.addEventListener('click', function closeEditOnClickOutside(e) {
+
+    document.addEventListener('click', function(e) {
         editables.forEach(function(wrap) {
             if (!wrap.classList.contains('edit-mode')) return;
             if (wrap.contains(e.target)) return;
-            closeEditable(wrap);
+            cancelEditable(wrap);
         });
     }, true);
-    document.addEventListener('touchstart', function closeEditOnTouchOutside(e) {
+    document.addEventListener('touchstart', function(e) {
         editables.forEach(function(wrap) {
             if (!wrap.classList.contains('edit-mode')) return;
             if (wrap.contains(e.target)) return;
-            closeEditable(wrap);
+            cancelEditable(wrap);
         });
     }, { passive: true, capture: true });
+
     editables.forEach(function(wrap) {
         var inputName = wrap.getAttribute('data-input');
         if (!inputName) return;
-        var form = document.getElementById('galeria-form');
-        if (!form) return;
         var hidden = form.querySelector('input[name="' + inputName + '"]');
         var display = wrap.querySelector('.text-display');
         var pencil = wrap.querySelector('.btn-edit-pencil');
         var editBlock = wrap.querySelector('.edit-inline');
         var inputEl = editBlock && (editBlock.querySelector('input') || editBlock.querySelector('textarea'));
+        var btnOk = editBlock && editBlock.querySelector('.btn-edit-ok');
+        var btnCancel = editBlock && editBlock.querySelector('.btn-edit-cancel');
         if (!display || !pencil || !editBlock || !inputEl || !hidden) return;
 
         pencil.addEventListener('click', function(e) {
@@ -541,18 +641,55 @@ if (!empty($settings['shop_logo'])) {
             inputEl.value = hidden.value;
             setTimeout(function() { inputEl.focus(); }, 10);
         });
-        function saveAndClose() {
-            var val = inputEl.value.trim();
-            if (val) hidden.value = val;
-            if (display) display.textContent = val || hidden.value;
-            wrap.classList.remove('edit-mode');
+
+        if (btnCancel) {
+            btnCancel.addEventListener('click', function(e) {
+                e.stopPropagation();
+                cancelEditable(wrap);
+            });
         }
-        inputEl.addEventListener('blur', function() {
-            setTimeout(saveAndClose, 200);
-        });
+
+        if (btnOk) {
+            btnOk.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var val = inputEl.value.trim();
+                if (!val) { cancelEditable(wrap); return; }
+                hidden.value = val;
+                var formData = new FormData(form);
+                var btn = this;
+                btn.disabled = true;
+                btn.textContent = '…';
+                fetch('<?= ADMIN_URL ?>/api/galeria-save-info.php', { method: 'POST', body: formData })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            var nameH = form.querySelector('input[name="galeria_name"]');
+                            var titleH = form.querySelector('input[name="galeria_title"]');
+                            if (nameH) nameH.value = data.name;
+                            if (titleH) titleH.value = data.title;
+                            var nameD = document.querySelector('.editable-nav-link .text-display');
+                            var titleD = document.querySelector('.editable-galeria-title .text-display');
+                            if (nameD) nameD.textContent = data.name;
+                            if (titleD) titleD.textContent = data.title;
+                            wrap.classList.remove('edit-mode');
+                        } else {
+                            alert(data.message || 'Error al guardar');
+                        }
+                    })
+                    .catch(function() { alert('Error de conexión'); })
+                    .finally(function() { btn.disabled = false; btn.textContent = '✓'; });
+            });
+        }
+
         inputEl.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && inputEl.tagName !== 'TEXTAREA') { e.preventDefault(); saveAndClose(); }
-            if (e.key === 'Escape') { e.preventDefault(); inputEl.value = hidden.value; wrap.classList.remove('edit-mode'); }
+            if (e.key === 'Enter' && inputEl.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                if (btnOk) btnOk.click();
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelEditable(wrap);
+            }
         });
     });
 

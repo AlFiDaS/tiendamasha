@@ -77,6 +77,9 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         .admin-layout {
             display: flex;
             min-height: 100vh;
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
         }
         
         /* Sidebar izquierda - estilo Xtreme Admin */
@@ -186,7 +189,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1050;
         }
         
         .admin-topbar-left {
@@ -379,6 +382,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         
         .admin-main-wrapper {
             flex: 1;
+            min-width: 0;
             margin-left: 340px;
             display: flex;
             flex-direction: column;
@@ -391,6 +395,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         
         .admin-container {
             flex: 1;
+            min-width: 0;
             max-width: 1400px;
             width: 100%;
             margin: 0 auto;
@@ -961,12 +966,27 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
             .admin-main-wrapper {
                 margin-left: 0;
             }
+            
+            /* Notificaciones: posición fija en mobile para evitar corte y solapamiento */
+            .admin-notifications-dropdown {
+                position: fixed;
+                top: 60px;
+                left: 1rem;
+                right: 1rem;
+                width: auto;
+                min-width: 0;
+                margin-top: 0;
+                z-index: 1100;
+                background: #fff;
+                max-height: 60vh;
+            }
         }
         
         @media (max-width: 768px) {
             .admin-container {
                 margin: 1rem auto;
                 padding: 0 1rem;
+                overflow-x: hidden;
             }
             
             .admin-content {
@@ -1290,7 +1310,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
         }
     </style>
 </head>
-<body>
+<body<?= (basename($_SERVER['PHP_SELF'] ?? '') == 'landing-page.php') ? ' class="landing-editor-page"' : '' ?>>
     <div class="admin-layout">
         <!-- Sidebar izquierda -->
         <aside class="admin-nav-sidebar" id="admin-nav-sidebar">
@@ -1313,7 +1333,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                 </section>
                 <section>
                     <div class="menu-label">Accesos rápidos</div>
-                    <a href="<?= ADMIN_URL ?>/add.php"><span class="nav-icon">➕</span> Agregar producto</a>
+                    <a href="<?= ADMIN_URL ?>/add.php"><span class="nav-icon" style="color:inherit;">+</span> Agregar producto</a>
                     <a href="<?= ADMIN_URL ?>/ordenar.php"><span class="nav-icon">📋</span> Ordenar productos</a>
                 </section>
                 <section>

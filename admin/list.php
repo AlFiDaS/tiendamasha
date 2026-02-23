@@ -103,7 +103,7 @@ if (!empty($buscar)) {
         </div>
         <div class="page-header-actions">
             <a href="ordenar.php" class="btn btn-secondary">📋 Ordenar</a>
-            <a href="add.php" class="btn btn-primary">➕ Agregar Producto</a>
+            <a href="add.php" class="btn btn-primary"><span style="color:white;font-weight:bold;">+</span> Agregar Producto</a>
         </div>
     </div>
     

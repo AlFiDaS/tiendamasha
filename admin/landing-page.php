@@ -369,8 +369,31 @@ require_once '_inc/header.php';
 ?>
 
 <style>
+/* Topbar fijo en landing para que siempre sea clickeable (Splide/contenido no lo tapan) */
+body.landing-editor-page .admin-topbar {
+  position: fixed !important;
+  top: 0;
+  left: 340px;
+  right: 0;
+  z-index: 9999;
+  pointer-events: auto;
+}
+body.landing-editor-page .admin-topbar * {
+  pointer-events: auto;
+}
+body.landing-editor-page .admin-main-wrapper {
+  padding-top: 60px;
+}
+@media (max-width: 992px) {
+  body.landing-editor-page .admin-topbar {
+    left: 0;
+  }
+}
+
 /* Variables iguales al index - colores del preview usan solo los guardados (no los del admin) */
 .landing-editor-preview {
+  position: relative;
+  z-index: 1;
   --primary: <?= htmlspecialchars($primaryLight) ?> !important;
   --primary-color: <?= htmlspecialchars($primaryLight) ?> !important;
   --primary-dark: <?= htmlspecialchars($primaryDarkComputed) ?>;
@@ -458,14 +481,16 @@ require_once '_inc/header.php';
 .landing-editor-preview .editable-text.edit-mode .text-display { display: none; }
 .landing-editor-preview .editable-text.edit-mode .edit-inline { display: block; }
 .landing-editor-preview .edit-inline { display: none; margin-top: 4px; }
-.landing-editor-preview .edit-inline input,
-.landing-editor-preview .edit-inline textarea {
-  width: 100%;
-  padding: 6px 8px;
-  border: 2px solid var(--primary);
-  border-radius: 4px;
-  font-size: inherit;
-}
+  .landing-editor-preview .edit-inline input,
+  .landing-editor-preview .edit-inline textarea {
+    width: 100%;
+    max-width: 100%;
+    padding: 6px 8px;
+    border: 2px solid var(--primary);
+    border-radius: 4px;
+    font-size: inherit;
+    box-sizing: border-box;
+  }
 .landing-editor-preview .image-wrapper { position: relative; }
 
 /* Splide carrusel (igual que index) */
@@ -1156,18 +1181,106 @@ require_once '_inc/header.php';
   .landing-editor-preview .stat-number { font-size: 2rem; }
 }
 
+/* Responsive: admin landing page en mobile */
+@media (max-width: 768px) {
+  .landing-page-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .landing-page-header a.btn {
+    width: 100%;
+    text-align: center;
+  }
+  .landing-editor-preview .section-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  .landing-editor-preview .section-footer label {
+    width: 100%;
+    justify-content: center;
+  }
+  .landing-editor-preview .section-footer select[name="productos_button_link"] {
+    min-width: 0;
+    flex: 1;
+    max-width: 100%;
+  }
+  .landing-editor-preview .btn-edit-pencil {
+    position: static;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  .landing-editor-preview .editable-text {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .landing-editor-preview #landing-save-area > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  .landing-editor-preview #landing-save-area .btn {
+    width: 100%;
+  }
+}
+@media (max-width: 576px) {
+  .landing-editor-preview .testimonials .section-header,
+  .landing-editor-preview #galeria-section .section-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .landing-editor-preview .testimonials .section-header label span,
+  .landing-editor-preview #galeria-section .section-header label span {
+    font-size: 0.85rem;
+  }
+  .landing-editor-preview #carousel-config-details {
+    margin: 0 0.5rem;
+  }
+  .landing-editor-preview #carousel-links-config {
+    flex-direction: column;
+  }
+}
+
 .landing-section-divider {
   margin: 2rem 0;
   border: none;
   border-top: 2px solid #e0e0e0;
   max-width: 100%;
 }
+
+/* Botones de sección */
+.section-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+  justify-content: center;
+}
+.section-actions .btn { margin: 0; }
+.section-actions .btn-save-section {
+  background: #22c55e;
+  color: white;
+  border-radius: 8px;
+}
+.section-actions .btn-save-section:hover {
+  background: #16a34a;
+}
+.section-actions .btn-cancel-section {
+  background: #dc3545;
+  color: white;
+  border-radius: 8px;
+}
+.section-actions .btn-cancel-section:hover {
+  background: #c82333;
+}
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css" />
 
 <div class="admin-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+    <div class="landing-page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
         <div>
             <h2 style="margin: 0;">Editor de Landing Page</h2>
             <p style="color: #666; margin: 0.25rem 0 0 0; font-size: 0.9rem;">Vista idéntica al index. Usá los botones "Cambiar imagen" y el lápiz para editar textos.</p>
@@ -1187,6 +1300,7 @@ require_once '_inc/header.php';
 
         <div class="landing-editor-preview">
             <!-- CARRUSEL (igual que index) -->
+            <div class="landing-section" data-section="carousel">
             <div class="splide" id="hero-slider">
                 <div class="splide__track">
                     <ul class="splide__list">
@@ -1245,10 +1359,16 @@ require_once '_inc/header.php';
                     </div>
                 </details>
             </div>
+            <div class="section-actions" style="display: none;">
+                <button type="button" class="btn btn-primary btn-save-section" data-section="carousel">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="carousel">Cancelar</button>
+            </div>
+            </div>
 
             <hr class="landing-section-divider">
 
             <!-- PRODUCTOS MÁS VENDIDOS (título, descripción y botón editables; grid cargado desde API) -->
+            <div class="landing-section" data-section="productos">
             <section class="productos">
                 <div class="section-header">
                     <div class="editable-text" data-input="productos_title" style="display: block;">
@@ -1299,10 +1419,16 @@ require_once '_inc/header.php';
                     </label>
                 </div>
             </section>
+            <div class="section-actions" style="display: none;">
+                <button type="button" class="btn btn-primary btn-save-section" data-section="productos">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="productos">Cancelar</button>
+            </div>
+            </div>
 
             <hr class="landing-section-divider">
 
             <!-- SOBRE -->
+            <div class="landing-section" data-section="sobre">
             <section class="sobre" id="sobre-section">
                 <div class="container">
                     <div class="sobre-content">
@@ -1357,10 +1483,16 @@ require_once '_inc/header.php';
                     </div>
                 </div>
             </section>
+            <div class="section-actions" style="display: none;">
+                <button type="button" class="btn btn-primary btn-save-section" data-section="sobre">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="sobre">Cancelar</button>
+            </div>
+            </div>
 
             <hr class="landing-section-divider">
 
             <!-- TESTIMONIALS - Máx 5 comentarios. Estrellas: solo 1-5. Agregar/Eliminar. -->
+            <div class="landing-section" data-section="testimonials">
             <?php
             $starOptions = ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'];
             $testimonialsDisplay = array_slice($testimonials, 0, 5);
@@ -1413,10 +1545,16 @@ require_once '_inc/header.php';
                 </div>
             </section>
             <div id="new-testimonials-container"></div>
+            <div class="section-actions" style="display: none;">
+                <button type="button" class="btn btn-primary btn-save-section" data-section="testimonials">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="testimonials">Cancelar</button>
+            </div>
+            </div>
 
             <hr class="landing-section-divider">
 
             <!-- CTA GALERÍA - Orden igual que index. En el editor siempre visible; "Mostrar sección" solo afecta al index público. -->
+            <div class="landing-section" data-section="galeria">
             <section class="cta" id="galeria-section">
                 <div class="container">
                     <div class="section-header" style="display: flex; align-items: center; justify-content: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -1499,8 +1637,14 @@ require_once '_inc/header.php';
                     </div>
                 </div>
             </section>
+            <div class="section-actions" style="display: none;">
+                <button type="button" class="btn btn-primary btn-save-section" data-section="galeria">Guardar cambios</button>
+                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="galeria">Cancelar</button>
+            </div>
+            </div>
 
             <!-- COLORES -->
+            <div class="landing-section" data-section="colors">
             <section id="landing-save-area" style="padding: var(--space-xl) 0; background: #f5f5f5; border-radius: var(--radius-lg); margin: 2rem auto; max-width: 1200px; padding: 2rem;">
                 <h3 style="margin-bottom: 1rem; color: #333;">Configuración de colores</h3>
                 <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.9rem;">Estos colores se aplican en la página principal (modo claro y modo oscuro).</p>
@@ -1524,12 +1668,13 @@ require_once '_inc/header.php';
                     <?php if (!empty($success) && isset($_GET['updated'])): ?>
                     <div id="landing-success-msg" class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
                     <?php endif; ?>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
-                        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary" style="text-decoration: none;">Cancelar</a>
+                    <div class="section-actions" style="display: none; gap: 1rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary btn-save-section" data-section="colors">Guardar cambios</button>
+                        <button type="button" class="btn btn-secondary btn-cancel-section" data-section="colors">Cancelar</button>
                     </div>
                 </div>
             </section>
+            </div>
         </div>
     </form>
 </div>
@@ -1600,6 +1745,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Eliminar imagen del carrusel
   document.addEventListener('click', function(e) {
+    if (e.target.closest('.admin-topbar') || e.target.closest('.admin-nav-sidebar')) return;
     var btn = e.target.closest('.btn-eliminar-slide');
     if (!btn) return;
     e.preventDefault();
@@ -1815,6 +1961,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var starOptions = ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'];
 
   document.addEventListener('click', function(e) {
+    if (e.target.closest('.admin-topbar') || e.target.closest('.admin-nav-sidebar')) return;
     if (e.target.closest('.btn-eliminar-testimonial')) {
       e.preventDefault();
       var card = e.target.closest('.testimonial-item');
@@ -1871,5 +2018,124 @@ document.addEventListener('DOMContentLoaded', function() {
     pd.addEventListener('input', function() { pdHex.value = this.value; });
     pdHex.addEventListener('input', function() { if (/^#[a-fA-F0-9]{6}$/.test(this.value)) pd.value = this.value; });
   }
+
+  // Guardar por sección
+  var form = document.getElementById('landing-form');
+  var csrfToken = form && form.querySelector('input[name="csrf_token"]') ? form.querySelector('input[name="csrf_token"]').value : '';
+
+  function getSectionFields(sectionName) {
+    var sectionEl = document.querySelector('.landing-section[data-section="' + sectionName + '"]');
+    if (!sectionEl) return [];
+    var fields = [];
+    sectionEl.querySelectorAll('input, select, textarea').forEach(function(el) {
+      if (el.name) fields.push(el);
+    });
+    return fields;
+  }
+
+  document.querySelectorAll('.btn-save-section').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var section = this.getAttribute('data-section');
+      if (!section || !form || !csrfToken) return;
+      var sectionEl = document.querySelector('.landing-section[data-section="' + section + '"]');
+      if (!sectionEl) return;
+
+      if (section === 'colors') {
+        if (plHex && pl && /^#[a-fA-F0-9]{6}$/.test(plHex.value)) pl.value = plHex.value;
+        if (pdHex && pd && /^#[a-fA-F0-9]{6}$/.test(pdHex.value)) pd.value = pdHex.value;
+      }
+
+      var fd = new FormData();
+      fd.append('section', section);
+      fd.append('csrf_token', csrfToken);
+
+      getSectionFields(section).forEach(function(el) {
+        if (el.type === 'file' && el.files && el.files.length > 0) {
+          for (var i = 0; i < el.files.length; i++) fd.append(el.name + (el.multiple ? '[]' : ''), el.files[i]);
+        } else if (el.type === 'checkbox') {
+          if (el.checked) fd.append(el.name, '1');
+        } else if (el.name && el.value !== undefined) {
+          fd.append(el.name, el.value);
+        }
+      });
+
+      var originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      fetch('<?= ADMIN_URL ?>/api/landing-save-section.php', {
+        method: 'POST',
+        body: fd
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        if (data.success) {
+          var actions = sectionEl.querySelector('.section-actions');
+          if (actions) {
+            actions.querySelectorAll('.btn').forEach(function(b) { b.style.display = 'none'; });
+            var oldMsg = actions.querySelector('.alert');
+            if (oldMsg) oldMsg.remove();
+            var msg = document.createElement('div');
+            msg.className = 'alert alert-success';
+            msg.style.cssText = 'margin:0;';
+            msg.textContent = '✅ ' + (data.message || 'Guardado');
+            actions.appendChild(msg);
+            setTimeout(function() {
+              msg.remove();
+              actions.querySelectorAll('.btn').forEach(function(b) { b.style.display = ''; });
+              hideSectionActions(section);
+            }, 4000);
+          } else {
+            hideSectionActions(section);
+          }
+          if (section === 'carousel') mountCarousel();
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo guardar'));
+        }
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Guardar cambios';
+        alert('Error de conexión. Intenta de nuevo.');
+      });
+    });
+  });
+
+  document.querySelectorAll('.btn-cancel-section').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (confirm('¿Descartar los cambios de esta sección? Se recargará la página.')) {
+        window.location.reload();
+      }
+    });
+  });
+
+  // Mostrar botones solo cuando hay cambios en la sección
+  function showSectionActions(sectionName) {
+    var sectionEl = document.querySelector('.landing-section[data-section="' + sectionName + '"]');
+    if (sectionEl) {
+      var actions = sectionEl.querySelector('.section-actions');
+      if (actions) actions.style.display = 'flex';
+    }
+  }
+  function hideSectionActions(sectionName) {
+    var sectionEl = document.querySelector('.landing-section[data-section="' + sectionName + '"]');
+    if (sectionEl) {
+      var actions = sectionEl.querySelector('.section-actions');
+      if (actions) actions.style.display = 'none';
+    }
+  }
+  document.querySelectorAll('.landing-section').forEach(function(sectionEl) {
+    var sectionName = sectionEl.getAttribute('data-section');
+    if (!sectionName) return;
+    var handler = function() { showSectionActions(sectionName); };
+    sectionEl.addEventListener('input', handler);
+    sectionEl.addEventListener('change', handler);
+    sectionEl.addEventListener('click', function(e) {
+      if (e.target.closest('.btn-eliminar-slide') || e.target.closest('.btn-eliminar-testimonial') ||
+          e.target.closest('#btn-agregar-carousel') || e.target.closest('#btn-agregar-testimonial') ||
+          e.target.closest('.btn-change-img')) {
+        showSectionActions(sectionName);
+      }
+    });
+  });
 });
 </script>

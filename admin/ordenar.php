@@ -438,6 +438,23 @@ foreach ($products as $index => $product) {
         -webkit-user-drag: none;
         user-select: none;
     }
+    
+    /* Guardar orden: fijo abajo centrado en mobile */
+    #btn-guardar-orden {
+        position: fixed;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 900;
+        width: auto;
+        min-width: 200px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    
+    #products-grid {
+        padding-bottom: 5rem;
+    }
 }
 
 @media (max-width: 480px) {

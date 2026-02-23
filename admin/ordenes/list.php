@@ -588,11 +588,11 @@ require_once '../_inc/header.php';
                 <label>Estado</label>
                 <select name="status">
                     <option value="">Todos</option>
-                    <option value="pending" <?= $filtro_status === 'pending' ? 'selected' : '' ?>>Pendientes</option>
                     <option value="a_confirmar" <?= $filtro_status === 'a_confirmar' ? 'selected' : '' ?>>A Confirmar</option>
-                    <option value="approved" <?= $filtro_status === 'approved' ? 'selected' : '' ?>>Aprobadas</option>
+                    <option value="pending" <?= $filtro_status === 'pending' ? 'selected' : '' ?>>Pendientes</option>
                     <option value="rejected" <?= $filtro_status === 'rejected' ? 'selected' : '' ?>>Rechazadas</option>
                     <option value="cancelled" <?= $filtro_status === 'cancelled' ? 'selected' : '' ?>>Canceladas</option>
+                    <option value="approved" <?= $filtro_status === 'approved' ? 'selected' : '' ?>>Aprobadas</option>
                     <option value="finalizado" <?= $filtro_status === 'finalizado' ? 'selected' : '' ?>>Finalizadas</option>
                 </select>
             </div>
@@ -683,10 +683,10 @@ require_once '../_inc/header.php';
                                         data-current="<?= htmlspecialchars($orden['status'] ?? '') ?>"
                                         title="Cambiar estado">
                                     <option value="a_confirmar" <?= ($orden['status'] ?? '') === 'a_confirmar' ? 'selected' : '' ?>>A Confirmar</option>
-                                    <option value="approved" <?= ($orden['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Aprobada</option>
                                     <option value="pending" <?= ($orden['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pendiente</option>
                                     <option value="rejected" <?= ($orden['status'] ?? '') === 'rejected' ? 'selected' : '' ?>>Rechazada</option>
                                     <option value="cancelled" <?= ($orden['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelada</option>
+                                    <option value="approved" <?= ($orden['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Aprobada</option>
                                     <option value="finalizado" <?= ($orden['status'] ?? '') === 'finalizado' ? 'selected' : '' ?>>Finalizada</option>
                                 </select>
                             </td>

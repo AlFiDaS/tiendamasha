@@ -33,7 +33,7 @@ function getSalesToday($date = null) {
                 AVG(total_amount) as avg_order_value
             FROM orders 
             WHERE DATE(created_at) = :date 
-            AND status IN ('approved', 'a_confirmar')";
+            AND status IN ('approved', 'a_confirmar', 'finalizado')";
     
     $result = fetchOne($sql, ['date' => $date]);
     
@@ -67,7 +67,7 @@ function getSalesThisMonth($month = null, $year = null) {
             FROM orders 
             WHERE MONTH(created_at) = :month 
             AND YEAR(created_at) = :year
-            AND status IN ('approved', 'a_confirmar')
+            AND status IN ('approved', 'a_confirmar', 'finalizado')
             GROUP BY DAY(created_at)
             ORDER BY day ASC";
     
@@ -81,7 +81,7 @@ function getSalesThisMonth($month = null, $year = null) {
                 FROM orders 
                 WHERE MONTH(created_at) = :month 
                 AND YEAR(created_at) = :year
-                AND status IN ('approved', 'a_confirmar')";
+                AND status IN ('approved', 'a_confirmar', 'finalizado')";
     
     $totals = fetchOne($sqlTotal, ['month' => $month, 'year' => $year]);
     
@@ -124,7 +124,7 @@ function getTopSellingProducts($limit = 10, $period = 'month') {
     // Obtener todas las órdenes con items
     $sql = "SELECT id, items, total_amount 
             FROM orders 
-            WHERE status IN ('approved', 'a_confirmar')
+            WHERE status IN ('approved', 'a_confirmar', 'finalizado')
             {$dateCondition}";
     
     $orders = fetchAll($sql, $params);
@@ -250,7 +250,7 @@ function getSalesByDay() {
                 SUM(total_amount) as revenue
             FROM orders 
             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-            AND status IN ('approved', 'a_confirmar')
+            AND status IN ('approved', 'a_confirmar', 'finalizado')
             GROUP BY DATE(created_at), DAYNAME(created_at), DAYOFWEEK(created_at)
             ORDER BY date ASC";
     

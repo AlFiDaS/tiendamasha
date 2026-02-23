@@ -528,11 +528,11 @@ require_once '../_inc/header.php';
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                         <label for="status" style="font-weight: 500;">Cambiar estado:</label>
                         <select name="status" id="status" style="flex: 1; min-width: 150px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="pending" <?= $orden['status'] === 'pending' ? 'selected' : '' ?>>Pendiente</option>
                             <option value="a_confirmar" <?= $orden['status'] === 'a_confirmar' ? 'selected' : '' ?>>A Confirmar</option>
-                            <option value="approved" <?= $orden['status'] === 'approved' ? 'selected' : '' ?>>Aprobada</option>
+                            <option value="pending" <?= $orden['status'] === 'pending' ? 'selected' : '' ?>>Pendiente</option>
                             <option value="rejected" <?= $orden['status'] === 'rejected' ? 'selected' : '' ?>>Rechazada</option>
                             <option value="cancelled" <?= $orden['status'] === 'cancelled' ? 'selected' : '' ?>>Cancelada</option>
+                            <option value="approved" <?= $orden['status'] === 'approved' ? 'selected' : '' ?>>Aprobada</option>
                             <option value="finalizado" <?= $orden['status'] === 'finalizado' ? 'selected' : '' ?>>Finalizada</option>
                         </select>
                         <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
