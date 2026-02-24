@@ -3,6 +3,6 @@ export function agregarAlCarrito(producto) {
     const carrito = JSON.parse(localStorage.getItem(key)) || [];
     carrito.push(producto);
     localStorage.setItem(key, JSON.stringify(carrito));
-    alert(`Agregaste "${producto.name}" al carrito 🛒`);
+    alert(`Agregaste "${producto.name}" al carrito`);
   }
   

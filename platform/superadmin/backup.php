@@ -72,14 +72,14 @@ require_once __DIR__ . '/_inc/header.php';
 ?>
 
 <div class="sa-content">
-    <h1>💾 Backups de Base de Datos</h1>
+    <h1><?= icon('save', 24) ?> Backups de Base de Datos</h1>
     <p style="color:#666; margin-bottom:1.5rem;">Backup de la base de datos de la plataforma (stores, usuarios). Solo Super Admin.</p>
 
     <?php if ($success): ?>
-        <div class="sa-alert sa-alert-success">✅ <?= htmlspecialchars($success) ?></div>
+        <div class="sa-alert sa-alert-success"><?= icon('check', 18) ?> <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     <?php if ($error): ?>
-        <div class="sa-alert sa-alert-error">❌ <?= htmlspecialchars($error) ?></div>
+        <div class="sa-alert sa-alert-error"><?= icon('x', 18) ?> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
     <div class="sa-card" style="margin-bottom:1.5rem;">
@@ -116,8 +116,8 @@ require_once __DIR__ . '/_inc/header.php';
                         <td><?= number_format($b['size'] / 1024, 2) ?> KB</td>
                         <td><?= date('d/m/Y H:i', $b['created']) ?></td>
                         <td>
-                            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup-download.php?file=<?= urlencode($b['filename']) ?>" class="sa-btn sa-btn-sm sa-btn-primary">📥 Descargar</a>
-                            <a href="?delete=<?= urlencode($b['filename']) ?>&csrf_token=<?= urlencode(platformCSRFToken()) ?>" class="sa-btn sa-btn-sm" onclick="return confirm('¿Eliminar este backup?')">🗑️ Eliminar</a>
+                            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup-download.php?file=<?= urlencode($b['filename']) ?>" class="sa-btn sa-btn-sm sa-btn-primary"><?= icon('download', 16) ?> Descargar</a>
+                            <a href="?delete=<?= urlencode($b['filename']) ?>&csrf_token=<?= urlencode(platformCSRFToken()) ?>" class="sa-btn sa-btn-sm" onclick="return confirm('¿Eliminar este backup?')"><?= icon('trash', 16) ?> Eliminar</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>

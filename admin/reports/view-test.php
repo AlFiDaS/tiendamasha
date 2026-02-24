@@ -17,7 +17,7 @@ require_once '../_inc/header.php';
 <div class="admin-content">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
-            <h2>📊 Reporte de Prueba: <?= htmlspecialchars($report['month_name']) ?> <?= $report['year'] ?></h2>
+            <h2><?= icon('bar-chart', 24) ?> Reporte de Prueba: <?= htmlspecialchars($report['month_name']) ?> <?= $report['year'] ?></h2>
             <p style="color: #999; margin: 0.25rem 0 0 0; font-size: 0.9rem;">Datos ficticios para visualizar el formato del reporte</p>
         </div>
         <a href="<?= ADMIN_URL ?>/reports/list.php" class="btn btn-secondary">← Volver</a>

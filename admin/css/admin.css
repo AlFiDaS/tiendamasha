@@ -102,10 +102,32 @@ body {
 }
 
 .admin-nav-menu .nav-icon {
-    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 24px;
-    text-align: center;
+    flex-shrink: 0;
     opacity: 0.9;
+}
+.admin-nav-menu .nav-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+.admin-user-dropdown a svg,
+.admin-notifications-dropdown .notif-title svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+}
+.section-title svg,
+.alert svg {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+}
+.no-image svg {
+    opacity: 0.4;
 }
 
 .admin-nav-menu .nav-badge {

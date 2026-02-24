@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Icon from '../components/Icon.astro';
 ---
 <Layout noindex={true}>
   <div class="pagina-carrito">
@@ -12,7 +13,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
     <section class="carrito">
       <div class="container">
         <div class="carrito-header">
-          <h1>🛒 Tu Carrito</h1>
+          <h1><Icon name="cart" size={28} /> Tu Carrito</h1>
         </div>
 
         <div class="carrito-content">
@@ -158,7 +159,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                   <strong>Total a pagar: <span id="total-a-pagar-display">$0</span></strong>
                 </div>
                 <button type="button" id="btn-ver-resumen" class="btn-ver-resumen">
-                  📊 Ver resumen
+                  <Icon name="bar-chart" size={18} /> Ver resumen
                 </button>
 
                 <div class="form-group">
@@ -185,7 +186,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                     <input type="file" id="proof_image" accept="image/jpeg,image/png,image/webp" style="display: none;" />
                     <small>Sube una imagen del comprobante de transferencia (JPG, PNG o WEBP - máx. 5MB)</small>
                     <button type="button" id="btn-subir-comprobante" class="btn-subir-comprobante">
-                      📎 Subir comprobante de pago
+                      <Icon name="paperclip" size={18} /> Subir comprobante de pago
                     </button>
                     <div id="proof-preview" style="display: none; margin-top: 0.5rem;">
                       <img id="proof-preview-img" src="" alt="Vista previa" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid #ddd;" />
@@ -194,10 +195,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                 </div>
 
                 <button id="btn-finalizar" class="btn-finalizar" type="button">
-                  💳 Pagar con MercadoPago
+                  <Icon name="credit-card" size={18} /> Pagar con MercadoPago
                 </button>
                 <button id="btn-finalizar-directa" class="btn-finalizar-directa" type="button" style="display: none;">
-                  ✅ Confirmar pedido
+                  <Icon name="check" size={18} /> Confirmar pedido
                 </button>
               </form>
             </div>
@@ -500,7 +501,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       if (carrito.length === 0) {
         contenedor.innerHTML = `
           <div class="carrito-vacio">
-            <p>Tu carrito está vacío 🕯️</p>
+            <p>Tu carrito está vacío</p>
             <a href="/productos" class="btn-continuar">Ver productos</a>
           </div>
         `;
@@ -820,13 +821,13 @@ Gracias!`);
         } else {
           alert('Error al procesar el pago: ' + (data.error || 'Error desconocido'));
           finalizarBtn.disabled = false;
-          finalizarBtn.textContent = '💳 Pagar con MercadoPago';
+          finalizarBtn.textContent = 'Pagar con MercadoPago';
         }
       } catch (error) {
         console.error('Error:', error);
         alert('Error de conexión. Por favor, intenta nuevamente.');
         finalizarBtn.disabled = false;
-        finalizarBtn.textContent = '💳 Pagar con MercadoPago';
+        finalizarBtn.textContent = 'Pagar con MercadoPago';
       }
     }
 
@@ -884,7 +885,7 @@ Gracias!`);
             }
             // Cambiar texto del botón de subir a indicar que ya hay archivo
             if (btnSubirComprobante) {
-              btnSubirComprobante.textContent = '📎 Cambiar comprobante';
+              btnSubirComprobante.textContent = 'Cambiar comprobante';
             }
           };
           reader.onerror = () => {
@@ -897,7 +898,7 @@ Gracias!`);
             proofPreview.style.display = 'none';
           }
           if (btnSubirComprobante) {
-            btnSubirComprobante.textContent = '📎 Subir comprobante de pago';
+            btnSubirComprobante.textContent = 'Subir comprobante de pago';
           }
         }
       };

@@ -58,28 +58,28 @@ $impersonateErrorMsg = [
 <!-- Stats de la tienda -->
 <div class="sa-stats">
     <div class="sa-stat-card">
-        <div class="sa-stat-icon blue">📦</div>
+        <div class="sa-stat-icon blue"><?= icon('package', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= $s['db_error'] ? '?' : number_format($s['products_count']) ?></h3>
             <p>Productos</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon green">🛒</div>
+        <div class="sa-stat-icon green"><?= icon('cart', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= $s['db_error'] ? '?' : number_format($s['orders_count']) ?></h3>
             <p>Órdenes</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon amber">💰</div>
+        <div class="sa-stat-icon amber"><?= icon('dollar', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= $s['db_error'] ? '?' : '$' . number_format($s['revenue'], 0, ',', '.') ?></h3>
             <p>Ingresos (aprobados)</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon purple">🏷️</div>
+        <div class="sa-stat-icon purple"><?= icon('tag', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= $s['db_error'] ? '?' : number_format($s['categories_count']) ?></h3>
             <p>Categorías</p>
@@ -190,7 +190,7 @@ $impersonateErrorMsg = [
         Eliminar esta tienda borrará todas sus tablas, productos, órdenes, configuraciones y datos asociados. Esta acción es irreversible.
     </p>
     <button type="button" class="sa-btn" style="background:#dc2626; color:#fff;" onclick="document.getElementById('deleteModal').style.display='flex'">
-        🗑️ Eliminar tienda
+        <?= icon('trash', 16) ?> Eliminar tienda
     </button>
 </div>
 

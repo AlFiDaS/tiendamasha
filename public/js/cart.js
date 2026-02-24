@@ -101,7 +101,7 @@
     }
 
     saveCarrito(carrito);
-    mostrarToast(`${name} agregado al carrito 🛒`);
+    mostrarToast(`${name} agregado al carrito`);
   }
 
   function updateCartCount() {

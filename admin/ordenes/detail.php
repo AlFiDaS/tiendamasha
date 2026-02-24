@@ -480,7 +480,7 @@ require_once '../_inc/header.php';
                     </a>
                     <?php if ($orden['status'] === 'rejected'): ?>
                     <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #856404;">
-                        ⚠️ El mensaje incluye espacio para que escribas el motivo del rechazo manualmente.
+                        <?= icon('alert', 16) ?> El mensaje incluye espacio para que escribas el motivo del rechazo manualmente.
                     </p>
                     <?php endif; ?>
                 </div>
@@ -541,7 +541,7 @@ require_once '../_inc/header.php';
                     </div>
                     <?php if ($orden['status'] !== 'finalizado' && !empty($orden['proof_image'])): ?>
                         <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #856404;">
-                            ⚠️ Al cambiar a "Finalizada", se eliminará el comprobante de pago para ahorrar espacio.
+                            <?= icon('alert', 16) ?> Al cambiar a "Finalizada", se eliminará el comprobante de pago para ahorrar espacio.
                         </p>
                     <?php endif; ?>
                 </form>
@@ -615,7 +615,7 @@ require_once '../_inc/header.php';
                        class="btn btn-danger"
                        onclick="return confirm('¿Estás seguro de eliminar esta orden? Esta acción no se puede deshacer.');"
                        style="display: inline-block; padding: 0.5rem 1rem; background: #dc3545; color: white; text-decoration: none; border-radius: 4px;">
-                        🗑️ Eliminar Orden
+                        <?= icon('trash', 16) ?> Eliminar Orden
                     </a>
                     <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #721c24;">
                         Esta acción eliminará permanentemente la orden y su comprobante de pago (si existe).

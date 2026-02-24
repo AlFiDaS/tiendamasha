@@ -91,10 +91,10 @@ require_once '_inc/header.php';
     <p style="color: #666; margin-bottom: 2rem;">Recibí alertas por Telegram cuando haya nuevas órdenes o pagos aprobados.</p>
     
     <?php if ($error): ?>
-        <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-error"><?= icon('x', 18) ?> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <?php if ($success): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
+        <div class="alert alert-success"><?= icon('check', 18) ?> <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     
     <form method="POST" action="">
@@ -129,7 +129,7 @@ require_once '_inc/header.php';
             
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <button type="submit" class="btn btn-primary">Guardar configuración</button>
-                <button type="submit" name="probar_telegram" value="1" class="btn btn-secondary">📱 Enviar mensaje de prueba</button>
+                <button type="submit" name="probar_telegram" value="1" class="btn btn-secondary"><?= icon('smartphone', 18) ?> Enviar mensaje de prueba</button>
             </div>
         </div>
     </form>
@@ -140,26 +140,26 @@ require_once '_inc/header.php';
         </h3>
         <div id="guia-telegram" class="guia-telegram collapsed">
             <div class="guia-paso">
-                <h4>1️⃣ Crear tu bot</h4>
+                <h4>1. Crear tu bot</h4>
                 <p>Abri Telegram y buscá <strong>@BotFather</strong>. Enviá el comando <code>/newbot</code>.</p>
                 <p>Te pedirá un nombre (ej: "Notificaciones Mi Tienda") y un username que termine en "bot" (ej: <code>mitienda_notif_bot</code>).</p>
                 <p><strong>Guardá el token</strong> que te da BotFather. Se ve así: <code>123456789:ABCdefGHIjklMNOpqrsTUVwxyz</code></p>
             </div>
             <div class="guia-paso">
-                <h4>2️⃣ Obtener tu Chat ID</h4>
+                <h4>2. Obtener tu Chat ID</h4>
                 <p>Buscá <strong>@userinfobot</strong> en Telegram y enviá cualquier mensaje (ej: "hola").</p>
                 <p>Te responderá con tu información. El <strong>Chat ID</strong> es un número como <code>8228149072</code>.</p>
             </div>
             <div class="guia-paso">
-                <h4>3️⃣ Iniciar el bot</h4>
+                <h4>3. Iniciar el bot</h4>
                 <p>Antes de recibir mensajes, tenés que <strong>iniciar una conversación</strong> con tu bot. Buscá el username de tu bot (ej: @mitienda_notif_bot) y enviá <code>/start</code>.</p>
             </div>
             <div class="guia-paso">
-                <h4>4️⃣ Completar los datos</h4>
+                <h4>4. Completar los datos</h4>
                 <p>Pegá el Bot Token y el Chat ID en los campos de arriba, activá las notificaciones y guardá.</p>
             </div>
             <div class="guia-paso">
-                <h4>5️⃣ Probar</h4>
+                <h4>5. Probar</h4>
                 <p>Hacé clic en <strong>"Enviar mensaje de prueba"</strong>. Si recibís el mensaje en Telegram, ¡está todo listo!</p>
             </div>
             <p style="margin-top: 1rem;"><strong>¿Cuándo recibirás notificaciones?</strong></p>

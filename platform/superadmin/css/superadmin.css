@@ -58,7 +58,8 @@ body {
 }
 .sa-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
 .sa-nav a.active { background: var(--sa-primary); color: #fff; }
-.sa-nav-icon { font-size: 1.15rem; width: 24px; text-align: center; }
+.sa-nav-icon { font-size: 1.15rem; width: 24px; text-align: center; display: flex; align-items: center; justify-content: center; }
+.sa-nav-icon svg { flex-shrink: 0; }
 
 .sa-sidebar-footer {
     padding: 1rem 1.25rem;
@@ -108,10 +109,11 @@ body {
     display: flex; align-items: center; justify-content: center;
     font-size: 1.5rem; flex-shrink: 0;
 }
-.sa-stat-icon.blue { background: #eef2ff; }
-.sa-stat-icon.green { background: #d1fae5; }
-.sa-stat-icon.amber { background: #fef3c7; }
-.sa-stat-icon.purple { background: #f3e8ff; }
+.sa-stat-icon.blue { background: #eef2ff; color: #4f46e5; }
+.sa-stat-icon.green { background: #d1fae5; color: #059669; }
+.sa-stat-icon.amber { background: #fef3c7; color: #d97706; }
+.sa-stat-icon.purple { background: #f3e8ff; color: #7c3aed; }
+.sa-stat-icon svg { flex-shrink: 0; }
 .sa-stat-icon.rose { background: #ffe4e6; }
 .sa-stat-info h3 { font-size: 1.6rem; font-weight: 800; color: var(--sa-dark); line-height: 1.2; }
 .sa-stat-info p { font-size: 0.8rem; color: var(--sa-muted); margin-top: 0.15rem; }

@@ -26,7 +26,7 @@ require_once __DIR__ . '/_inc/header.php';
 <?php if (empty($stores)): ?>
     <div class="platform-card">
         <div class="empty-state">
-            <div class="empty-state-icon">🏪</div>
+            <div class="empty-state-icon"><?= icon('store', 48) ?></div>
             <h3>No tenés tiendas aún</h3>
             <p>Creá tu primera tienda online en minutos y empezá a vender hoy mismo.</p>
             <a href="<?= PLATFORM_PAGES_URL ?>/create-store.php" class="btn-t btn-t-primary">
@@ -50,7 +50,7 @@ require_once __DIR__ . '/_inc/header.php';
         ?>
         <div class="store-card">
             <div class="store-card-header">
-                <div class="store-card-icon">🏪</div>
+                <div class="store-card-icon"><?= icon('store', 32) ?></div>
                 <div class="store-card-info">
                     <h3><?= htmlspecialchars($store['slug']) ?></h3>
                     <p><?= htmlspecialchars($domain) ?></p>

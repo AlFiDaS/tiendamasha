@@ -24,28 +24,28 @@ require_once __DIR__ . '/_inc/header.php';
 <!-- Stats principales -->
 <div class="sa-stats">
     <div class="sa-stat-card">
-        <div class="sa-stat-icon blue">👥</div>
+        <div class="sa-stat-icon blue"><?= icon('users', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['total_users']) ?></h3>
             <p>Usuarios registrados</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon green">🏪</div>
+        <div class="sa-stat-icon green"><?= icon('store', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['total_stores']) ?></h3>
             <p>Tiendas creadas (<?= $stats['active_stores'] ?> activas)</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon purple">📦</div>
+        <div class="sa-stat-icon purple"><?= icon('package', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['total_products']) ?></h3>
             <p>Productos en total</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon amber">💰</div>
+        <div class="sa-stat-icon amber"><?= icon('dollar', 24) ?></div>
         <div class="sa-stat-info">
             <h3>$<?= number_format($stats['total_revenue'], 0, ',', '.') ?></h3>
             <p><?= number_format($stats['total_orders']) ?> órdenes aprobadas</p>
@@ -56,21 +56,21 @@ require_once __DIR__ . '/_inc/header.php';
 <!-- Distribución de planes -->
 <div class="sa-stats" style="grid-template-columns: repeat(3, 1fr);">
     <div class="sa-stat-card">
-        <div class="sa-stat-icon" style="background:#f1f5f9;">🆓</div>
+        <div class="sa-stat-icon" style="background:#f1f5f9; color:#64748b;"><?= icon('tag', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['plans']['free'] ?? 0) ?></h3>
             <p>Plan Free</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon" style="background:#dbeafe;">⭐</div>
+        <div class="sa-stat-icon" style="background:#dbeafe; color:#2563eb;"><?= icon('star', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['plans']['basic'] ?? 0) ?></h3>
             <p>Plan Basic</p>
         </div>
     </div>
     <div class="sa-stat-card">
-        <div class="sa-stat-icon" style="background:#f3e8ff;">🚀</div>
+        <div class="sa-stat-icon" style="background:#f3e8ff; color:#7c3aed;"><?= icon('zap', 24) ?></div>
         <div class="sa-stat-info">
             <h3><?= number_format($stats['plans']['pro'] ?? 0) ?></h3>
             <p>Plan Pro</p>

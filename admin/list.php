@@ -102,8 +102,8 @@ if (!empty($buscar)) {
             <p class="page-desc">Gestiona tu catálogo de productos</p>
         </div>
         <div class="page-header-actions">
-            <a href="ordenar.php" class="btn btn-secondary">📋 Ordenar</a>
-            <a href="add.php" class="btn btn-primary"><span style="color:white;font-weight:bold;">+</span> Agregar Producto</a>
+            <a href="ordenar.php" class="btn btn-secondary"><?= icon('clipboard', 18) ?> Ordenar</a>
+            <a href="add.php" class="btn btn-primary"><?= icon('plus', 18) ?> Agregar Producto</a>
         </div>
     </div>
     
@@ -233,7 +233,7 @@ if (!empty($buscar)) {
                             <div class="price-editor" data-id="<?= htmlspecialchars($product['id']) ?>">
                                 <span class="price-display"><?= htmlspecialchars($product['price'] ?? 'N/A') ?></span>
                                 <button type="button" class="btn-edit-price" title="Editar precio" style="background: none; border: none; cursor: pointer; padding: 0.25rem 0.5rem; color: #666; font-size: 0.9rem;">
-                                    ✏️
+                                    <?= icon('edit', 16) ?>
                                 </button>
                                 <div class="price-edit-form" style="display: none;">
                                     <input type="text" 
@@ -283,9 +283,9 @@ if (!empty($buscar)) {
                                        <?= $product['destacado'] ? 'checked' : '' ?>
                                        style="display: none;">
                                 <?php if ($product['destacado']): ?>
-                                    <span class="badge badge-warning">⭐ Destacado</span>
+                                    <span class="badge badge-warning"><?= icon('star', 14) ?> Destacado</span>
                                 <?php else: ?>
-                                    <span class="badge" style="background: #e0e0e0; color: #666;">⭐ Destacado</span>
+                                    <span class="badge" style="background: #e0e0e0; color: #666;"><?= icon('star', 14) ?> Destacado</span>
                                 <?php endif; ?>
                             </label>
                         </td>
@@ -327,9 +327,9 @@ if (!empty($buscar)) {
                                        <?= $product['destacado'] ? 'checked' : '' ?>
                                        style="display: none;">
                                 <?php if ($product['destacado']): ?>
-                                    <span class="badge badge-warning">⭐ Destacado</span>
+                                    <span class="badge badge-warning"><?= icon('star', 14) ?> Destacado</span>
                                 <?php else: ?>
-                                    <span class="badge" style="background: #e0e0e0; color: #666;">⭐ Destacado</span>
+                                    <span class="badge" style="background: #e0e0e0; color: #666;"><?= icon('star', 14) ?> Destacado</span>
                                 <?php endif; ?>
                             </label>
                         </td>
@@ -561,13 +561,13 @@ if (!empty($buscar)) {
                     if (newValue) {
                         // Activar destacado: badge amarillo
                         badge.className = 'badge badge-warning';
-                        badge.textContent = '⭐ Destacado';
+                        badge.innerHTML = '<svg class="icon icon-star" width="14" height="14" style="vertical-align:middle;margin-right:2px"><use href="#icon-star"></use></svg> Destacado';
                         badge.removeAttribute('style');
                     } else {
                         // Desactivar destacado: badge gris
                         badge.className = 'badge';
                         badge.style.cssText = 'background: #e0e0e0; color: #666;';
-                        badge.textContent = '⭐ Destacado';
+                        badge.innerHTML = '<svg class="icon icon-star" width="14" height="14" style="vertical-align:middle;margin-right:2px"><use href="#icon-star"></use></svg> Destacado';
                     }
                 } else {
                     // Revertir checkbox

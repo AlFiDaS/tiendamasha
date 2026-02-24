@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import Icon from '../../components/Icon.astro';
 
 // Obtener tipo de pago y order_id de la URL
 const tipoPago = Astro.url.searchParams.get('tipo') || 'mercadopago';
@@ -20,7 +21,7 @@ const orderId = Astro.url.searchParams.get('order_id');
         <div class="carrito-header" style="text-align: center;">
           {tipoPago === 'transferencia_directa' ? (
             <>
-              <h1 style="color: #ffc107; font-size: 2.5rem; margin-bottom: 1rem;">✅ Pago a Confirmar</h1>
+              <h1 style="color: #ffc107; font-size: 2.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><Icon name="check" size={32} /> Pago a Confirmar</h1>
               {orderId && (
                 <p style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem;">
                   Pedido #{orderId}
@@ -32,7 +33,7 @@ const orderId = Astro.url.searchParams.get('order_id');
             </>
           ) : (
             <>
-              <h1 style="color: #28a745; font-size: 2.5rem; margin-bottom: 1rem;">✅ Pago Exitoso</h1>
+              <h1 style="color: #28a745; font-size: 2.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><Icon name="check" size={32} /> Pago Exitoso</h1>
               {orderId ? (
                 <p style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem;">
                   Pedido #{orderId}
@@ -53,7 +54,7 @@ const orderId = Astro.url.searchParams.get('order_id');
           <div data-order-id-placeholder>
             {orderId && (
               <div style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
-                <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem;">📋 Información del Pedido</h3>
+                <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;"><Icon name="clipboard" size={18} /> Información del Pedido</h3>
                 <p style="margin: 0; color: #333; font-size: 0.95rem;">
                   <strong>ID del Pedido: #{orderId}</strong>
                 </p>
@@ -66,17 +67,17 @@ const orderId = Astro.url.searchParams.get('order_id');
           <h2 style="margin-bottom: 1rem;">Próximos pasos:</h2>
           {tipoPago === 'transferencia_directa' ? (
             <ul style="line-height: 2; color: #333;">
-              <li>⏳ Revisaremos tu comprobante de pago.</li>
-              <li>📱 En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
-              <li>📦 Una vez confirmado, te contactaremos para coordinar el envío.</li>
-              <li>📞 Si tienes dudas, puedes contactarnos por WhatsApp.</li>
+              <li>Revisaremos tu comprobante de pago.</li>
+              <li>En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
+              <li>Una vez confirmado, te contactaremos para coordinar el envío.</li>
+              <li>Si tienes dudas, puedes contactarnos por WhatsApp.</li>
             </ul>
           ) : (
             <ul style="line-height: 2; color: #333;">
-              <li>✅ Recibirás un email de confirmación de MercadoPago</li>
-              <li>📱 En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
-              <li>📦 Te contactaremos pronto para coordinar el envío</li>
-              <li>📞 Si tienes dudas, puedes contactarnos por WhatsApp</li>
+              <li>Recibirás un email de confirmación de MercadoPago</li>
+              <li>En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
+              <li>Te contactaremos pronto para coordinar el envío</li>
+              <li>Si tienes dudas, puedes contactarnos por WhatsApp</li>
             </ul>
           )}
 
@@ -144,7 +145,7 @@ const orderId = Astro.url.searchParams.get('order_id');
                   if (orderInfoDiv && !orderInfoDiv.querySelector('.order-id-info')) {
                     orderInfoDiv.innerHTML = `
                       <div class="order-id-info" style="background: #e7f3ff; border: 1px solid #b3d9ff; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
-                        <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem;">📋 Información del Pedido</h3>
+                        <h3 style="margin: 0 0 0.5rem 0; color: #0056b3; font-size: 1rem;">Información del Pedido</h3>
                         <p style="margin: 0; color: #333; font-size: 0.95rem;">
                           <strong>ID del Pedido: #${data.order_id}</strong>
                         </p>

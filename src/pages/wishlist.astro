@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Icon from '../components/Icon.astro';
 ---
 
 <Layout noindex={true}>
@@ -12,7 +13,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
   <section class="wishlist-section">
     <div class="container">
       <div class="section-header">
-        <h1>❤️ Mis Favoritos</h1>
+        <h1><Icon name="heart" size={28} /> Mis Favoritos</h1>
         <p>Productos que guardaste para más tarde</p>
       </div>
       
@@ -24,7 +25,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       </div>
       
       <div id="empty-wishlist" class="empty-wishlist" style="display: none;">
-        <div class="empty-icon">❤️</div>
+        <div class="empty-icon"><Icon name="heart" size={48} /></div>
         <h2>Tu lista de favoritos está vacía</h2>
         <p>Agrega productos a tus favoritos para verlos aquí</p>
         <a href="/productos" class="btn-browse">Explorar Productos</a>
@@ -148,7 +149,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
                     class="remove-favorite" 
                     onclick="event.preventDefault(); event.stopPropagation(); if(window.removeFromWishlistPage){window.removeFromWishlistPage('${escapeHtml(product.product_id)}');}else{window.removeFromWishlist('${escapeHtml(product.product_id)}');} return false;"
                     title="Eliminar de favoritos">
-                    ❌
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                   ${!hasStock ? '<div class="sin-stock">Sin stock</div>' : ''}
                 </div>

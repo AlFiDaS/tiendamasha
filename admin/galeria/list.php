@@ -83,10 +83,10 @@ if (!empty($settings['shop_logo'])) {
     </div>
 
     <?php if ($error): ?>
-        <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-error"><?= icon('x', 18) ?> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <?php if ($success): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
+        <div class="alert alert-success"><?= icon('check', 18) ?> <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
 
     <form method="POST" action="" id="galeria-form">
@@ -119,7 +119,7 @@ if (!empty($settings['shop_logo'])) {
                             </div>
                         </li>
                     </ul>
-                    <span class="nav-icons-fake">❤️ 🛒</span>
+                    <span class="nav-icons-fake"><?= icon('heart', 16) ?> <?= icon('cart', 16) ?></span>
                 </div>
             </nav>
         </div>
@@ -144,7 +144,7 @@ if (!empty($settings['shop_logo'])) {
             </div>
         <?php else: ?>
             <div class="galeria-toolbar" style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
-                <button type="button" id="btn-guardar-orden" class="btn btn-primary" style="display: none;">💾 Guardar orden</button>
+                <button type="button" id="btn-guardar-orden" class="btn btn-primary" style="display: none;"><?= icon('save', 18) ?> Guardar orden</button>
             </div>
             <div id="galeria-grid" class="grid galeria-sortable-grid">
                 <?php foreach ($items as $index => $item): ?>
@@ -798,7 +798,7 @@ if (!empty($settings['shop_logo'])) {
                 });
             });
             saveBtn.disabled = true;
-            saveBtn.textContent = '💾 Guardando...';
+            saveBtn.textContent = 'Guardando...';
             fetch('<?= ADMIN_URL ?>/api/galeria-save-order.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -812,14 +812,14 @@ if (!empty($settings['shop_logo'])) {
                     if (saveMessage) {
                         saveMessage.style.display = 'block';
                         saveMessage.className = 'alert alert-success';
-                        saveMessage.textContent = '✅ Orden guardado correctamente';
+                        saveMessage.textContent = 'Orden guardado correctamente';
                         setTimeout(() => { saveMessage.style.display = 'none'; }, 3000);
                     }
                 } else {
                     if (saveMessage) {
                         saveMessage.style.display = 'block';
                         saveMessage.className = 'alert alert-error';
-                        saveMessage.textContent = '❌ ' + (data.error || 'Error al guardar');
+                        saveMessage.textContent = (data.error || 'Error al guardar');
                     }
                 }
             })
@@ -827,12 +827,12 @@ if (!empty($settings['shop_logo'])) {
                 if (saveMessage) {
                     saveMessage.style.display = 'block';
                     saveMessage.className = 'alert alert-error';
-                    saveMessage.textContent = '❌ Error de conexión';
+                    saveMessage.textContent = 'Error de conexión';
                 }
             })
             .finally(() => {
                 saveBtn.disabled = false;
-                saveBtn.textContent = '💾 Guardar orden';
+                saveBtn.textContent = 'Guardar orden';
             });
         });
     }

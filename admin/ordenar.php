@@ -76,7 +76,7 @@ foreach ($products as $index => $product) {
         </div>
         <div class="page-header-actions">
             <button type="button" id="btn-guardar-orden" class="btn btn-primary" style="display: none;">
-                💾 Guardar Orden
+                <?= icon('save', 18) ?> Guardar Orden
             </button>
             <a href="list.php" class="btn btn-secondary">← Volver a lista</a>
         </div>
@@ -107,7 +107,7 @@ foreach ($products as $index => $product) {
     <?php if (empty($products)): ?>
         <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
             <p style="margin: 0; color: #856404;">
-                <strong>⚠️ No se encontraron productos</strong><br>
+                <strong><?= icon('alert', 18) ?> No se encontraron productos</strong><br>
                 <small>Categoría: <?= strtoupper($categoriaFiltro) ?> | Visible: 1</small>
             </p>
             <p style="margin: 0.5rem 0 0 0; color: #856404; font-size: 0.9rem;">
@@ -634,7 +634,7 @@ foreach ($products as $index => $product) {
         
         // Deshabilitar botón mientras se guarda
         saveBtn.disabled = true;
-        saveBtn.textContent = '💾 Guardando...';
+        saveBtn.textContent = 'Guardando...';
         
         fetch('api/save-order.php', {
             method: 'POST',
@@ -650,7 +650,7 @@ foreach ($products as $index => $product) {
                 saveBtn.style.display = 'none';
                 saveMessage.style.display = 'block';
                 saveMessage.className = 'alert-success';
-                saveMessage.textContent = '✅ Orden guardado correctamente';
+                saveMessage.textContent = 'Orden guardado correctamente';
                 
                 // Actualizar data-orden en las cards
                 cards.forEach((card, index) => {
@@ -663,18 +663,18 @@ foreach ($products as $index => $product) {
             } else {
                 saveMessage.style.display = 'block';
                 saveMessage.className = 'alert-error';
-                saveMessage.textContent = '❌ Error al guardar: ' + (data.error || 'Error desconocido');
+                saveMessage.textContent = 'Error al guardar: ' + (data.error || 'Error desconocido');
             }
         })
         .catch(error => {
             console.error('Error:', error);
             saveMessage.style.display = 'block';
             saveMessage.className = 'alert-error';
-            saveMessage.textContent = '❌ Error al guardar el orden';
+            saveMessage.textContent = 'Error al guardar el orden';
         })
         .finally(() => {
             saveBtn.disabled = false;
-            saveBtn.textContent = '💾 Guardar Orden';
+            saveBtn.textContent = 'Guardar Orden';
         });
     });
 })();

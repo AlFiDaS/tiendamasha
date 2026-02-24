@@ -72,7 +72,7 @@
             if (data.success) {
                 updateWishlistButtons(productId, true);
                 if (callback) callback(true, data.message);
-                showNotification('❤️ Agregado a favoritos', 'success');
+                showNotification('Agregado a favoritos', 'success');
             } else {
                 if (callback) callback(false, data.error);
                 showNotification(data.error || 'Error al agregar a favoritos', 'error');
@@ -171,17 +171,17 @@
             if (isInWishlist) {
                 button.classList.add('in-wishlist');
                 if (button.classList.contains('wishlist-btn-detail')) {
-                    button.innerHTML = '❤️ En favoritos';
+                    button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> En favoritos';
                 } else {
-                    button.innerHTML = '❤️';
+                    button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
                 }
                 button.title = 'Eliminar de favoritos';
             } else {
                 button.classList.remove('in-wishlist');
                 if (button.classList.contains('wishlist-btn-detail')) {
-                    button.innerHTML = '🤍 Agregar a favoritos';
+                    button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> Agregar a favoritos';
                 } else {
-                    button.innerHTML = '🤍';
+                    button.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
                 }
                 button.title = 'Agregar a favoritos';
             }

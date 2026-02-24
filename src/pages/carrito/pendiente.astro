@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import Icon from '../../components/Icon.astro';
 ---
 
 <Layout>
@@ -14,7 +15,7 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
     <section class="carrito">
       <div class="container">
         <div class="carrito-header" style="text-align: center;">
-          <h1 style="color: #ffc107; font-size: 2.5rem; margin-bottom: 1rem;">✅ Pago a Confirmar</h1>
+          <h1 style="color: #ffc107; font-size: 2.5rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><Icon name="check" size={32} /> Pago a Confirmar</h1>
           <p id="order-id-display" style="font-size: 1.5rem; color: #333; font-weight: 600; margin-bottom: 1rem; display: none;">
             Pedido #<span id="order-id-number"></span>
           </p>
@@ -26,10 +27,10 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
         <div style="max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 2rem; border-radius: 8px;">
           <h2 style="margin-bottom: 1rem;">Información importante:</h2>
           <ul style="line-height: 2; color: #333;">
-            <li>⏳ Revisaremos tu comprobante de pago.</li>
-            <li>📱 En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
-            <li>📦 Una vez confirmado, te contactaremos para coordinar el envío.</li>
-            <li>📞 Si tienes dudas, puedes contactarnos por WhatsApp.</li>
+            <li>Revisaremos tu comprobante de pago.</li>
+            <li>En los próximos minutos nos comunicaremos con usted por WhatsApp para avisarle la confirmación de su pedido.</li>
+            <li>Una vez confirmado, te contactaremos para coordinar el envío.</li>
+            <li>Si tienes dudas, puedes contactarnos por WhatsApp.</li>
           </ul>
 
           <div id="buttons-container" style="margin-top: 2rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; align-items: center;">

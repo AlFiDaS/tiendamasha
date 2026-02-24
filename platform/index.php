@@ -4,6 +4,7 @@
  */
 try {
     require_once __DIR__ . '/../platform-config.php';
+    require_once __DIR__ . '/_inc/icon.php';
     platformStartSession();
     $isLogged = platformIsAuthenticated();
 } catch (Throwable $e) {
@@ -114,6 +115,7 @@ if (!defined('PLATFORM_PAGES_URL')) {
         .lp-feature-icon {
             width: 56px; height: 56px; border-radius: 14px; background: var(--t-primary-light);
             display: flex; align-items: center; justify-content: center;
+            color: var(--t-primary);
             font-size: 1.75rem; margin-bottom: 1.25rem;
         }
         .lp-feature h3 { font-size: 1.15rem; font-weight: 700; color: var(--t-dark); margin-bottom: 0.5rem; }
@@ -158,6 +160,7 @@ if (!defined('PLATFORM_PAGES_URL')) {
     </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="icon-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol><symbol id="icon-credit-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol><symbol id="icon-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol><symbol id="icon-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol><symbol id="icon-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol><symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol></svg>
 
 <!-- NAV -->
 <nav class="lp-nav">
@@ -223,32 +226,32 @@ if (function_exists('platformFetchOne')) {
     </div>
     <div class="lp-features">
         <div class="lp-feature">
-            <div class="lp-feature-icon">🛍️</div>
+            <div class="lp-feature-icon"><?= icon('package', 28) ?></div>
             <h3>Catálogo de productos</h3>
             <p>Subí tus productos con fotos, precios, categorías y control de stock. Todo desde un panel simple.</p>
         </div>
         <div class="lp-feature">
-            <div class="lp-feature-icon">💳</div>
+            <div class="lp-feature-icon"><?= icon('credit-card', 28) ?></div>
             <h3>Cobros integrados</h3>
             <p>Conectá MercadoPago y recibí pagos al instante. Tus clientes pagan seguro y vos cobrás rápido.</p>
         </div>
         <div class="lp-feature">
-            <div class="lp-feature-icon">📱</div>
+            <div class="lp-feature-icon"><?= icon('smartphone', 28) ?></div>
             <h3>Tu dominio propio</h3>
             <p>Tu tienda con tu marca: www.somostiendi.com/tu-tienda o conectá tu dominio personalizado.</p>
         </div>
         <div class="lp-feature">
-            <div class="lp-feature-icon">📊</div>
+            <div class="lp-feature-icon"><?= icon('bar-chart', 28) ?></div>
             <h3>Panel de administración</h3>
             <p>Gestioná órdenes, cupones de descuento, galería de imágenes y configuraciones desde un solo lugar.</p>
         </div>
         <div class="lp-feature">
-            <div class="lp-feature-icon">🔔</div>
+            <div class="lp-feature-icon"><?= icon('bell', 28) ?></div>
             <h3>Notificaciones</h3>
             <p>Recibí alertas por Telegram cada vez que alguien hace una compra. Nunca pierdas una venta.</p>
         </div>
         <div class="lp-feature">
-            <div class="lp-feature-icon">🎨</div>
+            <div class="lp-feature-icon"><?= icon('image', 28) ?></div>
             <h3>Personalizable</h3>
             <p>Elegí colores, subí tu logo, armá tu landing page. Tu tienda con tu identidad.</p>
         </div>

@@ -32,8 +32,8 @@ require_once '../_inc/header.php';
             <p class="page-desc">Gestiona las categorías de tu catálogo</p>
         </div>
         <div class="page-header-actions">
-            <a href="../ordenar.php" class="btn btn-secondary">📋 Ordenar</a>
-            <a href="add.php" class="btn btn-primary"><span style="color:white;font-weight:bold;">+</span> Agregar Categoría</a>
+            <a href="../ordenar.php" class="btn btn-secondary"><?= icon('clipboard', 18) ?> Ordenar</a>
+            <a href="add.php" class="btn btn-primary"><?= icon('plus', 18) ?> Agregar Categoría</a>
         </div>
     </div>
     

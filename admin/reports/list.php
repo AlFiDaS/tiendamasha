@@ -83,7 +83,7 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
         <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al Dashboard</a>
     </div>
     <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h2 style="margin: 0;">📊 Reportes Mensuales</h2>
+        <h2 style="margin: 0;"><?= icon('bar-chart', 24) ?> Reportes Mensuales</h2>
         <a href="<?= ADMIN_URL ?>/reports/view-test.php" class="btn btn-secondary">Ver reporte de ejemplo</a>
     </div>
     
@@ -152,10 +152,10 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
                             <td><?= date('d/m/Y H:i', $report['created']) ?></td>
                             <td>
                                 <a href="<?= ADMIN_URL ?>/reports/view.php?file=<?= urlencode($report['filename']) ?>" class="btn btn-small btn-primary">Ver</a>
-                                <a href="<?= ADMIN_URL ?>/reports/download.php?file=<?= urlencode($report['filename']) ?>&format=excel" class="btn btn-small btn-secondary">📥 Descargar Excel</a>
+                                <a href="<?= ADMIN_URL ?>/reports/download.php?file=<?= urlencode($report['filename']) ?>&format=excel" class="btn btn-small btn-secondary"><?= icon('download', 16) ?> Descargar Excel</a>
                                 <a href="?delete=<?= urlencode($report['filename']) ?>&csrf_token=<?= urlencode(generateCSRFToken()) ?>" 
                                    class="btn btn-small btn-danger" 
-                                   onclick="return confirm('¿Estás seguro de eliminar este reporte?')">🗑️ Eliminar</a>
+                                   onclick="return confirm('¿Estás seguro de eliminar este reporte?')"><?= icon('trash', 16) ?> Eliminar</a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

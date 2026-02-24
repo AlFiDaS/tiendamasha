@@ -146,13 +146,13 @@ require_once '_inc/header.php';
     
     <?php if ($error): ?>
         <div class="alert alert-error">
-            ❌ <?= htmlspecialchars($error) ?>
+            <?= icon('x', 18) ?> <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
     
     <?php if ($success): ?>
         <div class="alert alert-success">
-            ✅ <?= htmlspecialchars($success) ?>
+            <?= icon('check', 18) ?> <?= htmlspecialchars($success) ?>
         </div>
     <?php endif; ?>
     
@@ -345,10 +345,10 @@ require_once '_inc/header.php';
         
         <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
             <button type="submit" class="btn btn-primary">
-                💾 Guardar Configuración
+                <?= icon('save', 18) ?> Guardar Configuración
             </button>
             <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">
-                ↩️ Cancelar
+                <?= icon('arrow-left', 18) ?> Cancelar
             </a>
         </div>
     </form>

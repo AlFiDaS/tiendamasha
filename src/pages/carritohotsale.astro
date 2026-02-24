@@ -129,7 +129,7 @@ import Layout from '../layouts/Layout.astro';
       let totalCarrito = 0;
 
       if (carrito.length === 0) {
-        contenedor.innerHTML = "<p class='carrito-vacio'>Tu carrito está vacío 🕯️</p>";
+        contenedor.innerHTML = "<p class='carrito-vacio'>Tu carrito está vacío</p>";
         totalEl.textContent = "Total a pagar: $0";
         carritoTotalEl.textContent = "Tu Carrito: $0";
         descuentoTotalEl.textContent = "Descuento: $0";
@@ -217,9 +217,9 @@ import Layout from '../layouts/Layout.astro';
       carritoTotalEl.textContent = `Tu carrito: $${totalConTarjeta}`;
 
       if (preciosIndividuales.length >= 3 && pago === 'transferencia') {
-        descuentoTotalEl.textContent = `🔥 Descuento HotSale: - $${descuentoTotal * 1}`;
+        descuentoTotalEl.textContent = `Descuento HotSale: - $${descuentoTotal * 1}`;
       } else if ( preciosIndividuales.length >= 3 && pago === 'tarjeta') {
-        descuentoTotalEl.textContent = `🔥 Descuento HotSale: - $${descuentoTotal * 1.25}`;
+        descuentoTotalEl.textContent = `Descuento HotSale: - $${descuentoTotal * 1.25}`;
       } 
       else {
         descuentoTotalEl.textContent = `Descuento: $0`;

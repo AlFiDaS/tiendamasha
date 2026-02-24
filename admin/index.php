@@ -40,7 +40,7 @@ $salesByDay = getSalesByDay();
     </div>
     
     <!-- Estadísticas de Ventas -->
-    <h3 class="section-title">📊 Ventas</h3>
+    <h3 class="section-title"><?= icon('chart', 20) ?> Ventas</h3>
     <div class="stats-grid">
         <div class="stat-card stat-sales">
             <div class="stat-number">$<?= number_format($dashboardStats['today']['total_revenue'], 2, ',', '.') ?></div>
@@ -68,7 +68,7 @@ $salesByDay = getSalesByDay();
     </div>
     
     <!-- Estadísticas de Productos -->
-    <h3 class="section-title">📦 Productos</h3>
+    <h3 class="section-title"><?= icon('package', 20) ?> Productos</h3>
     <div class="stats-grid">
         <div class="stat-card stat-total">
             <div class="stat-number"><?= $dashboardStats['total_products'] ?></div>
@@ -94,7 +94,7 @@ $salesByDay = getSalesByDay();
     <!-- Productos Más Vendidos -->
     <?php if (!empty($topProducts)): ?>
     <div class="top-products-section">
-        <h3 class="section-title">🏆 Productos Más Vendidos (Este Mes)</h3>
+        <h3 class="section-title"><?= icon('star', 20) ?> Productos Más Vendidos (Este Mes)</h3>
         <div class="top-products-list">
             <?php foreach ($topProducts as $index => $product): ?>
                 <div class="top-product-item">
@@ -103,7 +103,7 @@ $salesByDay = getSalesByDay();
                         <?php if (!empty($product['image'])): ?>
                             <img src="<?= htmlspecialchars($product['image']) ?>" alt="<?= htmlspecialchars($product['name']) ?>" onerror="this.style.display='none'">
                         <?php else: ?>
-                            <div class="no-image">📦</div>
+                            <div class="no-image"><?= icon('package', 32) ?></div>
                         <?php endif; ?>
                     </div>
                     <div class="product-info">
@@ -123,7 +123,7 @@ $salesByDay = getSalesByDay();
     <!-- Alertas de Stock Bajo -->
     <?php if (!empty($lowStockProducts)): ?>
     <div class="low-stock-section">
-        <h3 class="section-title">⚠️ Alertas de Stock Bajo</h3>
+        <h3 class="section-title"><?= icon('alert', 20) ?> Alertas de Stock Bajo</h3>
         <div class="low-stock-list">
             <?php foreach ($lowStockProducts as $product): ?>
                 <div class="low-stock-item">
@@ -147,7 +147,7 @@ $salesByDay = getSalesByDay();
     if (!empty($categorias)):
     ?>
     <div class="category-summary">
-        <h3 class="section-title">📁 Productos por Categoría</h3>
+        <h3 class="section-title"><?= icon('folder', 20) ?> Productos por Categoría</h3>
         <div class="category-grid">
             <?php foreach ($categorias as $cat): ?>
                 <div class="category-item">

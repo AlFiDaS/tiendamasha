@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Icon from '../components/Icon.astro';
 ---
 
 <Layout noindex={true}>
@@ -12,7 +13,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
   <section class="orders-section">
     <div class="container">
       <div class="section-header">
-        <h1>📦 Mis Pedidos</h1>
+        <h1><Icon name="package" size={28} /> Mis Pedidos</h1>
         <p>Consulta el estado de tus pedidos</p>
       </div>
       
@@ -48,7 +49,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
           <div class="help-text">
             <p>¿No recuerdas tu teléfono?</p>
             <a href="#" id="whatsapp-link" class="whatsapp-link" onclick="openWhatsApp(); return false;">
-              📱 Contáctanos por WhatsApp
+              <Icon name="smartphone" size={18} /> Contáctanos por WhatsApp
             </a>
           </div>
         </div>
@@ -61,7 +62,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       
       <!-- Estado vacío -->
       <div id="empty-orders" class="empty-orders" style="display: none;">
-        <div class="empty-icon">📦</div>
+        <div class="empty-icon"><Icon name="package" size={48} /></div>
         <h2>No se encontró el pedido</h2>
         <p>Verifica que hayas ingresado correctamente el número de pedido y tu teléfono</p>
         <button onclick="resetSearch()" class="btn-secondary">Buscar otro pedido</button>
@@ -69,12 +70,12 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       
       <!-- Error de verificación -->
       <div id="verification-error" class="verification-error" style="display: none;">
-        <div class="error-icon">⚠️</div>
+        <div class="error-icon"><Icon name="alert" size={48} /></div>
         <h2>Teléfono incorrecto</h2>
         <p>El teléfono ingresado no coincide con el del pedido. Por favor, verifica e intenta nuevamente.</p>
         <button onclick="resetSearch()" class="btn-secondary">Intentar de nuevo</button>
         <a href="#" id="whatsapp-link-error" class="whatsapp-link" onclick="openWhatsApp(); return false;">
-          📱 Contáctanos por WhatsApp
+          <Icon name="smartphone" size={18} /> Contáctanos por WhatsApp
         </a>
       </div>
     </div>
@@ -609,11 +610,11 @@ function displayOrder(order) {
                      order.status === 'approved' || order.status === 'finalizado' ? 'status-approved' : 
                      'status-rejected';
   
-  const statusText = order.status === 'pending' ? '⏳ Pendiente' : 
-                    order.status === 'a_confirmar' ? '⏳ A Confirmar' :
-                    order.status === 'approved' ? '✅ Aprobado' : 
-                    order.status === 'finalizado' ? '✅ Finalizado' :
-                    '❌ Rechazado';
+  const statusText = order.status === 'pending' ? 'Pendiente' : 
+                    order.status === 'a_confirmar' ? 'A Confirmar' :
+                    order.status === 'approved' ? 'Aprobado' : 
+                    order.status === 'finalizado' ? 'Finalizado' :
+                    'Rechazado';
   
   const itemsHtml = items.map(item => {
     // Manejar diferentes formatos de items

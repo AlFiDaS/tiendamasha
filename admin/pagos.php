@@ -58,10 +58,10 @@ require_once '_inc/header.php';
     <p style="color: #666; margin-bottom: 2rem;">Configura los datos para transferencia directa y las credenciales de MercadoPago.</p>
     
     <?php if ($error): ?>
-        <div class="alert alert-error">❌ <?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-error"><?= icon('x', 18) ?> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
     <?php if ($success): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
+        <div class="alert alert-success"><?= icon('check', 18) ?> <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     
     <!-- Formulario Transferencia directa -->
