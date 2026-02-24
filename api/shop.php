@@ -57,6 +57,15 @@ try {
     if ($facebook && !preg_match('#^https?://#i', $facebook)) {
         $facebook = 'https://www.facebook.com/' . preg_replace('/^@/', '', $facebook) . '/';
     }
+    // MercadoPago: indicar si está configurado (sin exponer el token)
+    // En multi-tenant: solo usar shop_settings de la tienda actual (no fallback a .env)
+    if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+        $mercadopagoConfigured = !empty(trim($settings['mercadopago_access_token'] ?? ''));
+    } else {
+        $mpToken = !empty($settings['mercadopago_access_token']) ? $settings['mercadopago_access_token'] : (defined('MERCADOPAGO_ACCESS_TOKEN') ? MERCADOPAGO_ACCESS_TOKEN : '');
+        $mercadopagoConfigured = !empty($mpToken);
+    }
+
     // Preparar datos para el frontend
     $shopData = [
         'shop_name' => $settings['shop_name'] ?? '',
@@ -74,7 +83,8 @@ try {
         'creation_year' => $settings['creation_year'] ?? null,
         'transfer_alias' => $settings['transfer_alias'] ?? '',
         'transfer_cbu' => $settings['transfer_cbu'] ?? '',
-        'transfer_titular' => $settings['transfer_titular'] ?? ''
+        'transfer_titular' => $settings['transfer_titular'] ?? '',
+        'mercadopago_configured' => $mercadopagoConfigured
     ];
     
     // Respuesta exitosa

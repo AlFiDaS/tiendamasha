@@ -233,7 +233,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
   <script is:inline>
     // Esperar a que cart.js se cargue y las funciones estén disponibles
-    function initCarrito() {
+    async function initCarrito() {
       // Verificar que las funciones estén disponibles
       if (typeof window.getCarrito === 'undefined' || typeof window.saveCarrito === 'undefined') {
         console.log('Esperando a que cart.js se cargue...');
@@ -247,7 +247,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       const updateCartCount = window.updateCartCount || (() => {});
 
       // Cargar datos de transferencia desde la API (siempre fresco para reflejar cambios en Configurar pagos)
-      (async function cargarDatosTransferencia() {
+      async function cargarDatosTransferencia() {
         try {
           const res = await fetch('/api/shop.php');
           const data = await res.json();
@@ -268,9 +268,24 @@ import Breadcrumb from '../components/Breadcrumb.astro';
               cbuEl.textContent = shop.transfer_cbu;
               if (cbuRow) cbuRow.style.display = 'block';
             }
+            // Si MercadoPago no está configurado, ocultar opción y botón
+            const pagoSelect = document.getElementById('pago');
+            const btnFinalizar = document.getElementById('btn-finalizar');
+            const btnFinalizarDirecta = document.getElementById('btn-finalizar-directa');
+            const datosBancarios = document.getElementById('datos-bancarios');
+            const totalTransferir = document.getElementById('total-transferir');
+            if (!shop.mercadopago_configured) {
+              const optTarjeta = pagoSelect?.querySelector('option[value="tarjeta"]');
+              if (optTarjeta) optTarjeta.remove();
+              if (pagoSelect) pagoSelect.value = 'transferencia_directa';
+              if (btnFinalizar) btnFinalizar.style.display = 'none';
+              if (btnFinalizarDirecta) btnFinalizarDirecta.style.display = 'inline-block';
+              if (datosBancarios) datosBancarios.style.display = 'block';
+              if (totalTransferir) totalTransferir.textContent = '$0'; // Se actualizará en renderCarrito
+            }
           }
         } catch (e) { console.warn('No se pudieron cargar datos de transferencia:', e); }
-      })();
+      }
 
       const contenedor = document.querySelector("#carrito-lista");
       const totalEl = document.querySelector("#total");
@@ -1336,12 +1351,13 @@ Gracias!`);
 
       actualizarFormularioEnvio();
       actualizarPreciosEnvio();
+      await cargarDatosTransferencia();
       renderCarrito();
     }
 
     // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initCarrito);
+      document.addEventListener('DOMContentLoaded', () => initCarrito());
     } else {
       initCarrito();
     }
