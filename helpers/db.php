@@ -14,8 +14,8 @@ if (!defined('LUME_ADMIN')) {
 
 /** Tablas de tienda que requieren store_id */
 $GLOBALS['_store_tables'] = [
-    'products', 'categories', 'admin_users', 'orders',
-    'galeria', 'coupons', 'reviews', 'wishlist', 'customers',
+    'products', 'categories', 'admin_users', 'orders', 'wishlist',
+    'galeria', 'coupons', 'reviews', 'customers',
     'stock_movements', 'shop_settings', 'gallery_info',
     'landing_page_settings',
 ];
@@ -51,7 +51,26 @@ function injectStoreIdIntoQuery($sql, $params) {
         if (preg_match('/\b(shop_settings|gallery_info|landing_page_settings)\b.*?WHERE\s+id\s*=\s*1\b/i', $sql)) {
             $sql = preg_replace('/WHERE\s+id\s*=\s*1\b/i', 'WHERE store_id = :__store_id', $sql);
         } elseif (preg_match('/\bWHERE\b/i', $sql)) {
-            $sql = preg_replace('/(\bWHERE\b)(.+?)(\bORDER\s+BY\b|\bGROUP\s+BY\b|\bLIMIT\b|\bHAVING\b|$)/is', '$1 $2 AND store_id = :__store_id $3', $sql, 1);
+            // Si hay JOIN de products y categories con alias, calificar store_id para evitar ambigüedad.
+            // Solo usar alias cuando no sea palabra reservada (ej. FROM products WHERE captura "WHERE" por error)
+            $storeIdCond = 'store_id = :__store_id';
+            $reserved = ['where', 'join', 'on', 'and', 'or', 'order', 'group', 'limit', 'having', 'left', 'right', 'inner', 'outer', 'from', 'set'];
+            $getValidAlias = function($m) use ($reserved) {
+                $a = strtolower($m[1]);
+                return !in_array($a, $reserved) ? $m[1] : null;
+            };
+            $pAlias = null;
+            $cAlias = null;
+            $wAlias = null;
+            if (preg_match('/\bproducts\s+(?:AS\s+)?(\w+)/i', $sql, $pm)) $pAlias = $getValidAlias($pm);
+            if (preg_match('/\bcategories\s+(?:AS\s+)?(\w+)/i', $sql, $cm)) $cAlias = $getValidAlias($cm);
+            if (preg_match('/\bwishlist\s+(?:AS\s+)?(\w+)/i', $sql, $wm)) $wAlias = $getValidAlias($wm);
+            $conds = [];
+            if ($pAlias) $conds[] = $pAlias . '.store_id = :__store_id';
+            if ($cAlias) $conds[] = $cAlias . '.store_id = :__store_id';
+            if ($wAlias) $conds[] = $wAlias . '.store_id = :__store_id';
+            $storeIdCond = !empty($conds) ? implode(' AND ', $conds) : 'store_id = :__store_id';
+            $sql = preg_replace('/(\bWHERE\b)(.+?)(\bORDER\s+BY\b|\bGROUP\s+BY\b|\bLIMIT\b|\bHAVING\b|$)/is', '$1 $2 AND ' . $storeIdCond . ' $3', $sql, 1);
         } else {
             $sql = preg_replace('/(\bFROM\s+[\w`]+(?:\s+[\w`]+)?)\s+(\b(?:ORDER|GROUP|LIMIT|HAVING)\b|$)/is', '$1 WHERE store_id = :__store_id $2', $sql, 1);
         }

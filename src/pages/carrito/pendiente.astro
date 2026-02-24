@@ -46,15 +46,17 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
     // Obtener datos de la tienda (WhatsApp y nombre) para el enlace
     async function getShopData() {
       try {
-        const cached = localStorage.getItem('shop_settings');
+        const sk = 'shop_settings' + (window.__STORE_BASE || '');
+        const cached = localStorage.getItem(sk);
         if (cached) {
           const s = JSON.parse(cached);
-          if (s && s.whatsapp_number) return s;
+          const shop = (s && s.data) ? s.data : s;
+          if (shop && shop.whatsapp_number) return shop;
         }
         const res = await fetch('/api/shop.php');
         const data = await res.json();
         if (data.success && data.shop) {
-          localStorage.setItem('shop_settings', JSON.stringify(data.shop));
+          localStorage.setItem(sk, JSON.stringify(data.shop));
           return data.shop;
         }
       } catch (e) { console.warn('Error al cargar tienda:', e); }

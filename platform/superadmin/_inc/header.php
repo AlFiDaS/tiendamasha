@@ -36,6 +36,9 @@ $_saCurrentPage = basename($_SERVER['PHP_SELF'], '.php');
             <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/users.php" class="<?= $_saCurrentPage === 'users' ? 'active' : '' ?>">
                 <span class="sa-nav-icon">👥</span> Usuarios
             </a>
+            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup.php" class="<?= $_saCurrentPage === 'backup' ? 'active' : '' ?>">
+                <span class="sa-nav-icon">💾</span> Backups
+            </a>
         </nav>
         <div class="sa-sidebar-footer">
             <a href="<?= PLATFORM_PAGES_URL ?>/dashboard.php">← Volver a mi panel</a>

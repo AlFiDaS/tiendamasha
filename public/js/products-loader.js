@@ -201,7 +201,7 @@
             ` : '<p class="price">N/A</p>';
         }
         
-        const productId = product.id || product.slug;
+        const productId = (product.id != null && product.id !== '') ? String(product.id) : (product.slug || '');
         
         return `
             <div class="product-card">

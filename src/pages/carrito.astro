@@ -246,21 +246,16 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       const saveCarrito = window.saveCarrito;
       const updateCartCount = window.updateCartCount || (() => {});
 
-      // Cargar datos de transferencia desde la API de la tienda
+      // Cargar datos de transferencia desde la API (siempre fresco para reflejar cambios en Configurar pagos)
       (async function cargarDatosTransferencia() {
         try {
+          const res = await fetch('/api/shop.php');
+          const data = await res.json();
           let shop = null;
-          const cached = localStorage.getItem('shop_settings');
-          if (cached) {
-            try { shop = JSON.parse(cached); } catch (e) {}
-          }
-          if (!shop || !shop.transfer_alias) {
-            const res = await fetch('/api/shop.php');
-            const data = await res.json();
-            if (data.success && data.shop) {
-              shop = data.shop;
-              localStorage.setItem('shop_settings', JSON.stringify(shop));
-            }
+          if (data.success && data.shop) {
+            shop = data.shop;
+            const cacheKey = 'shop_settings' + (window.__STORE_BASE || '');
+            localStorage.setItem(cacheKey, JSON.stringify(shop));
           }
           if (shop) {
             const aliasEl = document.getElementById('transfer-alias');
@@ -604,7 +599,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       
       // Aplicar descuento de cupón si existe (revalidar primero)
       let descuentoCupon = 0;
-      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon' + (window.__STORE_BASE || '')) || 'null');
       if (couponData && couponData.valid) {
         // Revalidar el cupón con el carrito actual y obtener el nuevo descuento
         const revalidationResult = await revalidarCupon(couponData.coupon.code, subtotalCalculado, carrito);
@@ -613,10 +608,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
           descuentoCupon = revalidationResult.discount || 0;
           // Actualizar el localStorage con el nuevo descuento
           couponData.discount = descuentoCupon;
-          localStorage.setItem('applied_coupon', JSON.stringify(couponData));
+          localStorage.setItem('applied_coupon' + (window.__STORE_BASE || ''), JSON.stringify(couponData));
         } else {
           // Si el cupón ya no es válido, removerlo
-          localStorage.removeItem('applied_coupon');
+          localStorage.removeItem('applied_coupon' + (window.__STORE_BASE || ''));
           ocultarCuponAplicado();
           mostrarMensajeCupon('El cupón ya no es válido para los productos en tu carrito', 'error');
         }
@@ -695,10 +690,11 @@ import Breadcrumb from '../components/Breadcrumb.astro';
       let shopName = 'Tienda';
       let whatsappPhone = '';
       try {
-        const cached = localStorage.getItem('shop_settings');
+        const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
         if (cached) {
           const s = JSON.parse(cached);
-          if (s) { shopName = s.shop_name || shopName; whatsappPhone = (s.whatsapp_number || '').replace(/\D/g, ''); }
+          const shop = (s && s.data) ? s.data : s;
+          if (shop) { shopName = shop.shop_name || shopName; whatsappPhone = (shop.whatsapp_number || '').replace(/\D/g, ''); }
         }
       } catch (e) {}
       
@@ -967,7 +963,7 @@ Gracias!`);
          }
         
         // Aplicar descuento de cupón si existe (revalidar primero para obtener el descuento actualizado)
-        const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+        const couponData = JSON.parse(localStorage.getItem('applied_coupon' + (window.__STORE_BASE || '')) || 'null');
         let descuentoCupon = 0;
         if (couponData && couponData.valid) {
           // Revalidar para obtener el descuento actualizado con el carrito actual
@@ -1093,7 +1089,7 @@ Gracias!`);
       saveCarrito(carrito);
       
       // Revalidar cupón si existe antes de renderizar
-      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon' + (window.__STORE_BASE || '')) || 'null');
       if (couponData && couponData.valid) {
         // Calcular total para revalidación (precio base de transferencia)
         let totalCarrito = 0;
@@ -1109,13 +1105,13 @@ Gracias!`);
         // Revalidar asíncronamente y actualizar descuento
         revalidarCupon(couponData.coupon.code, totalCarrito, carrito).then(result => {
           if (!result || !result.valid) {
-            localStorage.removeItem('applied_coupon');
+            localStorage.removeItem('applied_coupon' + (window.__STORE_BASE || ''));
             ocultarCuponAplicado();
             mostrarMensajeCupon('El cupón ya no es válido para los productos en tu carrito', 'error');
           } else {
             // Actualizar el descuento en localStorage con el nuevo valor
             couponData.discount = result.discount || 0;
-            localStorage.setItem('applied_coupon', JSON.stringify(couponData));
+            localStorage.setItem('applied_coupon' + (window.__STORE_BASE || ''), JSON.stringify(couponData));
           }
           renderCarrito();
         });
@@ -1128,7 +1124,7 @@ Gracias!`);
       if (confirm("¿Seguro que querés vaciar el carrito?")) {
         saveCarrito([]);
         // Remover cupón si se vacía el carrito
-        localStorage.removeItem('applied_coupon');
+        localStorage.removeItem('applied_coupon' + (window.__STORE_BASE || ''));
         ocultarCuponAplicado();
         mostrarMensajeCupon('', '');
         renderCarrito();
@@ -1186,13 +1182,13 @@ Gracias!`);
         
         if (data.success && data.valid) {
           // Guardar cupón aplicado
-          localStorage.setItem('applied_coupon', JSON.stringify(data));
+          localStorage.setItem('applied_coupon' + (window.__STORE_BASE || ''), JSON.stringify(data));
           mostrarCuponAplicado(data.coupon.code, data.discount);
           mostrarMensajeCupon(data.message, 'success');
           renderCarrito(); // Recalcular totales
         } else {
           mostrarMensajeCupon(data.message || 'Código de cupón no válido', 'error');
-          localStorage.removeItem('applied_coupon');
+          localStorage.removeItem('applied_coupon' + (window.__STORE_BASE || ''));
           ocultarCuponAplicado();
         }
       } catch (error) {
@@ -1241,7 +1237,7 @@ Gracias!`);
     
     // Función para remover cupón
     function removerCupon() {
-      localStorage.removeItem('applied_coupon');
+      localStorage.removeItem('applied_coupon' + (window.__STORE_BASE || ''));
       ocultarCuponAplicado();
       mostrarMensajeCupon('', '');
       const couponInput = document.getElementById('coupon-code');
@@ -1302,7 +1298,7 @@ Gracias!`);
     
     // Cargar cupón aplicado al iniciar (después de que el DOM esté listo)
     setTimeout(() => {
-      const couponData = JSON.parse(localStorage.getItem('applied_coupon') || 'null');
+      const couponData = JSON.parse(localStorage.getItem('applied_coupon' + (window.__STORE_BASE || '')) || 'null');
       if (couponData && couponData.valid) {
         mostrarCuponAplicado(couponData.coupon.code, couponData.discount);
       }

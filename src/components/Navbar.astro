@@ -65,10 +65,11 @@ const staticLinksAfter = [
 </nav>
 
 <script is:inline>
-  // Cargar contadores desde cache inmediatamente para evitar flash
+  // Cargar contadores desde cache inmediatamente para evitar flash (prefijados por tienda)
   (function() {
+    const storeBase = window.__STORE_BASE || '';
     // Cargar wishlist count desde localStorage
-    const cachedWishlistCount = localStorage.getItem('wishlist_count');
+    const cachedWishlistCount = localStorage.getItem('wishlist_count' + storeBase);
     if (cachedWishlistCount !== null) {
       const count = parseInt(cachedWishlistCount, 10);
       const countElements = document.querySelectorAll('#wishlist-count, #wishlist-count-mobile');
@@ -85,7 +86,7 @@ const staticLinksAfter = [
     }
     
     // Cargar cart count desde localStorage
-    const cachedCartCount = localStorage.getItem('cart_count');
+    const cachedCartCount = localStorage.getItem('cart_count' + storeBase);
     if (cachedCartCount !== null) {
       const count = parseInt(cachedCartCount, 10);
       const countElements = document.querySelectorAll('#cart-count, #cart-count-mobile');
@@ -194,7 +195,7 @@ const staticLinksAfter = [
   (function() {
     let categoriesLoaded = false;
     const CATEGORIES_MARKER = 'data-categories-loaded';
-    const CATEGORIES_CACHE_KEY = 'navbar_categories';
+    const CATEGORIES_CACHE_KEY = 'navbar_categories' + (window.__STORE_BASE || '');
     const CACHE_TIME = 5 * 60 * 1000; // 5 minutos
     
     // Función para insertar categorías en el DOM

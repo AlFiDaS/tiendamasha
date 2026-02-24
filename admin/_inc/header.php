@@ -126,7 +126,6 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                 <section>
                     <div class="menu-label">Información</div>
                     <a href="<?= ADMIN_URL ?>/reports/list.php"><span class="nav-icon">📈</span> Reportes mensuales</a>
-                    <a href="<?= ADMIN_URL ?>/backup/list.php"><span class="nav-icon">💾</span> Backups</a>
                 </section>
             </nav>
         </aside>

@@ -21,10 +21,10 @@ if (!function_exists('getShopSettings')) {
  * @return bool True si se envió correctamente, false en caso contrario
  */
 function sendTelegramNotification($message) {
-    // Obtener configuración: primero desde BD (Configurar notificaciones), luego config.php
+    // Solo usar configuración de la tienda; no heredar .env (evita que tiendas nuevas usen el bot del superadmin)
     $settings = function_exists('getShopSettings') ? getShopSettings() : [];
-    $botToken = !empty($settings['telegram_bot_token']) ? $settings['telegram_bot_token'] : (defined('TELEGRAM_BOT_TOKEN') ? TELEGRAM_BOT_TOKEN : '');
-    $chatId = !empty($settings['telegram_chat_id']) ? $settings['telegram_chat_id'] : (defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '');
+    $botToken = $settings['telegram_bot_token'] ?? '';
+    $chatId = $settings['telegram_chat_id'] ?? '';
     
     // Si está desactivado en BD (Configurar notificaciones), no enviar
     if (isset($settings['telegram_enabled']) && empty($settings['telegram_enabled'])) {

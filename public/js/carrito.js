@@ -1,7 +1,8 @@
 export function agregarAlCarrito(producto) {
-    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const key = 'carrito' + (window.__STORE_BASE || '');
+    const carrito = JSON.parse(localStorage.getItem(key)) || [];
     carrito.push(producto);
-    localStorage.setItem('carrito', JSON.stringify(carrito));
+    localStorage.setItem(key, JSON.stringify(carrito));
     alert(`Agregaste "${producto.name}" al carrito 🛒`);
   }
   

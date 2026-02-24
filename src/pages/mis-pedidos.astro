@@ -689,8 +689,8 @@ function resetSearch() {
 async function openWhatsApp() {
   let shop = null;
   try {
-    const cached = localStorage.getItem('shop_settings');
-    if (cached) { const s = JSON.parse(cached); if (s && s.whatsapp_number) shop = s; }
+    const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+    if (cached) { const s = JSON.parse(cached); const data = (s && s.data) ? s.data : s; if (data && data.whatsapp_number) shop = data; }
     if (!shop) {
       const res = await fetch('/api/shop.php');
       const data = await res.json();

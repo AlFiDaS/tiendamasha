@@ -37,10 +37,11 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 (function() {
   // Obtener session ID (usar localStorage o generar uno)
   function getSessionId() {
-    let sessionId = localStorage.getItem('wishlist_session_id');
+    const key = 'wishlist_session_id' + (window.__STORE_BASE || '');
+    let sessionId = localStorage.getItem(key);
     if (!sessionId) {
       sessionId = 'wishlist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('wishlist_session_id', sessionId);
+      localStorage.setItem(key, sessionId);
     }
     return sessionId;
   }

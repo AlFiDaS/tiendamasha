@@ -241,10 +241,11 @@ import Layout from '../layouts/Layout.astro';
       let shopName = 'Tienda';
       let whatsappPhone = '';
       try {
-        const cached = localStorage.getItem('shop_settings');
+        const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
         if (cached) {
           const s = JSON.parse(cached);
-          if (s) { shopName = s.shop_name || shopName; whatsappPhone = (s.whatsapp_number || '').replace(/\D/g, ''); }
+          const shop = (s && s.data) ? s.data : s;
+          if (shop) { shopName = shop.shop_name || shopName; whatsappPhone = (shop.whatsapp_number || '').replace(/\D/g, ''); }
         }
       } catch (e) {}
       if (!whatsappPhone) {

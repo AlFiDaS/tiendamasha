@@ -60,8 +60,8 @@ const orderId = Astro.url.searchParams.get('order_id');
   <script is:inline>
     async function getShopData() {
       try {
-        const cached = localStorage.getItem('shop_settings');
-        if (cached) { const s = JSON.parse(cached); if (s && s.whatsapp_number) return s; }
+        const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+        if (cached) { const s = JSON.parse(cached); const shop = (s && s.data) ? s.data : s; if (shop && shop.whatsapp_number) return shop; }
         const res = await fetch('/api/shop.php');
         const data = await res.json();
         if (data.success && data.shop) return data.shop;

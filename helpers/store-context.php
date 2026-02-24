@@ -76,13 +76,15 @@ function injectStoreContext($html, $slug) {
         . 'window.__STORE_BASE="' . $base . '";'
         . '(function(){'
         . 'var b=window.__STORE_BASE;'
+        . 'if(!b&&window.location){var m=window.location.pathname.match(/^\\/([a-z0-9\\-]+)(?:\\/|$)/);b=m?"/"+m[1]:""}'
 
         // fetch override
         . 'var f=window.fetch;'
         . 'window.fetch=function(u,o){'
         .   'if(typeof u==="string"){'
-        .     'if(u.startsWith("/api/"))u=b+u;'
-        .     'else if(u.match(/^https?:\\/\\/[^/]+(:\\d+)?\\/api\\//)){var p=new URL(u);p.pathname=b+p.pathname;u=p.toString()}'
+        .     'var base=b||(window.__STORE_BASE||"");'
+        .     'if(base&&u.startsWith("/api/"))u=base+u;'
+        .     'else if(base&&u.match(/^https?:\\/\\/[^/]+(:\\d+)?\\/api\\//)){var p=new URL(u);p.pathname=base+p.pathname;u=p.toString()}'
         .   '}'
         .   'return f.call(this,u,o)'
         . '};'
@@ -90,7 +92,8 @@ function injectStoreContext($html, $slug) {
         // XHR override
         . 'var X=XMLHttpRequest.prototype.open;'
         . 'XMLHttpRequest.prototype.open=function(m,u){'
-        .   'if(typeof u==="string"&&u.startsWith("/api/"))arguments[1]=b+u;'
+        .   'var base=b||(window.__STORE_BASE||"");'
+        .   'if(typeof u==="string"&&base&&u.startsWith("/api/"))arguments[1]=base+u;'
         .   'return X.apply(this,arguments)'
         . '};'
 

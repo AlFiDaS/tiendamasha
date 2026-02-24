@@ -9,12 +9,23 @@
 (function() {
     'use strict';
     
+    // Prefijo por tienda: evita cruce de wishlist entre wemasha, test1, etc.
+    // Fallback: si __STORE_BASE no está inyectado, derivar de la URL
+    function storeKey(key) {
+        var base = window.__STORE_BASE;
+        if (!base && typeof window.location !== 'undefined') {
+            var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+            base = m ? '/' + m[1] : '';
+        }
+        return key + (base || '');
+    }
+    
     // Obtener o crear session ID
     function getSessionId() {
-        let sessionId = localStorage.getItem('wishlist_session_id');
+        let sessionId = localStorage.getItem(storeKey('wishlist_session_id'));
         if (!sessionId) {
             sessionId = 'wishlist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('wishlist_session_id', sessionId);
+            localStorage.setItem(storeKey('wishlist_session_id'), sessionId);
         }
         return sessionId;
     }
@@ -109,7 +120,8 @@
             const data = await response.json();
             
             if (data.success && data.items) {
-                return data.items.some(item => item.product_id === productId);
+                const pid = String(productId);
+                return data.items.some(item => String(item.product_id) === pid);
             }
             return false;
         } catch (error) {
@@ -177,11 +189,11 @@
             const data = await response.json();
             
             if (data.success && data.items) {
-                const wishlistIds = new Set(data.items.map(item => item.product_id));
+                const wishlistIds = new Set(data.items.map(item => String(item.product_id)));
                 
                 wishlistButtons.forEach(button => {
                     const productId = button.getAttribute('data-wishlist-id');
-                    if (wishlistIds.has(productId)) {
+                    if (productId && wishlistIds.has(String(productId))) {
                         updateWishlistButtons(productId, true);
                     }
                 });
@@ -259,8 +271,8 @@
             
             const count = data.success && data.items ? data.items.length : 0;
             
-            // Guardar en localStorage para evitar flash
-            localStorage.setItem('wishlist_count', count.toString());
+            // Guardar en localStorage para evitar flash (prefijado por tienda)
+            localStorage.setItem(storeKey('wishlist_count'), count.toString());
             
             // Actualizar contadores
             const countElements = document.querySelectorAll('#wishlist-count, #wishlist-count-mobile');
@@ -272,6 +284,8 @@
             console.error('Error al actualizar contador de wishlist:', error);
         }
     }
+    
+    window.updateWishlistCount = updateWishlistCount;
     
     // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {

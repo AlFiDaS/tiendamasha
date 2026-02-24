@@ -21,9 +21,9 @@ $testResult = '';
 
 $settings = getShopSettings();
 
-// Valores por defecto desde config.php si la BD está vacía (migración)
-$botToken = $settings['telegram_bot_token'] ?? (defined('TELEGRAM_BOT_TOKEN') ? TELEGRAM_BOT_TOKEN : '');
-$chatId = $settings['telegram_chat_id'] ?? (defined('TELEGRAM_CHAT_ID') ? TELEGRAM_CHAT_ID : '');
+// Solo usar valores de la tienda; nuevas tiendas deben configurar vacío (no heredar .env)
+$botToken = $settings['telegram_bot_token'] ?? '';
+$chatId = $settings['telegram_chat_id'] ?? '';
 $telegramEnabled = isset($settings['telegram_enabled']) ? (int)$settings['telegram_enabled'] : 0;
 
 // Procesar formulario

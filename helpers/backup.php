@@ -20,9 +20,10 @@ if (!function_exists('getDB')) {
 /**
  * Crear backup de la base de datos
  * @param bool $compress Si true, comprime el backup en .gz
+ * @param array|null $dbCreds Credenciales opcionales [host, name, user, pass]; si null usa config
  * @return string|false Ruta del archivo de backup o false en error
  */
-function createDatabaseBackup($compress = true) {
+function createDatabaseBackup($compress = true, $dbCreds = null) {
     $backupDir = BASE_PATH . '/backups';
     
     // Crear directorio si no existe
@@ -37,13 +38,18 @@ function createDatabaseBackup($compress = true) {
     $filename = 'backup-' . date('Y-m-d-H-i-s') . '.sql';
     $filepath = $backupDir . '/' . $filename;
     
+    $host = $dbCreds['host'] ?? DB_HOST;
+    $name = $dbCreds['name'] ?? DB_NAME;
+    $user = $dbCreds['user'] ?? DB_USER;
+    $pass = $dbCreds['pass'] ?? DB_PASS;
+    
     // Comando mysqldump
     $command = sprintf(
         'mysqldump -h%s -u%s -p%s %s > %s 2>&1',
-        escapeshellarg(DB_HOST),
-        escapeshellarg(DB_USER),
-        escapeshellarg(DB_PASS),
-        escapeshellarg(DB_NAME),
+        escapeshellarg($host),
+        escapeshellarg($user),
+        escapeshellarg($pass),
+        escapeshellarg($name),
         escapeshellarg($filepath)
     );
     
@@ -77,10 +83,11 @@ function createDatabaseBackup($compress = true) {
 /**
  * Crear backup usando PDO (alternativa si mysqldump no está disponible)
  * @param bool $compress
+ * @param array|null $dbCreds Credenciales opcionales [host, name, user, pass]; si null usa getDB()
  * @return string|false
  */
-function createDatabaseBackupPDO($compress = true) {
-    $backupDir = BASE_PATH . '/backups';
+function createDatabaseBackupPDO($compress = true, $dbCreds = null) {
+    $backupDir = defined('BASE_PATH') ? BASE_PATH . '/backups' : dirname(__DIR__) . '/backups';
     
     if (!is_dir($backupDir)) {
         if (!mkdir($backupDir, 0755, true)) {
@@ -91,14 +98,25 @@ function createDatabaseBackupPDO($compress = true) {
     $filename = 'backup-' . date('Y-m-d-H-i-s') . '.sql';
     $filepath = $backupDir . '/' . $filename;
     
-    $pdo = getDB();
+    $pdo = null;
+    if ($dbCreds) {
+        try {
+            $dsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', $dbCreds['host'], $dbCreds['name']);
+            $pdo = new PDO($dsn, $dbCreds['user'], $dbCreds['pass'] ?? '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        } catch (PDOException $e) {
+            error_log('Backup PDO: ' . $e->getMessage());
+            return false;
+        }
+    } else {
+        $pdo = getDB();
+    }
     if (!$pdo) {
         return false;
     }
     
     $output = "-- Backup de base de datos\n";
     $output .= "-- Generado: " . date('Y-m-d H:i:s') . "\n";
-    $output .= "-- Base de datos: " . DB_NAME . "\n\n";
+    $output .= "-- Base de datos: " . ($dbCreds['name'] ?? DB_NAME) . "\n\n";
     $output .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
     
     // Obtener todas las tablas
@@ -157,10 +175,11 @@ function createDatabaseBackupPDO($compress = true) {
 
 /**
  * Obtener lista de backups guardados
+ * @param string|null $backupDir Ruta opcional; si null usa BASE_PATH/backups
  * @return array
  */
-function getBackupsList() {
-    $backupDir = BASE_PATH . '/backups';
+function getBackupsList($backupDir = null) {
+    $backupDir = $backupDir ?? (defined('BASE_PATH') ? BASE_PATH . '/backups' : dirname(__DIR__) . '/backups');
     
     if (!is_dir($backupDir)) {
         return [];
@@ -193,10 +212,11 @@ function getBackupsList() {
 /**
  * Eliminar backup antiguo
  * @param string $filename
+ * @param string|null $backupDir Ruta opcional
  * @return bool
  */
-function deleteBackup($filename) {
-    $backupDir = BASE_PATH . '/backups';
+function deleteBackup($filename, $backupDir = null) {
+    $backupDir = $backupDir ?? (defined('BASE_PATH') ? BASE_PATH . '/backups' : dirname(__DIR__) . '/backups');
     $filepath = $backupDir . '/' . basename($filename);
     
     if (file_exists($filepath) && strpos($filepath, $backupDir) === 0) {

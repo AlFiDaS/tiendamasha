@@ -77,21 +77,31 @@ try {
                 throw new Exception('Product ID requerido');
             }
             
-            // Verificar que el producto existe, es visible y su categoría es visible
-            $product = fetchOne(
-                "SELECT p.id FROM products p
-                 INNER JOIN categories c ON p.categoria = c.slug
-                 WHERE p.id = :id AND p.visible = 1 AND c.visible = 1",
-                ['id' => $productId]
-            );
+            // Verificar que el producto existe y es visible (acepta id numérico o slug)
+            $isNumeric = (is_numeric($productId) && (int) $productId > 0);
+            
+            if ($isNumeric) {
+                $product = fetchOne(
+                    "SELECT p.id FROM products p WHERE p.id = :id AND p.visible = 1",
+                    ['id' => (int) $productId]
+                );
+            } else {
+                $product = fetchOne(
+                    "SELECT p.id FROM products p WHERE p.slug = :slug AND p.visible = 1",
+                    ['slug' => $productId]
+                );
+            }
+            
             if (!$product) {
                 throw new Exception('Producto no encontrado o no disponible');
             }
             
+            $realProductId = (int) $product['id'];
+            
             // Verificar si ya está en wishlist
             $existing = fetchOne(
                 "SELECT id FROM wishlist WHERE session_id = :session_id AND product_id = :product_id",
-                ['session_id' => $sessionId, 'product_id' => $productId]
+                ['session_id' => $sessionId, 'product_id' => $realProductId]
             );
             
             if ($existing) {
@@ -102,7 +112,7 @@ try {
                 ], JSON_UNESCAPED_UNICODE);
             } else {
                 $sql = "INSERT INTO wishlist (session_id, product_id) VALUES (:session_id, :product_id)";
-                if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $productId])) {
+                if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $realProductId])) {
                     echo json_encode([
                         'success' => true,
                         'message' => 'Agregado a favoritos'
@@ -114,15 +124,30 @@ try {
             break;
             
         case 'DELETE':
-            // Eliminar producto de wishlist
+            // Eliminar producto de wishlist (acepta id numérico o slug)
             $productId = $input['product_id'] ?? $_GET['product_id'] ?? '';
             
             if (empty($productId)) {
                 throw new Exception('Product ID requerido');
             }
             
+            $isNumeric = (is_numeric($productId) && (int) $productId > 0);
+            if ($isNumeric) {
+                $realProductId = (int) $productId;
+            } else {
+                $product = fetchOne(
+                    "SELECT p.id FROM products p WHERE p.slug = :slug AND p.visible = 1",
+                    ['slug' => $productId]
+                );
+                $realProductId = $product ? (int) $product['id'] : 0;
+            }
+            
+            if ($realProductId < 1) {
+                throw new Exception('Producto no encontrado');
+            }
+            
             $sql = "DELETE FROM wishlist WHERE session_id = :session_id AND product_id = :product_id";
-            if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $productId])) {
+            if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $realProductId])) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Eliminado de favoritos'

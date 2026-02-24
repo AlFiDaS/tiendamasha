@@ -4,6 +4,17 @@
 (function() {
   'use strict';
   
+  // Prefijo por tienda: evita cruce de carrito entre wemasha, test1, etc.
+  // Fallback: si __STORE_BASE no está inyectado (ej. cache), derivar de la URL
+  function storeKey(key) {
+    var base = window.__STORE_BASE;
+    if (!base && typeof window.location !== 'undefined') {
+      var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+      base = m ? '/' + m[1] : '';
+    }
+    return key + (base || '');
+  }
+  
   // Cache de categorías con min_quantity
   let categoriesCache = null;
   let categoriesCacheTime = null;
@@ -11,11 +22,11 @@
 
   // Funciones del carrito
   function getCarrito() {
-    return JSON.parse(localStorage.getItem("carrito")) || [];
+    return JSON.parse(localStorage.getItem(storeKey("carrito"))) || [];
   }
 
   function saveCarrito(carrito) {
-    localStorage.setItem("carrito", JSON.stringify(carrito));
+    localStorage.setItem(storeKey("carrito"), JSON.stringify(carrito));
     updateCartCount();
   }
 
@@ -97,8 +108,8 @@
     const carrito = getCarrito();
     const total = carrito.reduce((acc, p) => acc + p.cantidad, 0);
     
-    // Guardar en localStorage para evitar flash
-    localStorage.setItem('cart_count', total.toString());
+    // Guardar en localStorage para evitar flash (prefijado por tienda)
+    localStorage.setItem(storeKey('cart_count'), total.toString());
 
     const badgeDesktop = document.getElementById("cart-count");
     const badgeMobile = document.getElementById("cart-count-mobile");

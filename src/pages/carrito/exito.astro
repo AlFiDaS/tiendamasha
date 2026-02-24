@@ -98,8 +98,8 @@ const orderId = Astro.url.searchParams.get('order_id');
             window.updateCartCount();
           }
         } else {
-          // Si cart.js no está cargado, limpiar directamente
-          localStorage.removeItem('carrito');
+          // Si cart.js no está cargado, limpiar directamente (prefijado por tienda)
+          localStorage.removeItem('carrito' + (window.__STORE_BASE || ''));
         }
         
         // Limpiar preference_id de sessionStorage (el pago fue exitoso)
