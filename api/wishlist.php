@@ -74,8 +74,9 @@ try {
                 throw new Exception('Product ID requerido');
             }
             
-            // Verificar que el producto existe y es visible (acepta id numérico o slug)
+            // Verificar que el producto existe y es visible (acepta id numérico, id VARCHAR tipo prod_xxx, o slug)
             // Incluir store_id para BD compartida: el product_id debe existir en products de esta tienda (evita FK violation)
+            $productId = trim($productId);
             $isNumeric = (is_numeric($productId) && (int) $productId > 0);
             $product = false;
             
@@ -86,10 +87,17 @@ try {
                         ['id' => (int) $productId, 'sid' => (int) CURRENT_STORE_ID]
                     );
                 } else {
+                    // products.id puede ser VARCHAR - buscar por id primero
                     $product = fetchOneRaw(
-                        "SELECT id FROM products WHERE slug = :slug AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
-                        ['slug' => trim($productId), 'sid' => (int) CURRENT_STORE_ID]
+                        "SELECT id FROM products WHERE id = :id AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                        ['id' => $productId, 'sid' => (int) CURRENT_STORE_ID]
                     );
+                    if (!$product) {
+                        $product = fetchOneRaw(
+                            "SELECT id FROM products WHERE slug = :slug AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                            ['slug' => $productId, 'sid' => (int) CURRENT_STORE_ID]
+                        );
+                    }
                 }
             }
             if (!$product) {
@@ -100,9 +108,15 @@ try {
                     );
                 } else {
                     $product = fetchOneRaw(
-                        "SELECT id FROM products WHERE slug = :slug AND visible = 1",
-                        ['slug' => trim($productId)]
+                        "SELECT id FROM products WHERE id = :id AND visible = 1",
+                        ['id' => $productId]
                     );
+                    if (!$product) {
+                        $product = fetchOneRaw(
+                            "SELECT id FROM products WHERE slug = :slug AND visible = 1",
+                            ['slug' => $productId]
+                        );
+                    }
                 }
             }
             
@@ -160,28 +174,44 @@ try {
             break;
             
         case 'DELETE':
-            // Eliminar producto de wishlist (acepta id numérico o slug)
+            // Eliminar producto de wishlist (acepta id numérico, id VARCHAR tipo prod_xxx, o slug)
             $productId = $input['product_id'] ?? $_GET['product_id'] ?? '';
             
             if (empty($productId)) {
                 throw new Exception('Product ID requerido');
             }
             
+            $productId = trim($productId);
             $isNumeric = (is_numeric($productId) && (int) $productId > 0);
+            
             if ($isNumeric) {
                 $realProductId = (int) $productId;
             } else {
                 $product = false;
+                // products.id puede ser VARCHAR (ej: prod_1770493136_34e40f0c) - intentar por id primero
                 if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
                     $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE id = :id AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                        ['id' => $productId, 'sid' => (int) CURRENT_STORE_ID]
+                    );
+                }
+                if (!$product) {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE id = :id AND visible = 1",
+                        ['id' => $productId]
+                    );
+                }
+                // Si no se encontró por id, intentar por slug
+                if (!$product && defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+                    $product = fetchOneRaw(
                         "SELECT id FROM products WHERE slug = :slug AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
-                        ['slug' => trim($productId), 'sid' => (int) CURRENT_STORE_ID]
+                        ['slug' => $productId, 'sid' => (int) CURRENT_STORE_ID]
                     );
                 }
                 if (!$product) {
                     $product = fetchOneRaw(
                         "SELECT id FROM products WHERE slug = :slug AND visible = 1",
-                        ['slug' => trim($productId)]
+                        ['slug' => $productId]
                     );
                 }
                 $realProductId = $product ? $product['id'] : null;

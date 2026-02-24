@@ -146,9 +146,11 @@ import Icon from '../components/Icon.astro';
                     />
                   </a>
                   <button 
+                    type="button"
                     class="remove-favorite" 
-                    onclick="event.preventDefault(); event.stopPropagation(); if(window.removeFromWishlistPage){window.removeFromWishlistPage('${escapeHtml(product.product_id)}');}else{window.removeFromWishlist('${escapeHtml(product.product_id)}');} return false;"
-                    title="Eliminar de favoritos">
+                    data-product-id="${escapeHtml(product.product_id)}"
+                    title="Eliminar de favoritos"
+                    aria-label="Eliminar de favoritos">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                   </button>
                   ${!hasStock ? '<div class="sin-stock">Sin stock</div>' : ''}
@@ -269,6 +271,20 @@ import Icon from '../components/Icon.astro';
       }
     };
   }, 200);
+
+  // Delegación de eventos: eliminar de favoritos al hacer clic en el botón X
+  document.getElementById('wishlist-container').addEventListener('click', function(e) {
+    var btn = e.target.closest('.remove-favorite');
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var productId = btn.getAttribute('data-product-id');
+    if (productId && window.removeFromWishlistPage) {
+      window.removeFromWishlistPage(productId);
+    } else if (productId && window.removeFromWishlist) {
+      window.removeFromWishlist(productId);
+    }
+  });
 
   // Cargar wishlist al cargar la página
   if (document.readyState === 'loading') {

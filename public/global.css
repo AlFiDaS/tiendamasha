@@ -3118,7 +3118,8 @@ div.breadcrumb .current {
   justify-content: center;
   transition: all 0.3s;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 3;
+  z-index: 10;
+  pointer-events: auto;
   backdrop-filter: blur(10px);
 }
 
