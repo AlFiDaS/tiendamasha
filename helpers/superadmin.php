@@ -155,6 +155,55 @@ function getPlatformGlobalStats() {
 }
 
 /**
+ * Obtiene los usuarios admin de una tienda (para superadmin)
+ */
+function getStoreAdminUsers($storeId) {
+    $pdo = getPlatformDB();
+    if (!$pdo) return [];
+    try {
+        $stmt = $pdo->prepare('SELECT id, username, email FROM admin_users WHERE store_id = :sid ORDER BY id ASC');
+        $stmt->execute(['sid' => (int) $storeId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log('[SuperAdmin] getStoreAdminUsers: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Crea un token de impersonación (válido 5 min, un solo uso)
+ */
+function createImpersonateToken($storeId, $adminId) {
+    $token = bin2hex(random_bytes(24));
+    $dir = dirname(__DIR__) . '/logs';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    $file = $dir . '/impersonate_' . $token;
+    $data = json_encode([
+        'store_id' => (int) $storeId,
+        'admin_id' => (int) $adminId,
+        'expires' => time() + 300,
+    ]);
+    return @file_put_contents($file, $data) ? $token : null;
+}
+
+/**
+ * Consume un token de impersonación (devuelve datos o null)
+ */
+function consumeImpersonateToken($token) {
+    $dir = dirname(__DIR__) . '/logs';
+    $file = $dir . '/impersonate_' . preg_replace('/[^a-f0-9]/', '', $token);
+    if (!file_exists($file)) return null;
+    $data = json_decode(file_get_contents($file), true);
+    @unlink($file);
+    if (!$data || empty($data['store_id']) || empty($data['admin_id']) || (int) $data['expires'] < time()) {
+        return null;
+    }
+    return $data;
+}
+
+/**
  * Obtiene datos detallados de una tienda para el panel superadmin
  */
 function getStoreDetail($storeId) {
@@ -175,6 +224,7 @@ function getStoreDetail($storeId) {
          WHERE sm.store_id = :sid',
         ['sid' => $storeId]
     );
+    $store['admin_users'] = getStoreAdminUsers($storeId);
 
     return $store;
 }

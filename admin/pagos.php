@@ -19,22 +19,30 @@ $success = '';
 
 $settings = getShopSettings();
 
-// Procesar formulario
+// Procesar formularios (cada sección tiene su propio botón)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
-    } else {
+    } elseif (isset($_POST['save_transferencia'])) {
         $formData = [
             'transfer_alias' => trim(sanitize($_POST['transfer_alias'] ?? '')),
             'transfer_cbu' => preg_replace('/\D/', '', sanitize($_POST['transfer_cbu'] ?? '')),
-            'transfer_titular' => trim(sanitize($_POST['transfer_titular'] ?? '')),
+            'transfer_titular' => trim(sanitize($_POST['transfer_titular'] ?? ''))
+        ];
+        if (updateShopSettings($formData)) {
+            $success = 'Datos de transferencia guardados correctamente';
+            $settings = getShopSettings();
+        } else {
+            $error = 'No se pudo actualizar la configuración. ¿Ejecutaste database-add-payment-fields.sql?';
+        }
+    } elseif (isset($_POST['save_mercadopago'])) {
+        $formData = [
             'mercadopago_access_token' => trim(sanitize($_POST['mercadopago_access_token'] ?? '')),
             'mercadopago_public_key' => trim(sanitize($_POST['mercadopago_public_key'] ?? '')),
             'mercadopago_test_mode' => isset($_POST['mercadopago_test_mode']) ? 1 : 0
         ];
-
         if (updateShopSettings($formData)) {
-            $success = 'Configuración de pagos guardada correctamente';
+            $success = 'Configuración de MercadoPago guardada correctamente';
             $settings = getShopSettings();
         } else {
             $error = 'No se pudo actualizar la configuración. ¿Ejecutaste database-add-payment-fields.sql?';
@@ -56,9 +64,9 @@ require_once '_inc/header.php';
         <div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     
-    <form method="POST" action="">
+    <!-- Formulario Transferencia directa -->
+    <form method="POST" action="" class="pagos-section-form">
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
-        
         <div class="content-card" style="margin-bottom: 2rem;">
             <h3 class="section-title">Transferencia directa</h3>
             <p style="color: #666; margin-bottom: 1rem;">Estos datos se mostrarán en el carrito cuando el cliente elija pagar por transferencia.</p>
@@ -86,11 +94,33 @@ require_once '_inc/header.php';
                     placeholder="Ej: Juan Pérez">
                 <small>Nombre del titular de la cuenta</small>
             </div>
+            
+            <div id="transfer-buttons" class="pagos-buttons-wrap" style="display: none;">
+                <button type="submit" name="save_transferencia" value="1" class="btn btn-primary">Guardar configuración</button>
+                <button type="button" class="btn btn-secondary btn-cancelar-transfer">Cancelar</button>
+            </div>
         </div>
-        
+    </form>
+    
+    <!-- Formulario MercadoPago -->
+    <form method="POST" action="" class="pagos-section-form">
+        <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
+        <?php $mpConfigurado = !empty($settings['mercadopago_access_token'] ?? ''); ?>
         <div class="content-card" style="margin-bottom: 2rem;">
             <h3 class="section-title">MercadoPago</h3>
-            <p style="color: #666; margin-bottom: 1rem;">Credenciales para pagos con tarjeta y transferencia vía MercadoPago. Obtén las credenciales en <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank" rel="noopener">el panel de desarrolladores</a>.</p>
+            
+            <?php if (!$mpConfigurado): ?>
+                <div id="mp-activar-wrap" class="mp-activar-wrap">
+                    <p style="color: #666; margin-bottom: 1rem;">Recibí pagos con tarjeta y transferencia vía MercadoPago.</p>
+                    <button type="button" id="btn-activar-mp" class="btn btn-secondary">Activar pagos por MercadoPago</button>
+                </div>
+                <div id="mp-campos-wrap" class="mp-campos-wrap" style="display: none;">
+            <?php else: ?>
+                <div id="mp-campos-wrap" class="mp-campos-wrap">
+                <p style="color: #28a745; margin-bottom: 1rem;">✓ MercadoPago activo. Tus clientes pueden pagar con tarjeta o transferencia.</p>
+            <?php endif; ?>
+            
+            <p style="color: #666; margin-bottom: 1rem;">Credenciales en <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank" rel="noopener">el panel de desarrolladores</a>.</p>
             
             <div class="form-group">
                 <label for="mercadopago_access_token">Access Token <span style="color: red;">*</span></label>
@@ -113,9 +143,13 @@ require_once '_inc/header.php';
                     <?= (!empty($settings['mercadopago_test_mode']) || !isset($settings['mercadopago_test_mode'])) ? 'checked' : '' ?>>
                 <label for="mercadopago_test_mode">Modo prueba (los pagos no serán reales)</label>
             </div>
+            
+            <div id="mercadopago-buttons" class="pagos-buttons-wrap" style="display: none;">
+                <button type="submit" name="save_mercadopago" value="1" class="btn btn-primary">Guardar configuración</button>
+                <button type="button" class="btn btn-secondary btn-cancelar-mp">Cancelar</button>
+            </div>
+            </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Guardar configuración</button>
     </form>
     
     <div class="content-card" style="margin-top: 2rem;">
@@ -145,6 +179,9 @@ require_once '_inc/header.php';
 .guia-mercadopago a { color: var(--primary-color); }
 #guia-mercadopago:not(.collapsed) ~ .section-title #guia-toggle-icon,
 #guia-mercadopago.collapsed ~ * { }
+.mp-activar-wrap { padding: 0.5rem 0; }
+.btn-activar-mp { margin-top: 0.25rem; }
+.pagos-buttons-wrap { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
 </style>
 <script>
 document.getElementById('guia-header').addEventListener('click', function() {
@@ -153,6 +190,71 @@ document.getElementById('guia-header').addEventListener('click', function() {
     guia.classList.toggle('collapsed');
     icon.textContent = guia.classList.contains('collapsed') ? '▼' : '▲';
 });
+(function() {
+    const btn = document.getElementById('btn-activar-mp');
+    const activarWrap = document.getElementById('mp-activar-wrap');
+    const camposWrap = document.getElementById('mp-campos-wrap');
+    if (btn && camposWrap) {
+        btn.addEventListener('click', function() {
+            if (activarWrap) activarWrap.style.display = 'none';
+            camposWrap.style.display = 'block';
+            document.getElementById('mercadopago_access_token')?.focus();
+        });
+    }
+})();
+
+(function() {
+    function getVal(el) {
+        if (!el) return '';
+        if (el.type === 'checkbox') return el.checked ? '1' : '0';
+        return (el.value || '').trim();
+    }
+    function setVal(el, val) {
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = (val === '1' || val === true);
+        else el.value = val;
+    }
+    function setupSection(fieldIds, buttonsWrapId, cancelBtnClass, initialValues) {
+        const buttonsWrap = document.getElementById(buttonsWrapId);
+        const cancelBtn = document.querySelector('.' + cancelBtnClass);
+        if (!buttonsWrap) return;
+        const fields = fieldIds.map(id => document.getElementById(id)).filter(Boolean);
+        const checkChanged = () => {
+            const changed = fields.some((el, i) => getVal(el) !== (initialValues[i] || ''));
+            buttonsWrap.style.display = changed ? 'flex' : 'none';
+        };
+        fields.forEach(el => {
+            el.addEventListener('input', checkChanged);
+            el.addEventListener('change', checkChanged);
+        });
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                fields.forEach((el, i) => setVal(el, initialValues[i] || ''));
+                buttonsWrap.style.display = 'none';
+            });
+        }
+    }
+    setupSection(
+        ['transfer_alias', 'transfer_cbu', 'transfer_titular'],
+        'transfer-buttons',
+        'btn-cancelar-transfer',
+        [
+            '<?= addslashes($settings['transfer_alias'] ?? '') ?>',
+            '<?= addslashes($settings['transfer_cbu'] ?? '') ?>',
+            '<?= addslashes($settings['transfer_titular'] ?? '') ?>'
+        ]
+    );
+    setupSection(
+        ['mercadopago_access_token', 'mercadopago_public_key', 'mercadopago_test_mode'],
+        'mercadopago-buttons',
+        'btn-cancelar-mp',
+        [
+            '<?= addslashes($settings['mercadopago_access_token'] ?? '') ?>',
+            '<?= addslashes($settings['mercadopago_public_key'] ?? '') ?>',
+            '<?= (!empty($settings['mercadopago_test_mode']) || !isset($settings['mercadopago_test_mode'])) ? '1' : '0' ?>'
+        ]
+    );
+})();
 </script>
 
 <?php require_once '_inc/footer.php'; ?>

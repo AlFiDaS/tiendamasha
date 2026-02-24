@@ -28,7 +28,19 @@ $planLabels = [
 ];
 
 require_once __DIR__ . '/_inc/header.php';
+
+$impersonateError = $_GET['error'] ?? '';
+$impersonateErrorMsg = [
+    'no_admin' => 'Esta tienda no tiene usuarios admin configurados.',
+    'token_failed' => 'No se pudo generar el token de acceso. Verificá que la carpeta logs/ exista y tenga permisos de escritura.',
+][$impersonateError] ?? '';
 ?>
+
+<?php if ($impersonateErrorMsg): ?>
+<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:1rem; margin-bottom:1.5rem; color:#991b1b;">
+    <?= htmlspecialchars($impersonateErrorMsg) ?>
+</div>
+<?php endif; ?>
 
 <div class="sa-page-header">
     <div style="display:flex; align-items:center; gap:1rem;">
@@ -39,7 +51,7 @@ require_once __DIR__ . '/_inc/header.php';
         </div>
     </div>
     <?php if ($store['status'] === 'active'): ?>
-        <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="sa-btn sa-btn-primary" target="_blank">Acceder al Admin</a>
+        <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/impersonate-store.php?store_id=<?= (int)$store['id'] ?>" class="sa-btn sa-btn-primary" target="_blank">Acceder al Admin</a>
     <?php endif; ?>
 </div>
 
@@ -125,6 +137,25 @@ require_once __DIR__ . '/_inc/header.php';
             <span class="sa-detail-label">Teléfono</span>
             <span class="sa-detail-value"><?= htmlspecialchars($store['owner_phone'] ?? '-') ?></span>
         </div>
+
+        <h3 style="margin-top:1.5rem;">Acceso al panel admin</h3>
+        <?php if (!empty($store['admin_users'])): ?>
+            <?php foreach ($store['admin_users'] as $i => $au): ?>
+            <?php if ($i > 0): ?><hr style="margin:1rem 0; border:none; border-top:1px solid #e5e7eb;"><?php endif; ?>
+            <div class="sa-detail-row">
+                <span class="sa-detail-label">Usuario</span>
+                <span class="sa-detail-value" style="font-family:monospace;"><?= htmlspecialchars($au['username']) ?></span>
+            </div>
+            <div class="sa-detail-row">
+                <span class="sa-detail-label">Email</span>
+                <span class="sa-detail-value"><?= htmlspecialchars($au['email'] ?? '-') ?></span>
+            </div>
+            <?php endforeach; ?>
+            <p style="font-size:0.85rem; color:var(--sa-muted); margin:0.5rem 0 0.5rem;">Usá estos datos para iniciar sesión manualmente si el acceso directo no funciona. La contraseña no se puede mostrar (está encriptada); usá "¿Olvidaste tu contraseña?" en el login.</p>
+            <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/login.php" target="_blank" class="sa-btn sa-btn-secondary sa-btn-sm" style="margin-top:0.5rem;">Ir al login del admin</a>
+        <?php else: ?>
+            <p style="color:var(--sa-muted); font-size:0.9rem; padding:0.5rem 0;">Sin usuarios admin configurados</p>
+        <?php endif; ?>
 
         <h3 style="margin-top:1.5rem;">Miembros del equipo</h3>
         <?php if (empty($store['members'])): ?>

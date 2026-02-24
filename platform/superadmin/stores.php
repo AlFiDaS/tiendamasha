@@ -81,7 +81,7 @@ require_once __DIR__ . '/_inc/header.php';
                     <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
                         <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/store-detail.php?id=<?= (int)$store['id'] ?>" class="sa-btn sa-btn-primary sa-btn-sm">Detalle</a>
                         <?php if ($store['status'] === 'active'): ?>
-                            <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="sa-btn sa-btn-secondary sa-btn-sm" target="_blank">Admin</a>
+                            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/impersonate-store.php?store_id=<?= (int)$store['id'] ?>" class="sa-btn sa-btn-secondary sa-btn-sm" target="_blank">Admin</a>
                         <?php endif; ?>
                         <button type="button" class="sa-btn sa-btn-sm" style="background:#dc2626; color:#fff;" onclick="openDeleteModal(<?= (int)$store['id'] ?>, '<?= htmlspecialchars($store['slug'], ENT_QUOTES) ?>')">Eliminar</button>
                     </div>
