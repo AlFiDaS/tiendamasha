@@ -380,17 +380,18 @@
      * @returns {string}
      */
     function getCategoriaFromPath() {
-        const path = window.location.pathname;
-        // Formato: /categoria/slug
-        const match = path.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
+        var path = window.location.pathname;
+        if (window.__STORE_BASE && path.indexOf(window.__STORE_BASE) === 0) {
+            path = path.substring(window.__STORE_BASE.length) || '/';
+        }
+        var match = path.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
         if (match && match[1]) {
-            // Excluir rutas especiales
-            const excluded = ['api', 'admin', 'ideas', 'carrito', 'wishlist', 'mis-pedidos'];
+            var excluded = ['api', 'admin', 'ideas', 'carrito', 'wishlist', 'mis-pedidos'];
             if (!excluded.includes(match[1])) {
                 return match[1];
             }
         }
-        return 'productos'; // Fallback
+        return 'productos';
     }
     
     /**
@@ -473,17 +474,17 @@
     
     // Auto-inicializar si hay un contenedor con clase 'product-detail-container'
     document.addEventListener('DOMContentLoaded', function() {
-        const autoContainer = document.querySelector('.product-detail-container');
+        var autoContainer = document.querySelector('.product-detail-container');
         if (autoContainer) {
-            // Intentar obtener slug desde la URL
-            const path = window.location.pathname;
-            // Detectar cualquier categoría dinámicamente (formato: /categoria/slug)
-            // Excluir rutas especiales
-            const excluded = ['api', 'admin', 'ideas', 'carrito', 'wishlist', 'mis-pedidos'];
-            const slugMatch = path.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
+            var path = window.location.pathname;
+            if (window.__STORE_BASE && path.indexOf(window.__STORE_BASE) === 0) {
+                path = path.substring(window.__STORE_BASE.length) || '/';
+            }
+            var excluded = ['api', 'admin', 'ideas', 'carrito', 'wishlist', 'mis-pedidos'];
+            var slugMatch = path.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
             
             if (slugMatch && slugMatch[1] && slugMatch[2] && !excluded.includes(slugMatch[1])) {
-                const slug = slugMatch[2];
+                var slug = slugMatch[2];
                 window.initProductDetail(slug, {
                     containerSelector: '.product-detail-container',
                     autoLoad: true

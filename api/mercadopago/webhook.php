@@ -46,8 +46,44 @@ function logRequestData() {
 }
 
 try {
-    // Log de la solicitud completa para debugging
     logRequestData();
+    
+    // Verificar firma de MercadoPago (x-signature header)
+    $xSignature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+    $xRequestId = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
+    if ($xSignature && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $dataId = '';
+        $input = file_get_contents('php://input');
+        $postData = json_decode($input, true);
+        if ($postData) {
+            $dataId = $postData['data']['id'] ?? '';
+        }
+        
+        $parts = [];
+        foreach (explode(',', $xSignature) as $part) {
+            $kv = explode('=', trim($part), 2);
+            if (count($kv) === 2) {
+                $parts[trim($kv[0])] = trim($kv[1]);
+            }
+        }
+        $ts = $parts['ts'] ?? '';
+        $receivedHash = $parts['v1'] ?? '';
+        
+        $settings = getShopSettings();
+        $webhookSecret = $settings['mercadopago_webhook_secret'] ?? '';
+        
+        if ($webhookSecret && $ts && $receivedHash) {
+            $manifest = "id:$dataId;request-id:$xRequestId;ts:$ts;";
+            $computedHash = hash_hmac('sha256', $manifest, $webhookSecret);
+            if (!hash_equals($computedHash, $receivedHash)) {
+                logWebhook("FIRMA INVALIDA - Posible webhook falso. Computed: $computedHash, Received: $receivedHash");
+                http_response_code(401);
+                echo json_encode(['error' => 'Firma invalida']);
+                exit;
+            }
+            logWebhook("Firma verificada correctamente");
+        }
+    }
     
     // MercadoPago puede enviar notificaciones de diferentes formas:
     // 1. Como parámetros GET: ?type=payment&data.id=123456

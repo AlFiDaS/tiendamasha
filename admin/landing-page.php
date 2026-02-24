@@ -1304,6 +1304,11 @@ body.landing-editor-page .admin-main-wrapper {
             <div class="splide" id="hero-slider">
                 <div class="splide__track">
                     <ul class="splide__list">
+                        <?php if (empty($carouselImages)): ?>
+                            <li class="splide__slide" style="display:flex;align-items:center;justify-content:center;min-height:200px;background:#f9fafb;color:#6b7280;">
+                                <p style="margin:0;font-size:1rem;">Sin imágenes. Hacé clic en &quot;+ Agregar imagen(s)&quot; abajo para subir imágenes al carrusel.</p>
+                            </li>
+                        <?php endif; ?>
                         <?php foreach ($carouselImages as $index => $item): ?>
                             <li class="splide__slide">
                                 <div class="image-wrapper" style="width:100%;height:100%;position:relative;">
@@ -1345,10 +1350,10 @@ body.landing-editor-page .admin-main-wrapper {
             <?php endforeach; ?>
             </div>
 
-            <!-- Config links carrusel (colapsable debajo del slider) -->
+            <!-- Config links carrusel (colapsable debajo del slider; abierto por defecto si está vacío) -->
             <div style="max-width: 1200px; margin: 0 auto var(--space-lg); padding: 0 var(--space-md);">
-                <details style="background: #f5f5f5; padding: 0.75rem 1rem; border-radius: 8px;" id="carousel-config-details">
-                    <summary style="cursor: pointer; font-weight: 600;">Configurar links del carrusel</summary>
+                <details style="background: #f5f5f5; padding: 0.75rem 1rem; border-radius: 8px;" id="carousel-config-details"<?= empty($carouselImages) ? ' open' : '' ?>>
+                    <summary style="cursor: pointer; font-weight: 600;"><?= empty($carouselImages) ? 'Agregar imágenes al carrusel' : 'Configurar links del carrusel' ?></summary>
                     <div id="carousel-links-config" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem;"></div>
                     <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
                         <p style="margin-bottom: 0.5rem; font-weight: 600;">Agregar imagen(s) al carrusel</p>
@@ -1797,6 +1802,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       var toAdd = Math.min(files.length, maxNew);
       newCarouselRows.innerHTML = '';
+      if (typeof showSectionActions === 'function') showSectionActions('carousel');
       if (files.length > maxNew) {
         var hint = document.createElement('p');
         hint.className = 'carousel-new-hint';
@@ -2051,7 +2057,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       getSectionFields(section).forEach(function(el) {
         if (el.type === 'file' && el.files && el.files.length > 0) {
-          for (var i = 0; i < el.files.length; i++) fd.append(el.name + (el.multiple ? '[]' : ''), el.files[i]);
+          for (var i = 0; i < el.files.length; i++) fd.append(el.name, el.files[i]);
         } else if (el.type === 'checkbox') {
           if (el.checked) fd.append(el.name, '1');
         } else if (el.name && el.value !== undefined) {
@@ -2070,6 +2076,10 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = false;
         btn.textContent = originalText;
         if (data.success) {
+          if (section === 'carousel') {
+            window.location.reload();
+            return;
+          }
           var actions = sectionEl.querySelector('.section-actions');
           if (actions) {
             actions.querySelectorAll('.btn').forEach(function(b) { b.style.display = 'none'; });
@@ -2088,7 +2098,6 @@ document.addEventListener('DOMContentLoaded', function() {
           } else {
             hideSectionActions(section);
           }
-          if (section === 'carousel') mountCarousel();
         } else {
           alert('Error: ' + (data.message || 'No se pudo guardar'));
         }

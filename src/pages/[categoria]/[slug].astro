@@ -35,9 +35,11 @@ const { categoria, slug } = Astro.params;
   <script is:inline>
     // Extraer slug y categoría directamente de la URL (funciona en modo estático)
     function getSlugAndCategoria() {
-      const pathname = window.location.pathname;
-      // Formato: /categoria/slug
-      const match = pathname.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
+      var p = window.location.pathname;
+      if (window.__STORE_BASE && p.indexOf(window.__STORE_BASE) === 0) {
+        p = p.substring(window.__STORE_BASE.length) || '/';
+      }
+      var match = p.match(/^\/([^\/]+)\/([^\/]+)\/?$/);
       if (match && match[1] && match[2]) {
         return {
           categoria: decodeURIComponent(match[1]),

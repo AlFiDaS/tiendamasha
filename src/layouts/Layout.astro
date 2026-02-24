@@ -7,13 +7,15 @@ export interface Props {
   description?: string;
   image?: string;
   canonical?: string;
+  noindex?: boolean;
 }
 
 const { 
   title = "Somos Tiendi",
   description = "Creando paginas webs al alcance de todos los emprendedores",
   image = "/images/hero.webp",
-  canonical = ""
+  canonical = "",
+  noindex = false
 } = Astro.props;
 
 const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
@@ -22,12 +24,12 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- 🎯 SEO OPTIMIZADO -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />

@@ -109,8 +109,11 @@ export async function getStaticPaths() {
 (function() {
   // Obtener categoría desde la URL
   function getCategoriaFromPath() {
-    const path = window.location.pathname;
-    const match = path.match(/^\/([^\/]+)\/?$/);
+    var path = window.location.pathname;
+    if (window.__STORE_BASE && path.indexOf(window.__STORE_BASE) === 0) {
+      path = path.substring(window.__STORE_BASE.length) || '/';
+    }
+    var match = path.match(/^\/([^\/]+)\/?$/);
     if (match && match[1]) {
       return match[1];
     }

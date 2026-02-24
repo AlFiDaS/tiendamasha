@@ -1,24 +1,33 @@
 <?php
 /**
- * Script de prueba simple para verificar que el archivo se ejecuta correctamente
+ * Endpoint de diagnóstico de MercadoPago
+ * Solo accesible para administradores autenticados
  */
 
-// Headers
 header('Content-Type: application/json; charset=utf-8');
 
-// Verificar que LUME_ADMIN esté definido
 if (!defined('LUME_ADMIN')) {
     define('LUME_ADMIN', true);
 }
 
-// Intentar cargar config
+require_once '../../config.php';
+require_once '../../helpers/auth.php';
+
+startSecureSession();
+
+if (!isAuthenticated()) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Acceso denegado']);
+    exit;
+}
+
 try {
-    require_once '../../config.php';
+    $hasToken = defined('MERCADOPAGO_ACCESS_TOKEN') && MERCADOPAGO_ACCESS_TOKEN !== '';
     
     echo json_encode([
         'success' => true,
-        'message' => 'Config cargado correctamente',
-        'mercadopago_token' => defined('MERCADOPAGO_ACCESS_TOKEN') ? (substr(MERCADOPAGO_ACCESS_TOKEN, 0, 20) . '...') : 'NO DEFINIDO',
+        'mercadopago_configured' => $hasToken,
+        'test_mode' => MERCADOPAGO_TEST_MODE,
         'db_functions' => [
             'executeQuery' => function_exists('executeQuery'),
             'fetchOne' => function_exists('fetchOne'),
@@ -34,17 +43,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-} catch (Error $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'error' => 'Fatal: ' . $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        'error' => 'Error interno del servidor'
+    ]);
 }
-

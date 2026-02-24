@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 ---
-<Layout>
+<Layout noindex={true}>
   <div class="pagina-carrito">
     <Breadcrumb items={[
       { text: "Inicio", href: "/" },
@@ -522,7 +522,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
         const cardPriceFormatted = '$' + cardPriceValue.toLocaleString('es-AR');
 
         card.innerHTML = `
-          <div class="producto-imagen" onclick="window.location.href='/${item.categoria}/${item.slug}'">
+          <div class="producto-imagen" onclick="window.location.href=(window.__STORE_BASE||'')+'/${item.categoria}/${item.slug}'">
             <img src="${item.image}" alt="${item.name}" />
           </div>
           <div class="producto-info">
@@ -1021,7 +1021,7 @@ Gracias!`);
           saveCarrito([]);
           // Redirigir a página de pendiente (transferencia directa requiere confirmación)
           const orderId = data.order_id ? `?order_id=${data.order_id}` : '';
-          window.location.href = `/carrito/pendiente${orderId}`;
+          window.location.href = (window.__STORE_BASE||'') + `/carrito/pendiente${orderId}`;
         } else {
           alert('Error al crear el pedido: ' + (data.error || 'Error desconocido'));
           btnFinalizarDirecta.disabled = false;

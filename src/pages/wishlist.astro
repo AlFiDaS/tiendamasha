@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 ---
 
-<Layout>
+<Layout noindex={true}>
   <Breadcrumb items={[
     { text: "Inicio", href: "/" },
     { text: "Mis Favoritos" }
@@ -245,7 +245,9 @@ import Breadcrumb from '../components/Breadcrumb.astro';
     const originalRemove = window.removeFromWishlist;
     window.removeFromWishlist = async function(productId, callback) {
       // Si estamos en la página de wishlist, usar nuestra función
-      if (window.location.pathname === '/wishlist' || window.location.pathname === '/wishlist/') {
+      var _wp = window.location.pathname;
+      if (window.__STORE_BASE && _wp.indexOf(window.__STORE_BASE) === 0) { _wp = _wp.substring(window.__STORE_BASE.length) || '/'; }
+      if (_wp === '/wishlist' || _wp === '/wishlist/') {
         await window.removeFromWishlistPage(productId);
         if (callback) callback(true, 'Eliminado');
       } else {
