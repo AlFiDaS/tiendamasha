@@ -156,33 +156,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 🌐 API: Network First (solo cachear GET requests)
-  if (url.pathname.startsWith('/api/')) {
-    // Solo cachear requests GET (POST, DELETE, PUT no se pueden cachear)
+  // 🌐 API: Network First para GET; POST/DELETE/PUT sin interceptar (evita errores con body)
+  const isApiRequest = url.pathname.includes('/api/');
+  if (isApiRequest) {
     const isGetRequest = request.method === 'GET';
     
+    // POST/DELETE/PUT: no interceptar, dejar que el navegador maneje directo (evita sw.js:165)
+    if (!isGetRequest) {
+      return;
+    }
+    
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then(response => {
-          // Solo cachear si es GET y la respuesta es exitosa
-          if (isGetRequest && response.status === 200) {
+          if (response.status === 200) {
             const responseClone = response.clone();
             caches.open(DYNAMIC_CACHE).then(cache => {
-              cache.put(request, responseClone).catch(() => {
-                // Ignorar errores de cache silenciosamente
-              });
+              cache.put(request, responseClone).catch(() => {});
             });
           }
           return response;
         })
-        .catch(() => {
-          // Solo intentar cache si es GET
-          if (isGetRequest) {
-            return caches.match(request);
-          }
-          // Para POST/DELETE, devolver error de red
-          return new Response('Network error', { status: 408 });
-        })
+        .catch(() => caches.match(request))
     );
     return;
   }

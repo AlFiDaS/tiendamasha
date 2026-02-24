@@ -178,6 +178,66 @@ function fetchOne($sql, $params = []) {
     return $stmt ? $stmt->fetch() : false;
 }
 
+/**
+ * Ejecuta una consulta SIN inyectar store_id (INSERT/UPDATE/DELETE)
+ * @param string $sql
+ * @param array $params
+ * @param string|null &$errorMsg Si se pasa, se rellena con el mensaje de error en caso de fallo
+ * @return PDOStatement|false
+ */
+function executeRaw($sql, $params = [], &$errorMsg = null) {
+    $pdo = getDB();
+    if (!$pdo) {
+        $errorMsg = 'No hay conexión a BD';
+        return false;
+    }
+    try {
+        $stmt = $pdo->prepare($sql);
+        $ok = $stmt->execute($params ?: []);
+        if (!$ok) {
+            $errorMsg = $stmt->errorInfo()[2] ?? 'Error desconocido';
+            return false;
+        }
+        return $stmt;
+    } catch (PDOException $e) {
+        $errorMsg = $e->getMessage();
+        error_log('executeRaw: ' . $errorMsg . ' | SQL: ' . $sql);
+        return false;
+    }
+}
+
+/**
+ * Ejecuta SELECT y devuelve todos los resultados SIN inyectar store_id
+ */
+function fetchAllRaw($sql, $params = []) {
+    $pdo = getDB();
+    if (!$pdo) return false;
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params ?: []);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (PDOException $e) {
+        error_log('fetchAllRaw: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Ejecuta una consulta SIN inyectar store_id (para casos donde la BD ya está aislada por tienda)
+ */
+function fetchOneRaw($sql, $params = []) {
+    $pdo = getDB();
+    if (!$pdo) return false;
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params ?: []);
+        return $stmt->fetch() ?: false;
+    } catch (PDOException $e) {
+        error_log('fetchOneRaw: ' . $e->getMessage());
+        return false;
+    }
+}
+
 function fetchAll($sql, $params = []) {
     $stmt = executeQuery($sql, $params);
     return $stmt ? $stmt->fetchAll() : false;

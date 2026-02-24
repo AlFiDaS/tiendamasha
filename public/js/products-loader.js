@@ -10,16 +10,21 @@
 (function() {
     'use strict';
     
-    // Detectar si estamos en desarrollo local y ajustar la URL de la API
+    // Obtener base de tienda (igual que wishlist.js)
+    function getStoreBase() {
+        if (window.__STORE_BASE) return window.__STORE_BASE;
+        var m = (window.location.pathname || '').match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+        return m ? '/' + m[1] : '';
+    }
+    
     const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const currentPort = window.location.port;
     
-    // Si estamos en el servidor de Astro (puerto 4321), usar el servidor PHP directamente (puerto 8080)
-    // Si estamos en producción o el servidor PHP, usar ruta relativa
-    let API_BASE = '/api/products.php';
+    let API_BASE;
     if (isLocalDev && (currentPort === '4321' || currentPort === '')) {
-        // Desde Astro, usar el servidor PHP directamente
-        API_BASE = 'http://localhost:8080/api/products.php';
+        API_BASE = 'http://localhost:8080' + getStoreBase() + '/api/products.php';
+    } else {
+        API_BASE = getStoreBase() + '/api/products.php';
     }
     
     /**
@@ -201,7 +206,8 @@
             ` : '<p class="price">N/A</p>';
         }
         
-        const productId = (product.id != null && product.id !== '') ? String(product.id) : (product.slug || '');
+        // Usar slug para wishlist (más fiable en multi-tenant con store_id)
+        const productId = (product.slug || (product.id != null && product.id !== '' ? String(product.id) : ''));
         
         return `
             <div class="product-card">

@@ -177,9 +177,9 @@
                     />
                     ${discountBadgeHtml}
                     <button 
-                        class="wishlist-btn-detail-image" 
-                        data-wishlist-id="${escapeHtml(String(product.id))}"
-                        onclick="toggleWishlist('${escapeHtml(String(product.id))}')"
+                        class="wishlist-btn-detail-image"
+                        data-wishlist-id="${escapeHtml(product.slug || String(product.id))}"
+                        onclick="toggleWishlist('${escapeHtml(product.slug || String(product.id))}')"
                         title="Agregar a favoritos"
                     >
                         🤍
@@ -441,8 +441,8 @@
                 renderProductDetail(product, container);
                 
                 // Actualizar estado del botón de wishlist después de renderizar
-                if (window.isInWishlist && product.id != null) {
-                    const pid = String(product.id);
+                if (window.isInWishlist && (product.slug || product.id != null)) {
+                    const pid = product.slug || String(product.id);
                     setTimeout(async () => {
                         const isIn = await window.isInWishlist(pid);
                         if (isIn && window.updateWishlistButtons) {

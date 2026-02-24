@@ -35,9 +35,17 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
 <script is:inline>
 (function() {
-  // Obtener session ID (usar localStorage o generar uno)
+  function getStoreBase() {
+    var b = window.__STORE_BASE;
+    if (b) return b;
+    var m = (window.location.pathname || '').match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+    return m ? '/' + m[1] : '';
+  }
+  function getWishlistApiUrl() {
+    return getStoreBase() + '/api/wishlist.php';
+  }
   function getSessionId() {
-    const key = 'wishlist_session_id' + (window.__STORE_BASE || '');
+    const key = 'wishlist_session_id' + getStoreBase();
     let sessionId = localStorage.getItem(key);
     if (!sessionId) {
       sessionId = 'wishlist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -52,7 +60,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
     const sessionId = getSessionId();
 
     try {
-      const response = await fetch(`/api/wishlist.php?session_id=${encodeURIComponent(sessionId)}`);
+      const response = await fetch(getWishlistApiUrl() + '?session_id=' + encodeURIComponent(sessionId));
       const data = await response.json();
 
       if (data.success && data.items && data.items.length > 0) {
@@ -203,7 +211,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
     const sessionId = getSessionId();
     
     try {
-      const response = await fetch('/api/wishlist.php', {
+      const response = await fetch(getWishlistApiUrl(), {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -244,10 +252,11 @@ import Breadcrumb from '../components/Breadcrumb.astro';
   // Esperar a que wishlist.js se cargue primero
   setTimeout(() => {
     const originalRemove = window.removeFromWishlist;
+    const getBase = window.getStoreBase || function() { return window.__STORE_BASE || ''; };
     window.removeFromWishlist = async function(productId, callback) {
-      // Si estamos en la página de wishlist, usar nuestra función
       var _wp = window.location.pathname;
-      if (window.__STORE_BASE && _wp.indexOf(window.__STORE_BASE) === 0) { _wp = _wp.substring(window.__STORE_BASE.length) || '/'; }
+      var base = getBase();
+      if (base && _wp.indexOf(base) === 0) { _wp = _wp.substring(base.length) || '/'; }
       if (_wp === '/wishlist' || _wp === '/wishlist/') {
         await window.removeFromWishlistPage(productId);
         if (callback) callback(true, 'Eliminado');

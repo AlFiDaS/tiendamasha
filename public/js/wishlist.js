@@ -10,15 +10,29 @@
     'use strict';
     
     // Prefijo por tienda: evita cruce de wishlist entre wemasha, test1, etc.
-    // Fallback: si __STORE_BASE no está inyectado, derivar de la URL
     function storeKey(key) {
-        var base = window.__STORE_BASE;
-        if (!base && typeof window.location !== 'undefined') {
-            var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
-            base = m ? '/' + m[1] : '';
-        }
-        return key + (base || '');
+        return key + (getStoreBase() || '');
     }
+    
+    // Obtener base de tienda (ej: /wemasha) - NO depender del override de fetch
+    function getStoreBase() {
+        var base = window.__STORE_BASE;
+        if (base) return base;
+        if (typeof window.location !== 'undefined') {
+            var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+            return m ? '/' + m[1] : '';
+        }
+        return '';
+    }
+    
+    // URL absoluta de la API wishlist - evita depender del fetch override
+    function getWishlistApiUrl(path) {
+        var base = getStoreBase();
+        return (base || '') + (path || '/api/wishlist.php');
+    }
+    
+    window.getWishlistApiUrl = getWishlistApiUrl;
+    window.getStoreBase = getStoreBase;
     
     // Obtener o crear session ID
     function getSessionId() {
@@ -42,7 +56,7 @@
         const sessionId = getSessionId();
         
         try {
-            const response = await fetch('/api/wishlist.php', {
+            const response = await fetch(getWishlistApiUrl('/api/wishlist.php'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -79,7 +93,7 @@
         const sessionId = getSessionId();
         
         try {
-            const response = await fetch('/api/wishlist.php', {
+            const response = await fetch(getWishlistApiUrl('/api/wishlist.php'), {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -116,12 +130,14 @@
         const sessionId = getSessionId();
         
         try {
-            const response = await fetch(`/api/wishlist.php?session_id=${encodeURIComponent(sessionId)}`);
+            const response = await fetch(getWishlistApiUrl('/api/wishlist.php') + '?session_id=' + encodeURIComponent(sessionId));
             const data = await response.json();
             
             if (data.success && data.items) {
                 const pid = String(productId);
-                return data.items.some(item => String(item.product_id) === pid);
+                return data.items.some(item => 
+                    String(item.product_id) === pid || (item.slug && item.slug === pid)
+                );
             }
             return false;
         } catch (error) {
@@ -185,11 +201,15 @@
         if (wishlistButtons.length === 0) return;
         
         try {
-            const response = await fetch(`/api/wishlist.php?session_id=${encodeURIComponent(sessionId)}`);
+            const response = await fetch(getWishlistApiUrl('/api/wishlist.php') + '?session_id=' + encodeURIComponent(sessionId));
             const data = await response.json();
             
             if (data.success && data.items) {
-                const wishlistIds = new Set(data.items.map(item => String(item.product_id)));
+                const wishlistIds = new Set();
+                data.items.forEach(item => {
+                    wishlistIds.add(String(item.product_id));
+                    if (item.slug) wishlistIds.add(item.slug);
+                });
                 
                 wishlistButtons.forEach(button => {
                     const productId = button.getAttribute('data-wishlist-id');
@@ -266,7 +286,7 @@
         const sessionId = getSessionId();
         
         try {
-            const response = await fetch(`/api/wishlist.php?session_id=${encodeURIComponent(sessionId)}`);
+            const response = await fetch(getWishlistApiUrl('/api/wishlist.php') + '?session_id=' + encodeURIComponent(sessionId));
             const data = await response.json();
             
             const count = data.success && data.items ? data.items.length : 0;

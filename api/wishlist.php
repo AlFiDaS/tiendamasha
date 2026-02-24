@@ -48,19 +48,16 @@ try {
     
     switch ($method) {
         case 'GET':
-            // Obtener wishlist del usuario
-            // Solo mostrar productos visibles y de categorías visibles
+            // Obtener wishlist del usuario (solo productos visibles)
+            // fetchAllRaw: evita que injectStoreId excluya filas con store_id=NULL
             $sql = "SELECT w.id, w.product_id, w.created_at, 
                            p.name, p.slug, p.image, p.hoverImage, p.price, p.categoria, p.stock
                     FROM wishlist w
                     INNER JOIN products p ON w.product_id = p.id
-                    INNER JOIN categories c ON p.categoria = c.slug
                     WHERE w.session_id = :session_id
                       AND p.visible = 1
-                      AND c.visible = 1
                     ORDER BY w.created_at DESC";
-            
-            $items = fetchAll($sql, ['session_id' => $sessionId]);
+            $items = fetchAllRaw($sql, ['session_id' => $sessionId]);
             
             echo json_encode([
                 'success' => true,
@@ -78,28 +75,51 @@ try {
             }
             
             // Verificar que el producto existe y es visible (acepta id numérico o slug)
+            // Incluir store_id para BD compartida: el product_id debe existir en products de esta tienda (evita FK violation)
             $isNumeric = (is_numeric($productId) && (int) $productId > 0);
+            $product = false;
             
-            if ($isNumeric) {
-                $product = fetchOne(
-                    "SELECT p.id FROM products p WHERE p.id = :id AND p.visible = 1",
-                    ['id' => (int) $productId]
-                );
-            } else {
-                $product = fetchOne(
-                    "SELECT p.id FROM products p WHERE p.slug = :slug AND p.visible = 1",
-                    ['slug' => $productId]
-                );
+            if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+                if ($isNumeric) {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE id = :id AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                        ['id' => (int) $productId, 'sid' => (int) CURRENT_STORE_ID]
+                    );
+                } else {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE slug = :slug AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                        ['slug' => trim($productId), 'sid' => (int) CURRENT_STORE_ID]
+                    );
+                }
+            }
+            if (!$product) {
+                if ($isNumeric) {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE id = :id AND visible = 1",
+                        ['id' => (int) $productId]
+                    );
+                } else {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE slug = :slug AND visible = 1",
+                        ['slug' => trim($productId)]
+                    );
+                }
             }
             
             if (!$product) {
                 throw new Exception('Producto no encontrado o no disponible');
             }
             
-            $realProductId = (int) $product['id'];
+            // product_id puede ser INT o VARCHAR según esquema
+            $realProductId = $product['id'];
+            if (is_numeric($realProductId)) {
+                $realProductId = (int) $realProductId;
+            } else {
+                $realProductId = (string) trim($realProductId);
+            }
             
             // Verificar si ya está en wishlist
-            $existing = fetchOne(
+            $existing = fetchOneRaw(
                 "SELECT id FROM wishlist WHERE session_id = :session_id AND product_id = :product_id",
                 ['session_id' => $sessionId, 'product_id' => $realProductId]
             );
@@ -111,14 +131,30 @@ try {
                     'already_exists' => true
                 ], JSON_UNESCAPED_UNICODE);
             } else {
-                $sql = "INSERT INTO wishlist (session_id, product_id) VALUES (:session_id, :product_id)";
-                if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $realProductId])) {
+                // INSERT: intentar con store_id primero, fallback sin store_id
+                $inserted = false;
+                $lastError = '';
+                if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+                    $inserted = executeRaw(
+                        "INSERT INTO wishlist (store_id, session_id, product_id) VALUES (:store_id, :session_id, :product_id)",
+                        ['store_id' => (int) CURRENT_STORE_ID, 'session_id' => $sessionId, 'product_id' => $realProductId],
+                        $lastError
+                    );
+                }
+                if (!$inserted) {
+                    $inserted = executeRaw(
+                        "INSERT INTO wishlist (session_id, product_id) VALUES (:session_id, :product_id)",
+                        ['session_id' => $sessionId, 'product_id' => $realProductId],
+                        $lastError
+                    );
+                }
+                if ($inserted) {
                     echo json_encode([
                         'success' => true,
                         'message' => 'Agregado a favoritos'
                     ], JSON_UNESCAPED_UNICODE);
                 } else {
-                    throw new Exception('Error al agregar a favoritos');
+                    throw new Exception('Error al agregar a favoritos' . ($lastError ? ': ' . $lastError : ''));
                 }
             }
             break;
@@ -135,19 +171,42 @@ try {
             if ($isNumeric) {
                 $realProductId = (int) $productId;
             } else {
-                $product = fetchOne(
-                    "SELECT p.id FROM products p WHERE p.slug = :slug AND p.visible = 1",
-                    ['slug' => $productId]
-                );
-                $realProductId = $product ? (int) $product['id'] : 0;
+                $product = false;
+                if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE slug = :slug AND visible = 1 AND (store_id = :sid OR store_id IS NULL)",
+                        ['slug' => trim($productId), 'sid' => (int) CURRENT_STORE_ID]
+                    );
+                }
+                if (!$product) {
+                    $product = fetchOneRaw(
+                        "SELECT id FROM products WHERE slug = :slug AND visible = 1",
+                        ['slug' => trim($productId)]
+                    );
+                }
+                $realProductId = $product ? $product['id'] : null;
+                if (is_numeric($realProductId)) $realProductId = (int) $realProductId;
+                else $realProductId = (string) trim($realProductId ?? '');
             }
             
-            if ($realProductId < 1) {
+            if ($realProductId === '' || $realProductId === null || (is_numeric($realProductId) && $realProductId < 1)) {
                 throw new Exception('Producto no encontrado');
             }
             
-            $sql = "DELETE FROM wishlist WHERE session_id = :session_id AND product_id = :product_id";
-            if (executeQuery($sql, ['session_id' => $sessionId, 'product_id' => $realProductId])) {
+            $deleted = false;
+            if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+                $deleted = executeRaw(
+                    "DELETE FROM wishlist WHERE session_id = :session_id AND product_id = :product_id AND (store_id = :store_id OR store_id IS NULL)",
+                    ['session_id' => $sessionId, 'product_id' => $realProductId, 'store_id' => (int) CURRENT_STORE_ID]
+                );
+            }
+            if (!$deleted) {
+                $deleted = executeRaw(
+                    "DELETE FROM wishlist WHERE session_id = :session_id AND product_id = :product_id",
+                    ['session_id' => $sessionId, 'product_id' => $realProductId]
+                );
+            }
+            if ($deleted) {
                 echo json_encode([
                     'success' => true,
                     'message' => 'Eliminado de favoritos'
