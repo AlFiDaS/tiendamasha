@@ -37,9 +37,10 @@ function getShopSettings() {
 /**
  * Actualizar configuración de la tienda
  * @param array $data Datos a actualizar
+ * @param string|null $outError Mensaje de error si falla (por referencia)
  * @return bool True si se actualizó correctamente
  */
-function updateShopSettings($data) {
+function updateShopSettings($data, &$outError = null) {
     // Campos básicos que siempre existen
     $baseFields = [
         'shop_name', 'shop_logo', 'whatsapp_number', 'whatsapp_message',
@@ -91,23 +92,40 @@ function updateShopSettings($data) {
     }
     
     if (empty($updateFields)) {
+        $outError = 'No hay campos para actualizar';
         error_log('updateShopSettings: No hay campos para actualizar');
         return false;
     }
     
-    $params['id'] = 1;
-    $sql = "UPDATE `shop_settings` SET " . implode(', ', $updateFields) . " WHERE `id` = :id";
+    $sql = "UPDATE `shop_settings` SET " . implode(', ', $updateFields);
+    if (defined('CURRENT_STORE_ID') && CURRENT_STORE_ID > 0) {
+        $params['__store_id'] = (int) CURRENT_STORE_ID;
+        $sql .= " WHERE store_id = :__store_id";
+    } else {
+        $params['id'] = 1;
+        $sql .= " WHERE `id` = :id";
+    }
     
     try {
-        $result = executeQuery($sql, $params);
-        if ($result === false) {
-            error_log('updateShopSettings: executeQuery retornó false');
-            error_log('updateShopSettings: SQL: ' . $sql);
-            error_log('updateShopSettings: Params: ' . print_r($params, true));
+        $pdo = getDB();
+        if (!$pdo) {
+            $outError = 'Error de conexión a la base de datos';
+            error_log('updateShopSettings: getDB retornó null');
+            return false;
         }
-        return $result !== false;
-    } catch (Exception $e) {
-        error_log('updateShopSettings: Exception: ' . $e->getMessage());
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute($params);
+        if (!$result) {
+            $err = $stmt->errorInfo();
+            $outError = 'Error SQL: ' . ($err[2] ?? 'desconocido');
+            error_log('updateShopSettings: execute falló - ' . $outError);
+            error_log('updateShopSettings: SQL: ' . $sql);
+            return false;
+        }
+        return true;
+    } catch (PDOException $e) {
+        $outError = 'Error: ' . $e->getMessage();
+        error_log('updateShopSettings: PDOException: ' . $e->getMessage());
         error_log('updateShopSettings: SQL: ' . $sql);
         error_log('updateShopSettings: Params: ' . print_r($params, true));
         return false;

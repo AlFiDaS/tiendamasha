@@ -102,18 +102,18 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
     <!-- 🚀 CARGAR DATOS CRÍTICOS INMEDIATAMENTE (antes del renderizado) -->
     <script is:inline>
       (function() {
-        // Intentar cargar desde localStorage primero (cache)
-        const cachedShop = localStorage.getItem('shop_settings');
-        const cachedColors = localStorage.getItem('landing_colors');
-        const cacheTime = 5 * 60 * 1000; // 5 minutos
+        var cacheKey = 'shop_settings' + (window.__STORE_BASE || '');
+        var cachedShop = localStorage.getItem(cacheKey);
+        var cachedColors = localStorage.getItem('landing_colors' + (window.__STORE_BASE || ''));
+        var cacheTime = 60 * 60 * 1000; // 1 hora para logo estable al navegar
         
-        let shopData = null;
-        let colorsData = null;
+        var shopData = null;
+        var colorsData = null;
         
         // Verificar cache válido
         if (cachedShop) {
           try {
-            const parsed = JSON.parse(cachedShop);
+            var parsed = JSON.parse(cachedShop);
             if (parsed.timestamp && Date.now() - parsed.timestamp < cacheTime) {
               shopData = parsed.data;
             }
@@ -122,9 +122,9 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
         
         if (cachedColors) {
           try {
-            const parsed = JSON.parse(cachedColors);
-            if (parsed.timestamp && Date.now() - parsed.timestamp < cacheTime) {
-              colorsData = parsed.data;
+            var parsedC = JSON.parse(cachedColors);
+            if (parsedC.timestamp && Date.now() - parsedC.timestamp < cacheTime) {
+              colorsData = parsedC.data;
             }
           } catch(e) {}
         }
@@ -202,7 +202,7 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
               try {
                 const data = JSON.parse(xhr.responseText);
                 if (data.success && data.shop) {
-                  localStorage.setItem('shop_settings', JSON.stringify({
+                  localStorage.setItem(cacheKey, JSON.stringify({
                     timestamp: Date.now(),
                     data: data.shop
                   }));
@@ -226,14 +226,14 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
         }
         
         if (!colorsData) {
-          const xhr2 = new XMLHttpRequest();
+          var xhr2 = new XMLHttpRequest();
           xhr2.open('GET', '/api/landing-page.php', true);
           xhr2.onload = function() {
             if (xhr2.status === 200) {
               try {
-                const data = JSON.parse(xhr2.responseText);
+                var data = JSON.parse(xhr2.responseText);
                 if (data.colors) {
-                  localStorage.setItem('landing_colors', JSON.stringify({
+                  localStorage.setItem('landing_colors' + (window.__STORE_BASE || ''), JSON.stringify({
                     timestamp: Date.now(),
                     data: data
                   }));
@@ -363,8 +363,9 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
           const data = await response.json();
           
           if (data.success && data.shop) {
-            // Actualizar cache
-            localStorage.setItem('shop_settings', JSON.stringify({
+            // Actualizar cache (clave con prefijo de tienda)
+            var sk = 'shop_settings' + (window.__STORE_BASE || '');
+            localStorage.setItem(sk, JSON.stringify({
               timestamp: Date.now(),
               data: data.shop
             }));
@@ -408,8 +409,8 @@ const canonicalURL = canonical ? new URL(canonical, Astro.site) : Astro.url;
           const data = await response.json();
           
           if (data.colors) {
-            // Actualizar cache
-            localStorage.setItem('landing_colors', JSON.stringify({
+            // Actualizar cache (clave con prefijo de tienda)
+            localStorage.setItem('landing_colors' + (window.__STORE_BASE || ''), JSON.stringify({
               timestamp: Date.now(),
               data: data
             }));

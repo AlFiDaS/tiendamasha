@@ -26,13 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
     } else {
+        $instagram = trim(sanitize($_POST['instagram'] ?? ''));
+        $facebook = trim(sanitize($_POST['facebook'] ?? ''));
+        if ($instagram && !preg_match('#^https?://#i', $instagram)) {
+            $instagram = preg_replace('/^@/', '', $instagram);
+            $instagram = 'https://www.instagram.com/' . $instagram . '/';
+        }
+        if ($facebook && !preg_match('#^https?://#i', $facebook)) {
+            $facebook = preg_replace('/^@/', '', $facebook);
+            $facebook = 'https://www.facebook.com/' . $facebook . '/';
+        }
         $formData = [
             'shop_name' => sanitize($_POST['shop_name'] ?? ''),
             'whatsapp_number' => sanitize($_POST['whatsapp_number'] ?? ''),
             'whatsapp_message' => sanitize($_POST['whatsapp_message'] ?? ''),
             'address' => sanitize($_POST['address'] ?? ''),
-            'instagram' => sanitize($_POST['instagram'] ?? ''),
-            'facebook' => sanitize($_POST['facebook'] ?? ''),
+            'instagram' => $instagram,
+            'facebook' => $facebook,
             'email' => sanitize($_POST['email'] ?? ''),
             'phone' => sanitize($_POST['phone'] ?? ''),
             'description' => sanitize($_POST['description'] ?? ''),
@@ -79,8 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 if ($isValid && empty($error)) {
-                    // Crear directorio de logos si no existe
-                    $logoDir = IMAGES_PATH . '/logo';
+                    // Subcarpeta por tienda para que cada una tenga su propio logo
+                    $storeSlug = defined('CURRENT_STORE_SLUG') ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG)) : 'default';
+                    $logoDir = IMAGES_PATH . '/logo/' . $storeSlug;
                     if (!is_dir($logoDir)) {
                         if (!mkdir($logoDir, 0755, true)) {
                             $error = 'No se pudo crear el directorio de logos';
@@ -88,20 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                     
                     if (empty($error)) {
-                        // Generar nombre de archivo: logo.ext
                         $filename = 'logo.' . $ext;
                         $destination = $logoDir . '/' . $filename;
                         
-                        // Eliminar logo anterior si existe (puede tener extensión diferente)
+                        // Eliminar solo los logos de ESTA tienda (no de otras)
                         $existingLogos = glob($logoDir . '/logo.*');
                         foreach ($existingLogos as $existingLogo) {
                             @unlink($existingLogo);
                         }
                         
-                        // Mover archivo
                         if (move_uploaded_file($_FILES['shop_logo']['tmp_name'], $destination)) {
                             chmod($destination, 0644);
-                            $formData['shop_logo'] = '/images/logo/' . $filename;
+                            $formData['shop_logo'] = '/images/logo/' . $storeSlug . '/' . $filename;
                         } else {
                             $error = 'Error al mover el archivo del logo';
                         }
@@ -114,13 +123,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Si no hay error, actualizar
             if (empty($error)) {
-                if (updateShopSettings($formData)) {
+                $updateError = '';
+                if (updateShopSettings($formData, $updateError)) {
                     $success = 'Configuración de la tienda actualizada correctamente';
                     $_SESSION['success_message'] = $success;
                     // Recargar configuración
                     $settings = getShopSettings();
                 } else {
-                    $error = 'No se pudo actualizar la configuración';
+                    $error = $updateError ?: 'No se pudo actualizar la configuración';
                 }
             }
         }
@@ -146,7 +156,7 @@ require_once '_inc/header.php';
         </div>
     <?php endif; ?>
     
-    <form method="POST" action="" enctype="multipart/form-data">
+    <form method="POST" action="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '') ?>" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
         
         <div class="form-group">
@@ -261,25 +271,25 @@ require_once '_inc/header.php';
         <div class="form-group">
             <label for="instagram">Instagram</label>
             <input 
-                type="url" 
+                type="text" 
                 id="instagram" 
                 name="instagram" 
                 value="<?= htmlspecialchars($settings['instagram'] ?? '') ?>" 
-                placeholder="https://instagram.com/tu_cuenta"
+                placeholder="test2 o https://instagram.com/tu_cuenta"
             >
-            <small>URL completa de tu perfil de Instagram</small>
+            <small>Usuario (ej: test2) o URL completa. Se guardará como enlace a instagram.com</small>
         </div>
         
         <div class="form-group">
             <label for="facebook">Facebook</label>
             <input 
-                type="url" 
+                type="text" 
                 id="facebook" 
                 name="facebook" 
                 value="<?= htmlspecialchars($settings['facebook'] ?? '') ?>" 
-                placeholder="https://facebook.com/tu_pagina"
+                placeholder="tu_pagina o https://facebook.com/tu_pagina"
             >
-            <small>URL completa de tu página de Facebook</small>
+            <small>Usuario o URL completa. Se guardará como enlace a facebook.com</small>
         </div>
         
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
@@ -287,14 +297,14 @@ require_once '_inc/header.php';
         <h3 style="margin-bottom: 1rem; color: #333;">Información General</h3>
         
         <div class="form-group">
-            <label for="description">Descripción de la Tienda</label>
+            <label for="description">Descripción para SEO</label>
             <textarea 
                 id="description" 
                 name="description" 
                 rows="5"
-                placeholder="Breve descripción de tu tienda, productos, historia, etc."
+                placeholder="Breve descripción para buscadores (meta description, redes sociales)"
             ><?= htmlspecialchars($settings['description'] ?? '') ?></textarea>
-            <small>Descripción que puede aparecer en el sitio web (opcional)</small>
+            <small>Se usa en meta description, Open Graph y Twitter. Afecta cómo aparece tu tienda en Google y al compartir en redes.</small>
         </div>
         
         <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
@@ -309,7 +319,7 @@ require_once '_inc/header.php';
                 rows="3"
                 placeholder="Iluminando momentos especiales con velas artesanales únicas"
             ><?= htmlspecialchars($settings['footer_description'] ?? '') ?></textarea>
-            <small>Texto que aparece debajo del nombre de la tienda en el footer</small>
+            <small>Texto que aparece debajo del nombre de la tienda en el pie de página del sitio. Es independiente de la descripción SEO.</small>
         </div>
         
         <div class="form-group">

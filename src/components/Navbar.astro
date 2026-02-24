@@ -4,15 +4,15 @@ const staticLinksBefore = [
   { href: '/', text: 'Inicio' },
 ];
 
-// Galería: nombre y href se actualizan con /api/gallery-info.php
+// Galería: placeholder mínimo; se actualiza con cache o /api/gallery-info.php para evitar flash
 const staticLinksAfter = [
-  { href: '/galeria', text: 'Galeria de Ideas', id: 'nav-gallery-link' },
+  { href: '/galeria', text: '\u2026', id: 'nav-gallery-link' },
 ];
 ---
 
 <nav>
   <div class="nav-container">
-    <!-- Izquierda: logo -->
+    <!-- Izquierda: logo (inyectado server-side por store-router para evitar flash) -->
     <a href="/" class="logo" id="nav-logo">
       <img src="/images/lume-logo.png" alt="Logo" width="120" height="60" id="nav-logo-img" loading="eager" decoding="async" />
     </a>
@@ -102,60 +102,46 @@ const staticLinksAfter = [
     }
   })();
   
-  // Cargar configuración de la tienda (logo, etc.) - Usar cache para evitar flash
+  // Cargar configuración de la tienda (logo, etc.) - Cache 1h para evitar flash al navegar
   (function loadShopSettings() {
-    // Intentar cargar desde cache primero
-    const cachedShop = localStorage.getItem('shop_settings');
-    let shopData = null;
+    var cacheKey = 'shop_settings' + (window.__STORE_BASE || '');
+    var cachedShop = localStorage.getItem(cacheKey);
+    var shopData = null;
     
     if (cachedShop) {
       try {
-        const parsed = JSON.parse(cachedShop);
-        if (parsed.timestamp && Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+        var parsed = JSON.parse(cachedShop);
+        if (parsed.timestamp && Date.now() - parsed.timestamp < 60 * 60 * 1000) {
           shopData = parsed.data;
         }
       } catch(e) {}
     }
     
-    // Aplicar logo inmediatamente si está en cache
-    if (shopData && shopData.shop_logo) {
-      const logoImg = document.getElementById('nav-logo-img');
-      const logoLink = document.getElementById('nav-logo');
-      if (logoImg) {
-        logoImg.src = shopData.shop_logo;
-        logoImg.alt = shopData.shop_name || 'Logo';
-      }
-      if (logoLink && shopData.shop_name) {
-        logoLink.title = shopData.shop_name;
-      }
+    // Logo ya viene inyectado server-side; no actualizar para evitar parpadeo
+    if (shopData && shopData.shop_name) {
+      var logoLink = document.getElementById('nav-logo');
+      if (logoLink) logoLink.title = shopData.shop_name;
     }
     
     // Cargar datos frescos en segundo plano
     (async function() {
       try {
-        const response = await fetch('/api/shop.php');
-        const data = await response.json();
+        var response = await fetch('/api/shop.php');
+        var data = await response.json();
         
         if (data.success && data.shop) {
-          const shop = data.shop;
+          var shop = data.shop;
           
-          // Actualizar cache
-          localStorage.setItem('shop_settings', JSON.stringify({
+          // Actualizar cache (1 hora)
+          localStorage.setItem(cacheKey, JSON.stringify({
             timestamp: Date.now(),
             data: shop
           }));
           
-          // Actualizar logo del navbar
-          if (shop.shop_logo) {
-            const logoImg = document.getElementById('nav-logo-img');
+          // No actualizar logo: ya viene correcto del servidor; cambiarlo causa parpadeo
+          if (shop.shop_name) {
             const logoLink = document.getElementById('nav-logo');
-            if (logoImg) {
-              logoImg.src = shop.shop_logo;
-              logoImg.alt = shop.shop_name || 'Logo';
-            }
-            if (logoLink && shop.shop_name) {
-              logoLink.title = shop.shop_name;
-            }
+            if (logoLink) logoLink.title = shop.shop_name;
           }
         }
       } catch (error) {
@@ -164,8 +150,23 @@ const staticLinksAfter = [
     })();
   })();
   
-  // Galería: actualizar nombre y enlace desde gallery_info
+  // Galería: actualizar nombre y enlace desde gallery_info (cache primero para evitar flash)
   (function() {
+    var cacheKey = 'gallery_info' + (window.__STORE_BASE || '');
+    var cached = null;
+    try {
+      var raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        var p = JSON.parse(raw);
+        if (p && p.timestamp && Date.now() - p.timestamp < 5 * 60 * 1000) cached = p;
+      }
+    } catch(e) {}
+    if (cached && cached.name) {
+      var d = document.getElementById('nav-gallery-link');
+      var m = document.getElementById('nav-gallery-link-mobile');
+      if (d) { d.textContent = cached.name; d.href = '/' + (cached.slug || 'galeria').replace(/^\//, ''); }
+      if (m) { m.textContent = cached.name; m.href = '/' + (cached.slug || 'galeria').replace(/^\//, ''); }
+    }
     fetch('/api/gallery-info.php')
       .then(r => r.json())
       .then(data => {
@@ -181,6 +182,9 @@ const staticLinksAfter = [
             mobileLink.href = href;
             mobileLink.textContent = data.name;
           }
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify({ name: data.name, slug: data.slug, title: data.title || '', timestamp: Date.now() }));
+          } catch(e) {}
         }
       })
       .catch(() => {});

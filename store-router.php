@@ -123,6 +123,7 @@ $htmlFile = resolveHtmlFile($storePath);
 if ($htmlFile && file_exists($htmlFile)) {
     $html = file_get_contents($htmlFile);
     $html = injectStoreContext($html, $storeSlug);
+    $html = injectShopLogo($html, $storeSlug, (int) $store['id']);
 
     header('Content-Type: text/html; charset=utf-8');
     echo $html;
@@ -137,35 +138,40 @@ exit;
 
 function resolveHtmlFile($path) {
     $base = dirname(__FILE__);
+    $dist = $base . '/dist';
     $path = trim($path, '/');
 
-    if (empty($path)) {
-        if (file_exists($base . '/index.html')) return $base . '/index.html';
+    $try = function ($root) use ($path) {
+        if (empty($path)) {
+            if (file_exists($root . '/index.html')) return $root . '/index.html';
+            return null;
+        }
+        if (file_exists($root . '/' . $path) && is_file($root . '/' . $path)) {
+            return $root . '/' . $path;
+        }
+        if (file_exists($root . '/' . $path . '/index.html')) {
+            return $root . '/' . $path . '/index.html';
+        }
+        if (file_exists($root . '/' . $path . '.html')) {
+            return $root . '/' . $path . '.html';
+        }
+        if (file_exists($root . '/placeholder/placeholder/index.html') && preg_match('#^[^/]+/[^/]+$#', $path)) {
+            return $root . '/placeholder/placeholder/index.html';
+        }
+        if (file_exists($root . '/placeholder/index.html') && preg_match('#^[^/]+$#', $path)) {
+            return $root . '/placeholder/index.html';
+        }
+        if (file_exists($root . '/index.html')) {
+            return $root . '/index.html';
+        }
         return null;
-    }
+    };
 
-    if (file_exists($base . '/' . $path) && is_file($base . '/' . $path)) {
-        return $base . '/' . $path;
+    $found = $try($base);
+    if (!$found && is_dir($dist)) {
+        $found = $try($dist);
     }
-    if (file_exists($base . '/' . $path . '/index.html')) {
-        return $base . '/' . $path . '/index.html';
-    }
-    if (file_exists($base . '/' . $path . '.html')) {
-        return $base . '/' . $path . '.html';
-    }
-
-    if (file_exists($base . '/placeholder/placeholder/index.html') && preg_match('#^[^/]+/[^/]+$#', $path)) {
-        return $base . '/placeholder/placeholder/index.html';
-    }
-    if (file_exists($base . '/placeholder/index.html') && preg_match('#^[^/]+$#', $path)) {
-        return $base . '/placeholder/index.html';
-    }
-
-    if (file_exists($base . '/index.html')) {
-        return $base . '/index.html';
-    }
-
-    return null;
+    return $found;
 }
 
 function serveStaticFile($filepath) {

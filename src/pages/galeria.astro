@@ -6,18 +6,33 @@ import Layout from "../layouts/Layout.astro";
     <div class="container">
       <a href="/">Inicio</a>
       <span class="separator">/</span>
-      <span id="galeria-breadcrumb-name">Galería de ideas</span>
+      <span id="galeria-breadcrumb-name"></span>
     </div>
   </div>
 
   <section class="galeria">
-    <h1 id="galeria-title">Galería de ideas</h1>
+    <h1 id="galeria-title"></h1>
     <p class="sub">Tocá una imagen para verla en grande. Usá flechas o deslizá para avanzar.</p>
 
     <div class="grid" data-galeria="true">
       <!-- Las imágenes se cargarán dinámicamente aquí -->
     </div>
   </section>
+
+  <script is:inline>
+  (function(){
+    var k='gallery_info'+(window.__STORE_BASE||'');
+    try{
+      var r=localStorage.getItem(k);
+      if(r){var p=JSON.parse(r);if(p&&p.timestamp&&Date.now()-p.timestamp<300000){
+        var b=document.getElementById('galeria-breadcrumb-name');
+        var t=document.getElementById('galeria-title');
+        if(b&&p.name)b.textContent=p.name;
+        if(t&&p.title)t.textContent=p.title;
+      }}
+    }catch(e){}
+  })();
+  </script>
 
   <!-- LIGHTBOX -->
   <div id="lightbox" class="lightbox hidden" aria-hidden="true">

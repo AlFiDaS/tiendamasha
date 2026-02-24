@@ -60,54 +60,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($existingStore) {
                 $error = 'Ya existe una tienda con ese slug. Elegí otro.';
             } else {
-                $tablePrefix = str_replace('-', '_', $slug) . '_';
                 $dbName = PLATFORM_DB_NAME;
 
-                $dbResult = createStoreTables($tablePrefix);
+                platformQuery(
+                    "INSERT INTO stores (owner_id, slug, db_name, plan, status) VALUES (:oid, :slug, :db, 'free', 'active')",
+                    ['oid' => $userId, 'slug' => $slug, 'db' => $dbName]
+                );
+                $storeId = platformLastInsertId();
 
-                if (!$dbResult['success']) {
-                    $error = 'Error al crear las tablas: ' . ($dbResult['error'] ?? 'Error desconocido');
+                if (!$storeId) {
+                    $error = 'Error al crear la tienda en la base de datos.';
                 } else {
-                    try {
-                        $storeDsn = sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', PLATFORM_DB_HOST, PLATFORM_DB_NAME);
-                        $storePdo = new PDO($storeDsn, PLATFORM_DB_USER, PLATFORM_DB_PASS, [
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                        ]);
+                    $dbResult = createStoreData(
+                        $storeId,
+                        $storeName,
+                        $adminUsername,
+                        $adminPassword,
+                        $user['email'],
+                        $whatsapp,
+                        $instagram,
+                        $description
+                    );
 
-                        $hashedAdminPass = password_hash($adminPassword, PASSWORD_DEFAULT);
-                        $stmt = $storePdo->prepare(
-                            'INSERT INTO `' . $tablePrefix . 'admin_users` (username, password, email) VALUES (:u, :p, :e)'
-                        );
-                        $stmt->execute([
-                            'u' => $adminUsername,
-                            'p' => $hashedAdminPass,
-                            'e' => $user['email']
-                        ]);
-
-                        $stmt = $storePdo->prepare(
-                            "UPDATE `" . $tablePrefix . "shop_settings` SET shop_name = :name, whatsapp_number = :wa,
-                             instagram = :ig, description = :desc WHERE id = 1"
-                        );
-                        $stmt->execute([
-                            'name' => $storeName,
-                            'wa'   => $whatsapp,
-                            'ig'   => $instagram,
-                            'desc' => $description,
-                        ]);
-
-                        $storePdo = null;
-                    } catch (PDOException $e) {
-                        $error = 'Error al configurar la tienda: ' . $e->getMessage();
-                        error_log('[Platform] Store setup error: ' . $e->getMessage());
-                    }
-
-                    if (empty($error)) {
-                        platformQuery(
-                            "INSERT INTO stores (owner_id, slug, db_name, table_prefix, plan, status) VALUES (:oid, :slug, :db, :tp, 'free', 'active')",
-                            ['oid' => $userId, 'slug' => $slug, 'db' => $dbName, 'tp' => $tablePrefix]
-                        );
-                        $storeId = platformLastInsertId();
-
+                    if (!$dbResult['success']) {
+                        platformQuery('DELETE FROM stores WHERE id = :id', ['id' => $storeId]);
+                        $error = 'Error al configurar la tienda: ' . ($dbResult['error'] ?? 'Error desconocido');
+                    } else {
                         platformQuery(
                             "INSERT INTO store_members (store_id, user_id, role) VALUES (:sid, :uid, 'owner')",
                             ['sid' => $storeId, 'uid' => $userId]

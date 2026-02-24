@@ -14,7 +14,7 @@ import InfoVelas from '../components/InfoVelas.astro';
   <section class="catalogo">
     <div class="container">
       <div class="section-header">
-        <h1>Catálogo de Velas</h1>
+        <h1 id="category-title">Cargando...</h1>
       </div>
       
       <!-- Componente de búsqueda -->
@@ -28,6 +28,36 @@ import InfoVelas from '../components/InfoVelas.astro';
   </section>
 
   <InfoVelas />
+
+  <script is:inline>
+  (function() {
+    async function loadCategoryInfo() {
+      try {
+        const response = await fetch('/api/categories.php');
+        const data = await response.json();
+        const titleEl = document.getElementById('category-title');
+        if (data.success && data.categories && titleEl) {
+          const category = data.categories.find(function(c) { return c.slug === 'productos'; });
+          if (category) {
+            titleEl.textContent = category.catalog_title || ('Catálogo de ' + category.name);
+          } else {
+            titleEl.textContent = 'Catálogo de productos';
+          }
+        } else if (titleEl) {
+          titleEl.textContent = 'Catálogo de productos';
+        }
+      } catch (e) {
+        var el = document.getElementById('category-title');
+        if (el) el.textContent = 'Catálogo de productos';
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadCategoryInfo);
+    } else {
+      loadCategoryInfo();
+    }
+  })();
+  </script>
 
   <style>
     .catalogo {

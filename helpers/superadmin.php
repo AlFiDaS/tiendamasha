@@ -25,32 +25,17 @@ function requireSuperAdmin() {
 }
 
 /**
- * Conecta a la BD de una tienda específica y devuelve un PDO
+ * Conecta a la BD compartida (misma para todas las tiendas)
  */
-function getStoreConnection($dbName) {
-    $safeName = preg_replace('/[^a-zA-Z0-9_]/', '', $dbName);
-    try {
-        return new PDO(
-            sprintf('mysql:host=%s;dbname=%s;charset=utf8mb4', STORE_DB_HOST, $safeName),
-            STORE_DB_USER,
-            STORE_DB_PASS,
-            [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
-        );
-    } catch (PDOException $e) {
-        error_log('[SuperAdmin] Store DB connection error (' . $safeName . '): ' . $e->getMessage());
-        return null;
-    }
+function getStoreConnection($dbName = null) {
+    $pdo = getPlatformDB();
+    return $pdo;
 }
 
 /**
- * Obtiene estadísticas de una tienda conectándose a su BD.
- * Soporta tablas con prefijo (table_prefix).
+ * Obtiene estadísticas de una tienda por store_id.
  */
-function getStoreStats($dbName, $tablePrefix = '') {
+function getStoreStats($dbName, $storeId = null) {
     $pdo = getStoreConnection($dbName);
     if (!$pdo) {
         return [
@@ -62,14 +47,37 @@ function getStoreStats($dbName, $tablePrefix = '') {
         ];
     }
 
-    $p = preg_replace('/[^a-z0-9_]/', '', $tablePrefix ?? '');
+    $sid = (int) $storeId;
+    if ($sid < 1) {
+        return [
+            'products_count'  => '?',
+            'orders_count'    => '?',
+            'revenue'         => '?',
+            'categories_count'=> '?',
+            'db_error'        => true,
+        ];
+    }
 
     try {
-        $products = $pdo->query("SELECT COUNT(*) FROM `{$p}products`")->fetchColumn();
-        $orders = $pdo->query("SELECT COUNT(*) FROM `{$p}orders`")->fetchColumn();
-        $revenue = $pdo->query("SELECT COALESCE(SUM(total_amount), 0) FROM `{$p}orders` WHERE status = 'approved'")->fetchColumn();
-        $categories = $pdo->query("SELECT COUNT(*) FROM `{$p}categories`")->fetchColumn();
-        $shopName = $pdo->query("SELECT shop_name FROM `{$p}shop_settings` WHERE id = 1 LIMIT 1")->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM products WHERE store_id = ?");
+        $stmt->execute([$sid]);
+        $products = $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE store_id = ?");
+        $stmt->execute([$sid]);
+        $orders = $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE store_id = ? AND status = 'approved'");
+        $stmt->execute([$sid]);
+        $revenue = $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE store_id = ?");
+        $stmt->execute([$sid]);
+        $categories = $stmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT shop_name FROM shop_settings WHERE store_id = ? LIMIT 1");
+        $stmt->execute([$sid]);
+        $shopName = $stmt->fetchColumn();
 
         return [
             'products_count'   => (int) $products,
@@ -80,7 +88,7 @@ function getStoreStats($dbName, $tablePrefix = '') {
             'db_error'         => false,
         ];
     } catch (PDOException $e) {
-        error_log('[SuperAdmin] Store stats error (' . $dbName . '/' . $p . '): ' . $e->getMessage());
+        error_log('[SuperAdmin] Store stats error (store_id=' . $sid . '): ' . $e->getMessage());
         return [
             'products_count'  => '?',
             'orders_count'    => '?',
@@ -124,9 +132,9 @@ function getPlatformGlobalStats() {
     $totalOrders = 0;
     $totalRevenue = 0;
 
-    $stores = platformFetchAll('SELECT db_name, table_prefix FROM stores');
+    $stores = platformFetchAll('SELECT id, db_name FROM stores');
     foreach ($stores as $store) {
-        $stats = getStoreStats($store['db_name'], $store['table_prefix'] ?? '');
+        $stats = getStoreStats($store['db_name'], $store['id']);
         if (!$stats['db_error']) {
             $totalProducts += $stats['products_count'];
             $totalOrders += $stats['orders_count'];
@@ -160,7 +168,7 @@ function getStoreDetail($storeId) {
 
     if (!$store) return null;
 
-    $store['stats'] = getStoreStats($store['db_name'], $store['table_prefix'] ?? '');
+    $store['stats'] = getStoreStats($store['db_name'], $store['id']);
     $store['members'] = platformFetchAll(
         'SELECT sm.role, pu.name, pu.email FROM store_members sm
          LEFT JOIN platform_users pu ON pu.id = sm.user_id
@@ -172,7 +180,7 @@ function getStoreDetail($storeId) {
 }
 
 /**
- * Elimina una tienda: borra sus tablas prefijadas y los registros de la plataforma.
+ * Elimina una tienda: borra sus datos de las tablas compartidas y los registros de la plataforma.
  */
 function deleteStore($storeId) {
     $store = platformFetchOne('SELECT * FROM stores WHERE id = :id', ['id' => $storeId]);
@@ -180,10 +188,10 @@ function deleteStore($storeId) {
         return ['success' => false, 'error' => 'Tienda no encontrada'];
     }
 
-    $prefix = $store['table_prefix'] ?? '';
+    $sid = (int) $storeId;
     $pdo = getStoreConnection($store['db_name']);
 
-    if ($pdo && $prefix) {
+    if ($pdo && $sid > 0) {
         $storeTables = [
             'products', 'categories', 'admin_users', 'orders', 'galeria',
             'coupons', 'reviews', 'wishlist', 'customers', 'stock_movements',
@@ -191,13 +199,11 @@ function deleteStore($storeId) {
         ];
         foreach ($storeTables as $t) {
             try {
-                $pdo->exec("DROP TABLE IF EXISTS `{$prefix}{$t}`");
+                $pdo->prepare("DELETE FROM `{$t}` WHERE store_id = ?")->execute([$sid]);
             } catch (PDOException $e) {
-                error_log('[DeleteStore] Drop table error: ' . $e->getMessage());
+                error_log('[DeleteStore] Delete error (' . $t . '): ' . $e->getMessage());
             }
         }
-    } elseif ($pdo && !$prefix) {
-        error_log('[DeleteStore] Tienda sin prefijo (slug=' . $store['slug'] . '), tablas no borradas por seguridad.');
     }
 
     $db = getPlatformDB();

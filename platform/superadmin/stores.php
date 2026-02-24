@@ -9,7 +9,7 @@ $allStores = getAllStoresWithOwner();
 
 $storesWithStats = [];
 foreach ($allStores as $store) {
-    $store['stats'] = getStoreStats($store['db_name'], $store['table_prefix'] ?? '');
+    $store['stats'] = getStoreStats($store['db_name'], $store['id']);
     $storesWithStats[] = $store;
 }
 

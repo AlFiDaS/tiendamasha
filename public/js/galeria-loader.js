@@ -21,6 +21,20 @@
      * Cargar galería desde la API
      */
     async function loadGaleria() {
+        // Aplicar cache inmediatamente para evitar flash
+        try {
+            const cacheKey = 'gallery_info' + (window.__STORE_BASE || '');
+            const raw = localStorage.getItem(cacheKey);
+            if (raw) {
+                const p = JSON.parse(raw);
+                if (p && p.timestamp && Date.now() - p.timestamp < 5 * 60 * 1000) {
+                    const titleEl = document.getElementById('galeria-title');
+                    const breadcrumbEl = document.getElementById('galeria-breadcrumb-name');
+                    if (titleEl && p.title) titleEl.textContent = p.title;
+                    if (breadcrumbEl && p.name) breadcrumbEl.textContent = p.name;
+                }
+            }
+        } catch (e) {}
         try {
             const response = await fetch(API_BASE);
             
@@ -46,13 +60,23 @@
             // Actualizar título de la galería (editable desde admin)
             const titleEl = document.getElementById('galeria-title');
             if (titleEl && data.title !== undefined) {
-                titleEl.textContent = data.title || 'Galería de ideas';
+                titleEl.textContent = data.title || '';
             }
             // Actualizar nombre en breadcrumb (Inicio / ...)
             const breadcrumbEl = document.getElementById('galeria-breadcrumb-name');
             if (breadcrumbEl && data.name !== undefined) {
-                breadcrumbEl.textContent = data.name || 'Galería de ideas';
+                breadcrumbEl.textContent = data.name || '';
             }
+            // Guardar en cache para evitar flash en próximas visitas
+            try {
+                const cacheKey = 'gallery_info' + (window.__STORE_BASE || '');
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    name: data.name || '',
+                    title: data.title || '',
+                    slug: data.slug || 'galeria',
+                    timestamp: Date.now()
+                }));
+            } catch (e) {}
             
             return data.galeria || [];
         } catch (error) {

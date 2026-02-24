@@ -3,8 +3,7 @@
  * ============================================
  * HELPER: Conexión a Base de Datos
  * ============================================
- * Manejo de conexión PDO a MySQL
- * Soporta prefijo de tablas para multi-tenancy
+ * Soporta store_id para multi-tenancy (una BD, datos por tienda)
  * Compatible: PHP 7.4+
  * ============================================
  */
@@ -13,77 +12,97 @@ if (!defined('LUME_ADMIN')) {
     die('Acceso directo no permitido');
 }
 
+/** Tablas de tienda que requieren store_id */
+$GLOBALS['_store_tables'] = [
+    'products', 'categories', 'admin_users', 'orders',
+    'galeria', 'coupons', 'reviews', 'wishlist', 'customers',
+    'stock_movements', 'shop_settings', 'gallery_info',
+    'landing_page_settings',
+];
+
 /**
- * PDO wrapper que aplica prefijos de tabla transparentemente.
- * Cuando prefix es vacío, se comporta como PDO estándar.
+ * Inyecta store_id en SQL y params para consultas de tablas de tienda.
  */
-class PrefixedPDO extends PDO {
-    /** @var string */
-    private $tablePrefix = '';
-
-    /** @var string[] */
-    private $storeTables = [
-        'products', 'categories', 'admin_users', 'orders',
-        'galeria', 'coupons', 'reviews', 'wishlist', 'customers',
-        'stock_movements', 'shop_settings', 'gallery_info',
-        'landing_page_settings',
-    ];
-
-    public function setTablePrefix($prefix) {
-        $this->tablePrefix = (string) $prefix;
+function injectStoreIdIntoQuery($sql, $params) {
+    $storeId = defined('CURRENT_STORE_ID') ? (int) CURRENT_STORE_ID : 0;
+    if ($storeId < 1) {
+        return [$sql, $params];
+    }
+    if (preg_match('/^\s*(SHOW|DESCRIBE|EXPLAIN)\b/i', $sql)) {
+        return [$sql, $params];
     }
 
-    public function getTablePrefix() {
-        return $this->tablePrefix;
-    }
-
-    private function prefixSQL($sql) {
-        if ($this->tablePrefix === '') {
-            return $sql;
+    $tables = $GLOBALS['_store_tables'];
+    $touchesStoreTable = false;
+    foreach ($tables as $t) {
+        if (preg_match('/\b' . preg_quote($t, '/') . '\b/i', $sql)) {
+            $touchesStoreTable = true;
+            break;
         }
-        foreach ($this->storeTables as $t) {
-            $sql = preg_replace('/\b' . preg_quote($t, '/') . '\b/', $this->tablePrefix . $t, $sql);
+    }
+    if (!$touchesStoreTable) {
+        return [$sql, $params];
+    }
+
+    $params = $params ?: [];
+    $params['__store_id'] = $storeId;
+
+    if (preg_match('/^\s*SELECT\b/i', $sql)) {
+        if (preg_match('/\b(shop_settings|gallery_info|landing_page_settings)\b.*?WHERE\s+id\s*=\s*1\b/i', $sql)) {
+            $sql = preg_replace('/WHERE\s+id\s*=\s*1\b/i', 'WHERE store_id = :__store_id', $sql);
+        } elseif (preg_match('/\bWHERE\b/i', $sql)) {
+            $sql = preg_replace('/(\bWHERE\b)(.+?)(\bORDER\s+BY\b|\bGROUP\s+BY\b|\bLIMIT\b|\bHAVING\b|$)/is', '$1 $2 AND store_id = :__store_id $3', $sql, 1);
+        } else {
+            $sql = preg_replace('/(\bFROM\s+[\w`]+(?:\s+[\w`]+)?)\s+(\b(?:ORDER|GROUP|LIMIT|HAVING)\b|$)/is', '$1 WHERE store_id = :__store_id $2', $sql, 1);
         }
-        return $sql;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function prepare($sql, $options = []) {
-        return parent::prepare($this->prefixSQL($sql), $options);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function query($sql, ...$args) {
-        if (count($args) > 0) {
-            return parent::query($this->prefixSQL($sql), ...$args);
+    } elseif (preg_match('/^\s*INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i', $sql, $m)) {
+        $table = strtolower($m[1]);
+        if (in_array($table, $tables)) {
+            $cols = $m[2];
+            $vals = $m[3];
+            if (in_array($table, ['shop_settings', 'gallery_info', 'landing_page_settings']) &&
+                preg_match('/^\s*id\s*(?:,|$)/i', trim($cols)) && preg_match('/^\s*1\s*(?:,|$)/i', trim($vals))) {
+                $cols = preg_replace('/^\s*id\s*,?\s*/i', '', $cols);
+                $vals = preg_replace('/^\s*1\s*,?\s*/i', '', $vals);
+                $cols = trim($cols) ? "store_id, $cols" : 'store_id';
+                $vals = trim($vals) ? ":__store_id, $vals" : ':__store_id';
+                $sql = "INSERT INTO $table ($cols) VALUES ($vals)";
+            } else {
+                $sql = preg_replace('/INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(/i', 'INSERT INTO $1 (store_id, $2) VALUES (:__store_id, ', $sql, 1);
+            }
         }
-        return parent::query($this->prefixSQL($sql));
+    } elseif (preg_match('/^\s*UPDATE\b/i', $sql) && preg_match('/\bWHERE\b/i', $sql)) {
+        if (preg_match('/\b(shop_settings|gallery_info|landing_page_settings)\b.*?WHERE\s+(?:id\s*=\s*1|id\s*=\s*:id)\b/i', $sql)) {
+            $sql = preg_replace('/WHERE\s+(?:id\s*=\s*1|id\s*=\s*:id)\b/i', 'WHERE store_id = :__store_id', $sql);
+            unset($params['id']);
+        } else {
+            $sql = preg_replace('/(\bWHERE\b)(.+?)(\bORDER\s+BY\b|\bLIMIT\b|$)/is', '$1 $2 AND store_id = :__store_id $3', $sql, 1);
+        }
+    } elseif (preg_match('/^\s*DELETE\b/i', $sql) && preg_match('/\bWHERE\b/i', $sql)) {
+        if (preg_match('/\b(shop_settings|gallery_info|landing_page_settings)\b.*?WHERE\s+(?:id\s*=\s*1|id\s*=\s*:id)\b/i', $sql)) {
+            $sql = preg_replace('/WHERE\s+(?:id\s*=\s*1|id\s*=\s*:id)\b/i', 'WHERE store_id = :__store_id', $sql);
+            unset($params['id']);
+        } else {
+            $sql = preg_replace('/(\bWHERE\b)(.+?)(\bORDER\s+BY\b|\bLIMIT\b|$)/is', '$1 $2 AND store_id = :__store_id $3', $sql, 1);
+        }
     }
 
-    #[\ReturnTypeWillChange]
-    public function exec($sql) {
-        return parent::exec($this->prefixSQL($sql));
-    }
+    return [$sql, $params];
 }
 
 /**
- * Obtener conexión PDO a la base de datos
- * @return PrefixedPDO|null
+ * Obtener conexión PDO a la base de datos (sin prefijos, BD única)
  */
 function getDB() {
     static $pdo = null;
     static $currentDbName = null;
-    static $currentPrefix = null;
 
-    $prefix = defined('CURRENT_STORE_TABLE_PREFIX') ? CURRENT_STORE_TABLE_PREFIX : '';
-
-    if ($pdo !== null && ($currentDbName !== DB_NAME || $currentPrefix !== $prefix)) {
+    if ($pdo !== null && $currentDbName !== DB_NAME) {
         $pdo = null;
     }
 
     if ($pdo === null) {
         $currentDbName = DB_NAME;
-        $currentPrefix = $prefix;
         try {
             $dsn = sprintf(
                 'mysql:host=%s;dbname=%s;charset=%s',
@@ -91,132 +110,76 @@ function getDB() {
                 DB_NAME,
                 DB_CHARSET
             );
-            
             $options = [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . DB_CHARSET
             ];
-            
-            $pdo = new PrefixedPDO($dsn, DB_USER, DB_PASS, $options);
-            $pdo->setTablePrefix($prefix);
-            
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
             error_log('Error de conexión a BD: ' . $e->getMessage());
             return null;
         }
     }
-    
+
     return $pdo;
 }
 
 /**
- * Ejecutar consulta preparada
- * @param string $sql
- * @param array $params
- * @return PDOStatement|false
+ * Ejecutar consulta preparada (con inyección automática de store_id)
  */
 function executeQuery($sql, $params = []) {
     $pdo = getDB();
     if (!$pdo) {
         return false;
     }
-    
+
+    list($sql, $params) = injectStoreIdIntoQuery($sql, $params);
+
     try {
         $stmt = $pdo->prepare($sql);
         $result = $stmt->execute($params);
-        
-        // Si hay errores después de ejecutar, loguearlos
         if (!$result) {
             $errorInfo = $stmt->errorInfo();
             error_log('Error en consulta SQL: ' . ($errorInfo[2] ?? 'Error desconocido'));
             error_log('SQL: ' . $sql);
-            error_log('Params: ' . print_r($params, true));
+            return false;
         }
-        
-        return $result ? $stmt : false;
+        return $stmt;
     } catch (PDOException $e) {
         error_log('Error en consulta SQL: ' . $e->getMessage());
         error_log('SQL: ' . $sql);
-        error_log('Params: ' . print_r($params, true));
         return false;
     }
 }
 
-/**
- * Obtener un solo registro
- * @param string $sql
- * @param array $params
- * @return array|false
- */
 function fetchOne($sql, $params = []) {
     $stmt = executeQuery($sql, $params);
-    if (!$stmt) {
-        return false;
-    }
-    return $stmt->fetch();
+    return $stmt ? $stmt->fetch() : false;
 }
 
-/**
- * Obtener múltiples registros
- * @param string $sql
- * @param array $params
- * @return array|false
- */
 function fetchAll($sql, $params = []) {
     $stmt = executeQuery($sql, $params);
-    if (!$stmt) {
-        return false;
-    }
-    return $stmt->fetchAll();
+    return $stmt ? $stmt->fetchAll() : false;
 }
 
-/**
- * Obtener el último ID insertado
- * @return string|false
- */
 function lastInsertId() {
     $pdo = getDB();
-    if (!$pdo) {
-        return false;
-    }
-    return $pdo->lastInsertId();
+    return $pdo ? $pdo->lastInsertId() : false;
 }
 
-/**
- * Iniciar transacción
- * @return bool
- */
 function beginTransaction() {
     $pdo = getDB();
-    if (!$pdo) {
-        return false;
-    }
-    return $pdo->beginTransaction();
+    return $pdo ? $pdo->beginTransaction() : false;
 }
 
-/**
- * Confirmar transacción
- * @return bool
- */
 function commit() {
     $pdo = getDB();
-    if (!$pdo) {
-        return false;
-    }
-    return $pdo->commit();
+    return $pdo ? $pdo->commit() : false;
 }
 
-/**
- * Revertir transacción
- * @return bool
- */
 function rollback() {
     $pdo = getDB();
-    if (!$pdo) {
-        return false;
-    }
-    return $pdo->rollBack();
+    return $pdo ? $pdo->rollBack() : false;
 }
-

@@ -48,14 +48,23 @@ try {
         throw new Exception('No se encontró configuración de la tienda');
     }
     
+    // Normalizar redes sociales: si es solo usuario, convertir a URL completa
+    $instagram = $settings['instagram'] ?? '';
+    $facebook = $settings['facebook'] ?? '';
+    if ($instagram && !preg_match('#^https?://#i', $instagram)) {
+        $instagram = 'https://www.instagram.com/' . preg_replace('/^@/', '', $instagram) . '/';
+    }
+    if ($facebook && !preg_match('#^https?://#i', $facebook)) {
+        $facebook = 'https://www.facebook.com/' . preg_replace('/^@/', '', $facebook) . '/';
+    }
     // Preparar datos para el frontend
     $shopData = [
         'shop_name' => $settings['shop_name'] ?? '',
         'shop_logo' => !empty($settings['shop_logo']) ? addCacheBust($settings['shop_logo']) : null,
         'whatsapp_number' => $settings['whatsapp_number'] ?? '',
         'whatsapp_message' => $settings['whatsapp_message'] ?? '',
-        'instagram' => $settings['instagram'] ?? '',
-        'facebook' => $settings['facebook'] ?? '',
+        'instagram' => $instagram,
+        'facebook' => $facebook,
         'email' => $settings['email'] ?? '',
         'phone' => $settings['phone'] ?? '',
         'address' => $settings['address'] ?? '',

@@ -2,8 +2,8 @@
   <div class="footer-container">
     <div class="footer-content">
       <div class="footer-brand">
-        <h3 id="footer-shop-name">LUME</h3>
-        <p id="footer-description">Iluminando momentos especiales con velas artesanales únicas</p>
+        <h3 id="footer-shop-name"></h3>
+        <p id="footer-description"></p>
       </div>
       <div class="footer-social">
         <h4>Síguenos</h4>
@@ -35,7 +35,7 @@
     <div class="footer-divider"></div>
     
     <div class="footer-bottom">
-      <p id="footer-copyright">© 2024 <strong>LUME</strong>. Todos los derechos reservados.</p>
+      <p id="footer-copyright"></p>
       <p>Desarrollado por <strong>WeMashaDev</strong></p>
       <a href="https://wa.me/3795343171?text=Hola WeMashaDev! Quiero una web!" target="_blank" aria-label="WhatsApp" class="dev-link">
         ¿Quieres una web? Contáctanos
@@ -46,27 +46,61 @@
 
 <script>
 (async function() {
+  var cacheKey = 'shop_settings' + (window.__STORE_BASE || '');
+  var cached = null;
+  try {
+    var raw = localStorage.getItem(cacheKey);
+    if (raw) {
+      var p = JSON.parse(raw);
+      if (p && p.timestamp && Date.now() - p.timestamp < 5 * 60 * 1000) cached = p.data;
+    }
+  } catch(e) {}
+  if (cached) {
+    var s = cached;
+    var n = document.getElementById('footer-shop-name');
+    var d = document.getElementById('footer-description');
+    var c = document.getElementById('footer-copyright');
+    if (n && s.shop_name) n.textContent = s.shop_name;
+    if (d && s.footer_description) d.textContent = s.footer_description;
+    if (c) {
+      var yr = s.creation_year || new Date().getFullYear();
+      c.innerHTML = '© ' + yr + ' <strong>' + (s.shop_name || '') + '</strong>. Todos los derechos reservados.';
+    }
+    if (s.instagram) {
+      var ig = document.getElementById('footer-instagram-link');
+      if (ig) { ig.href = s.instagram; ig.style.display = 'flex'; }
+    }
+    if (s.whatsapp_number) {
+      var wa = document.getElementById('footer-whatsapp-link');
+      if (wa) {
+        wa.href = 'https://wa.me/' + (s.whatsapp_number || '').replace(/\D/g, '') + (s.whatsapp_message ? '?text=' + encodeURIComponent(s.whatsapp_message) : '');
+        wa.style.display = 'flex';
+      }
+    }
+    if (s.facebook) {
+      var fb = document.getElementById('footer-facebook-link');
+      if (fb) { fb.href = s.facebook; fb.style.display = 'flex'; }
+    }
+  }
   try {
     const response = await fetch('/api/shop.php');
     const data = await response.json();
     
     if (data.success && data.shop) {
       const shop = data.shop;
-      
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: shop }));
+      } catch(e) {}
       // Actualizar nombre de la tienda en el footer
       if (shop.shop_name) {
         const shopNameEl = document.getElementById('footer-shop-name');
         if (shopNameEl) shopNameEl.textContent = shop.shop_name;
       }
       
-      // Actualizar descripción del footer (usa footer_description)
+      // Actualizar descripción del footer (solo footer_description, no description/SEO)
       if (shop.footer_description) {
         const footerDescEl = document.getElementById('footer-description');
         if (footerDescEl) footerDescEl.textContent = shop.footer_description;
-      } else if (shop.description) {
-        // Fallback a description de la tienda si footer_description no existe
-        const footerDescEl = document.getElementById('footer-description');
-        if (footerDescEl) footerDescEl.textContent = shop.description;
       }
       
       // Actualizar copyright dinámicamente: © AÑO NOMBRE_DE_TIENDA. Todos los derechos reservados.
