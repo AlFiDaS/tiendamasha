@@ -25,11 +25,11 @@ function startSecureSession() {
         session_name(SESSION_NAME);
         session_start();
         
-        // Regenerar ID de sesión periódicamente
+        // Regenerar ID de sesión periódicamente (false = no borrar sesión antigua, evita race conditions)
         if (!isset($_SESSION['created'])) {
             $_SESSION['created'] = time();
         } else if (time() - $_SESSION['created'] > 1800) {
-            session_regenerate_id(true);
+            session_regenerate_id(false);
             $_SESSION['created'] = time();
         }
     }

@@ -18,7 +18,15 @@ if (empty($storeSlug)) {
 
 require_once __DIR__ . '/helpers/store-context.php';
 
+// Sesión aislada por tienda: cookie path = /{slug}/ evita que una tienda pise la sesión de otra
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'path'     => '/' . $storeSlug . '/',
+        'httponly' => true,
+        'secure'   => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'),
+        'samesite' => 'Lax'
+    ]);
+    session_name('LUME_ADMIN_SESSION');
     session_start();
 }
 
