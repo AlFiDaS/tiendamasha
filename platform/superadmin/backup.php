@@ -71,9 +71,11 @@ $backups = getBackupsList($backupDir);
 require_once __DIR__ . '/_inc/header.php';
 ?>
 
-<div class="sa-content">
-    <h1><?= icon('save', 24) ?> Backups de Base de Datos</h1>
-    <p style="color:#666; margin-bottom:1.5rem;">Backup de la base de datos de la plataforma (stores, usuarios). Solo Super Admin.</p>
+<div class="sa-content sa-backup-page">
+    <div class="sa-page-header">
+        <h1><?= icon('save', 24) ?> Backups de Base de Datos</h1>
+        <p>Backup de la base de datos de la plataforma (stores, usuarios). Solo Super Admin.</p>
+    </div>
 
     <?php if ($success): ?>
         <div class="sa-alert sa-alert-success"><?= icon('check', 18) ?> <?= htmlspecialchars($success) ?></div>
@@ -82,47 +84,65 @@ require_once __DIR__ . '/_inc/header.php';
         <div class="sa-alert sa-alert-error"><?= icon('x', 18) ?> <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <div class="sa-card" style="margin-bottom:1.5rem;">
+    <div class="sa-card sa-backup-card">
         <h3>Crear Backup</h3>
-        <form method="post">
+        <form method="post" class="sa-backup-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(platformCSRFToken()) ?>">
-            <label><input type="checkbox" name="compress" value="1" checked> Comprimir (recomendado)</label>
+            <label class="sa-backup-checkbox"><input type="checkbox" name="compress" value="1" checked> Comprimir (recomendado)</label>
             <button type="submit" name="create_backup" class="sa-btn sa-btn-primary">Crear Backup Ahora</button>
         </form>
     </div>
 
-    <div class="sa-card" style="margin-bottom:1.5rem;">
+    <div class="sa-card sa-backup-card">
         <h3>Limpiar Backups Antiguos</h3>
-        <form method="post">
+        <form method="post" class="sa-backup-form sa-backup-form-inline">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(platformCSRFToken()) ?>">
-            Mantener los últimos <input type="number" name="keep" value="10" min="1" max="100" style="width:4rem;"> backups
+            <span class="sa-backup-form-row">
+                Mantener los últimos <input type="number" name="keep" value="10" min="1" max="100" class="sa-backup-input"> backups
+            </span>
             <button type="submit" name="clean_backups" class="sa-btn sa-btn-secondary">Limpiar</button>
         </form>
     </div>
 
-    <div class="sa-card">
+    <div class="sa-card sa-backup-card">
         <h3>Backups Guardados (<?= count($backups) ?>)</h3>
         <?php if (empty($backups)): ?>
             <p>No hay backups. Creá uno ahora.</p>
         <?php else: ?>
-            <table class="sa-table">
-                <thead>
-                    <tr><th>Archivo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th></tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($backups as $b): ?>
-                    <tr>
-                        <td><strong><?= htmlspecialchars($b['filename']) ?></strong><?= $b['compressed'] ? ' <small>(.gz)</small>' : '' ?></td>
-                        <td><?= number_format($b['size'] / 1024, 2) ?> KB</td>
-                        <td><?= date('d/m/Y H:i', $b['created']) ?></td>
-                        <td>
-                            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup-download.php?file=<?= urlencode($b['filename']) ?>" class="sa-btn sa-btn-sm sa-btn-primary"><?= icon('download', 16) ?> Descargar</a>
-                            <a href="?delete=<?= urlencode($b['filename']) ?>&csrf_token=<?= urlencode(platformCSRFToken()) ?>" class="sa-btn sa-btn-sm" onclick="return confirm('¿Eliminar este backup?')"><?= icon('trash', 16) ?> Eliminar</a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <div class="sa-backup-table-wrap">
+                <table class="sa-table">
+                    <thead>
+                        <tr><th>Archivo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($backups as $b): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($b['filename']) ?></strong><?= $b['compressed'] ? ' <small>(.gz)</small>' : '' ?></td>
+                            <td><?= number_format($b['size'] / 1024, 2) ?> KB</td>
+                            <td><?= date('d/m/Y H:i', $b['created']) ?></td>
+                            <td>
+                                <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup-download.php?file=<?= urlencode($b['filename']) ?>" class="sa-btn sa-btn-sm sa-btn-primary"><?= icon('download', 16) ?> Descargar</a>
+                                <a href="?delete=<?= urlencode($b['filename']) ?>&csrf_token=<?= urlencode(platformCSRFToken()) ?>" class="sa-btn sa-btn-sm" onclick="return confirm('¿Eliminar este backup?')"><?= icon('trash', 16) ?> Eliminar</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="sa-backup-mobile-cards">
+                <?php foreach ($backups as $b): ?>
+                <div class="sa-backup-card-item">
+                    <div class="sa-backup-card-main">
+                        <strong><?= htmlspecialchars($b['filename']) ?></strong><?= $b['compressed'] ? ' <small>(.gz)</small>' : '' ?>
+                        <span class="sa-backup-card-meta"><?= number_format($b['size'] / 1024, 2) ?> KB · <?= date('d/m/Y H:i', $b['created']) ?></span>
+                    </div>
+                    <div class="sa-backup-card-actions">
+                        <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/backup-download.php?file=<?= urlencode($b['filename']) ?>" class="sa-btn sa-btn-sm sa-btn-primary"><?= icon('download', 16) ?> Descargar</a>
+                        <a href="?delete=<?= urlencode($b['filename']) ?>&csrf_token=<?= urlencode(platformCSRFToken()) ?>" class="sa-btn sa-btn-sm" onclick="return confirm('¿Eliminar este backup?')"><?= icon('trash', 16) ?> Eliminar</a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
     </div>
 </div>

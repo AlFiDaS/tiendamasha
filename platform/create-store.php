@@ -110,7 +110,7 @@ require_once __DIR__ . '/_inc/header.php';
     <div class="alert-t alert-t-success">¡Tienda creada exitosamente!</div>
 <?php endif; ?>
 
-<div class="platform-card" style="max-width:700px;">
+<div class="platform-card platform-card-form">
     <form method="POST" action="">
         <input type="hidden" name="csrf_token" value="<?= platformCSRFToken() ?>">
 

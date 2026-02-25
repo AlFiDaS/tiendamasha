@@ -167,7 +167,7 @@ require_once __DIR__ . '/_inc/header.php';
 <?php endif; ?>
 
 <?php if ($storeId): ?>
-<div class="platform-card" style="max-width:700px;">
+<div class="platform-card platform-card-form">
     <form method="POST" action="" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="<?= platformCSRFToken() ?>">
         <input type="hidden" name="store" value="<?= htmlspecialchars($storeSlug) ?>">
@@ -273,7 +273,7 @@ require_once __DIR__ . '/_inc/header.php';
                    value="<?= htmlspecialchars($settings['transfer_titular'] ?? '') ?>" placeholder="Ej: Juan Pérez">
         </div>
 
-        <div style="display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap;">
+        <div class="platform-form-actions">
             <button type="submit" class="btn-t btn-t-primary">Guardar Configuración</button>
             <a href="<?= PLATFORM_PAGES_URL ?>/dashboard.php" class="btn-t btn-t-secondary">Volver al Dashboard</a>
         </div>

@@ -20,7 +20,7 @@ if (!defined('PLATFORM_PAGES_URL')) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Somos Tiendi - Creá tu tienda online en minutos</title>
     <meta name="description" content="Creá tu tienda online gratis y empezá a vender hoy. Sin código, sin complicaciones. La plataforma más simple para emprendedores.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,7 +38,8 @@ if (!defined('PLATFORM_PAGES_URL')) {
             --t-card: #ffffff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--t-text); line-height: 1.6; }
+        html { overflow-x: hidden; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--t-text); line-height: 1.6; overflow-x: hidden; }
 
         /* NAV */
         .lp-nav {
@@ -47,9 +48,40 @@ if (!defined('PLATFORM_PAGES_URL')) {
             border-bottom: 1px solid var(--t-border);
             padding: 0 2rem; height: 72px;
             display: flex; align-items: center; justify-content: space-between;
+            padding-left: max(2rem, env(safe-area-inset-left));
+            padding-right: max(2rem, env(safe-area-inset-right));
         }
         .lp-nav-logo { font-weight: 900; font-size: 1.35rem; color: var(--t-dark); text-decoration: none; }
         .lp-nav-logo span { color: var(--t-primary); }
+        .lp-nav-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 10px;
+            margin: -4px -4px -4px 0;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .lp-nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--t-dark);
+            border-radius: 1px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .lp-nav-toggle.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .lp-nav-toggle.active span:nth-child(2) { opacity: 0; }
+        .lp-nav-toggle.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         .lp-nav-links { display: flex; align-items: center; gap: 0.75rem; }
         .lp-btn {
             display: inline-flex; align-items: center; justify-content: center;
@@ -151,11 +183,53 @@ if (!defined('PLATFORM_PAGES_URL')) {
         @media (max-width: 768px) {
             .lp-hero h1 { font-size: 2.25rem; }
             .lp-hero p { font-size: 1rem; }
+            .lp-hero { padding-top: 5.5rem; }
             .lp-features, .lp-steps { grid-template-columns: 1fr; }
-            .lp-stats { gap: 2rem; }
+            .lp-stats { gap: 2rem; padding: 1.5rem 1rem; }
+            .lp-section { padding: 3rem 1rem; }
             .lp-section-header h2 { font-size: 1.75rem; }
-            .lp-nav { padding: 0 1rem; }
-            .lp-nav-links .lp-btn-ghost { display: none; }
+            .lp-nav { padding: 0 1rem; height: 64px; padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+            .lp-nav-toggle { display: flex; }
+            .lp-nav-links {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+                background: rgba(255,255,255,0.98);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--t-border);
+                padding: 1rem;
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+                max-height: 0;
+                overflow: hidden;
+                opacity: 0;
+                visibility: hidden;
+                transition: max-height 0.35s ease, opacity 0.25s, visibility 0.25s;
+                z-index: 99;
+            }
+            .lp-nav-links.open {
+                max-height: 200px;
+                opacity: 1;
+                visibility: visible;
+            }
+            .lp-nav-links .lp-btn {
+                width: 100%;
+                justify-content: center;
+                min-height: 44px;
+                padding: 0.75rem 1rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .lp-hero h1 { font-size: 1.85rem; }
+            .lp-hero-cta { flex-direction: column; }
+            .lp-hero-cta .lp-btn { width: 100%; }
+            .lp-cta-section { padding: 3rem 1rem; }
+            .lp-cta-section h2 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -165,7 +239,10 @@ if (!defined('PLATFORM_PAGES_URL')) {
 <!-- NAV -->
 <nav class="lp-nav">
     <a href="<?= PLATFORM_PAGES_URL ?>/" class="lp-nav-logo">Somos <span>Tiendi</span></a>
-    <div class="lp-nav-links">
+    <button type="button" class="lp-nav-toggle" id="lp-nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="lp-nav-links" id="lp-nav-links">
         <?php if ($isLogged): ?>
             <a href="<?= PLATFORM_PAGES_URL ?>/dashboard.php" class="lp-btn lp-btn-primary">Mi Panel</a>
         <?php else: ?>
@@ -305,6 +382,24 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a) {
         if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
     });
 });
+(function(){
+    var t = document.getElementById('lp-nav-toggle');
+    var n = document.getElementById('lp-nav-links');
+    if (t && n) {
+        t.addEventListener('click', function() {
+            n.classList.toggle('open');
+            t.classList.toggle('active');
+            t.setAttribute('aria-expanded', n.classList.contains('open'));
+        });
+        n.querySelectorAll('a').forEach(function(a) {
+            a.addEventListener('click', function() {
+                n.classList.remove('open');
+                t.classList.remove('active');
+                t.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+})();
 </script>
 </body>
 </html>

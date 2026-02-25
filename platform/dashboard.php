@@ -41,7 +41,7 @@ require_once __DIR__ . '/_inc/header.php';
         </div>
     </div>
 <?php else: ?>
-    <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+    <div class="platform-dashboard-actions">
         <a href="<?= PLATFORM_PAGES_URL ?>/create-store.php" class="btn-t btn-t-primary btn-t-sm">
             + Nueva Tienda
         </a>
@@ -63,7 +63,7 @@ require_once __DIR__ . '/_inc/header.php';
                 </div>
             </div>
 
-            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <div class="store-card-meta">
                 <span class="store-card-status <?= $status[1] ?>"><?= $status[0] ?></span>
                 <span style="font-size:0.8rem; color:var(--t-muted);">
                     Plan: <strong><?= strtoupper(htmlspecialchars($store['plan'])) ?></strong>

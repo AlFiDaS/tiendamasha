@@ -43,7 +43,7 @@ $impersonateErrorMsg = [
 <?php endif; ?>
 
 <div class="sa-page-header">
-    <div style="display:flex; align-items:center; gap:1rem;">
+    <div class="sa-page-header-left">
         <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/stores.php" class="sa-btn sa-btn-secondary sa-btn-sm">← Volver</a>
         <div>
             <h1><?= htmlspecialchars($s['shop_name'] ?: $store['slug']) ?></h1>

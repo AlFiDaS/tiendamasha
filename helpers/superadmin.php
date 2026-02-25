@@ -276,6 +276,8 @@ function deleteStore($storeId) {
  */
 function getRecentPlatformUsers($limit = 10) {
     return platformFetchAll(
-        'SELECT id, name, email, created_at, last_login FROM platform_users ORDER BY created_at DESC LIMIT ' . (int)$limit
+        'SELECT pu.id, pu.name, pu.email, pu.phone, pu.email_verified, pu.created_at, pu.last_login,
+                (SELECT COUNT(*) FROM store_members sm WHERE sm.user_id = pu.id) as stores_count
+         FROM platform_users pu ORDER BY pu.created_at DESC LIMIT ' . (int)$limit
     );
 }
