@@ -66,8 +66,9 @@ function platformLastInsertId() {
 /**
  * Crea los datos iniciales para una nueva tienda (store_id).
  * No crea tablas; asume que ya existen con store_id.
+ * WhatsApp, Instagram y descripción se configuran después en Configuración rápida.
  */
-function createStoreData($storeId, $storeName, $adminUsername, $adminPassword, $adminEmail, $whatsapp = '', $instagram = '', $description = '') {
+function createStoreData($storeId, $storeName, $adminUsername, $adminPassword, $adminEmail) {
     $pdo = getPlatformDB();
     if (!$pdo) {
         return ['success' => false, 'error' => 'No se pudo conectar a la base de datos'];
@@ -84,8 +85,8 @@ function createStoreData($storeId, $storeName, $adminUsername, $adminPassword, $
         $pdo->prepare('INSERT INTO admin_users (store_id, username, password, email) VALUES (:sid, :u, :p, :e)')
             ->execute(['sid' => $storeId, 'u' => $adminUsername, 'p' => $hashedPass, 'e' => $adminEmail]);
 
-        $pdo->prepare('INSERT INTO shop_settings (store_id, shop_name, whatsapp_number, instagram, description, primary_color) VALUES (:sid, :name, :wa, :ig, :desc, :color)')
-            ->execute(['sid' => $storeId, 'name' => $storeName, 'wa' => $whatsapp, 'ig' => $instagram, 'desc' => $description, 'color' => '#6366f1']);
+        $pdo->prepare('INSERT INTO shop_settings (store_id, shop_name, primary_color) VALUES (:sid, :name, :color)')
+            ->execute(['sid' => $storeId, 'name' => $storeName, 'color' => '#6366f1']);
 
         $pdo->prepare('INSERT INTO categories (store_id, slug, name, catalog_title, visible, orden) VALUES (:sid, :slug, :name, :cat_title, 1, 1)')
             ->execute(['sid' => $storeId, 'slug' => 'productos', 'name' => 'Productos', 'cat_title' => 'Catálogo de productos']);

@@ -23,6 +23,12 @@ require_once __DIR__ . '/_inc/header.php';
     <p>Administrá todas tus tiendas desde un solo lugar</p>
 </div>
 
+<?php if (isset($_GET['config_ok'])): ?>
+    <div class="alert-t alert-t-success" style="margin-bottom: 1.5rem;">
+        ¡Configuración rápida completada correctamente!
+    </div>
+<?php endif; ?>
+
 <?php if (empty($stores)): ?>
     <div class="platform-card">
         <div class="empty-state">
@@ -68,21 +74,27 @@ require_once __DIR__ . '/_inc/header.php';
             </div>
 
             <div class="store-card-actions">
-                <?php if ($store['status'] === 'active'): ?>
-                    <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="btn-t btn-t-primary btn-t-sm">
-                        Administrar
-                    </a>
-                    <a href="/<?= htmlspecialchars($store['slug']) ?>/" target="_blank" class="btn-t btn-t-secondary btn-t-sm">
-                        Ver Tienda
-                    </a>
-                <?php elseif ($store['status'] === 'setup'): ?>
-                    <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="btn-t btn-t-primary btn-t-sm">
-                        Completar Configuración
-                    </a>
+                <?php if (!empty($store['configuracion_rapida_completada'])): ?>
+                    <?php if ($store['status'] === 'active'): ?>
+                        <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="btn-t btn-t-primary btn-t-sm">
+                            Administrar
+                        </a>
+                        <a href="/<?= htmlspecialchars($store['slug']) ?>/" target="_blank" class="btn-t btn-t-secondary btn-t-sm">
+                            Ver Tienda
+                        </a>
+                    <?php elseif ($store['status'] === 'setup'): ?>
+                        <a href="/<?= htmlspecialchars($store['slug']) ?>/admin/" class="btn-t btn-t-primary btn-t-sm">
+                            Completar Configuración
+                        </a>
+                    <?php else: ?>
+                        <span class="btn-t btn-t-secondary btn-t-sm" style="opacity:0.6; pointer-events:none;">
+                            Suspendida
+                        </span>
+                    <?php endif; ?>
                 <?php else: ?>
-                    <span class="btn-t btn-t-secondary btn-t-sm" style="opacity:0.6; pointer-events:none;">
-                        Suspendida
-                    </span>
+                    <a href="<?= PLATFORM_PAGES_URL ?>/configuracion-rapida.php?store=<?= urlencode($store['slug']) ?>" class="btn-t btn-t-primary btn-t-sm" style="background:var(--t-primary);">
+                        Completar Configuración Rápida
+                    </a>
                 <?php endif; ?>
             </div>
         </div>

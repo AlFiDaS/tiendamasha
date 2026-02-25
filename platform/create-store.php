@@ -15,9 +15,7 @@ $old = [
     'store_name'     => '',
     'slug'           => '',
     'admin_username' => '',
-    'whatsapp'       => '',
-    'instagram'      => '',
-    'description'    => '',
+    'admin_email'    => '',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -28,23 +26,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $slug          = strtolower(trim($_POST['slug'] ?? ''));
         $adminUsername  = platformSanitize($_POST['admin_username'] ?? '');
         $adminPassword  = $_POST['admin_password'] ?? '';
-        $whatsapp      = platformSanitize($_POST['whatsapp'] ?? '');
-        $instagram     = platformSanitize($_POST['instagram'] ?? '');
-        $description   = platformSanitize($_POST['description'] ?? '');
+        $adminEmail     = trim($_POST['admin_email'] ?? '');
 
         $old = [
             'store_name'     => $storeName,
             'slug'           => $slug,
             'admin_username' => $adminUsername,
-            'whatsapp'       => $whatsapp,
-            'instagram'      => $instagram,
-            'description'    => $description,
+            'admin_email'    => $adminEmail,
         ];
 
         $slug = preg_replace('/[^a-z0-9\-]/', '', $slug);
 
-        if (empty($storeName) || empty($slug) || empty($adminUsername) || empty($adminPassword)) {
+        if (empty($storeName) || empty($slug) || empty($adminUsername) || empty($adminPassword) || empty($adminEmail)) {
             $error = 'Completá todos los campos obligatorios';
+        } elseif (!filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+            $error = 'El email de recuperación no es válido';
         } elseif (strlen($slug) < 3 || strlen($slug) > 50) {
             $error = 'El slug debe tener entre 3 y 50 caracteres';
         } elseif (!preg_match('/^[a-z][a-z0-9\-]*$/', $slug)) {
@@ -76,10 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $storeName,
                         $adminUsername,
                         $adminPassword,
-                        $user['email'],
-                        $whatsapp,
-                        $instagram,
-                        $description
+                        $adminEmail
                     );
 
                     if (!$dbResult['success']) {
@@ -91,7 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             ['sid' => $storeId, 'uid' => $userId]
                         );
 
-                        header('Location: ' . PLATFORM_PAGES_URL . '/dashboard.php?created=1');
+                        // Redirigir a configuración rápida en platform (aparece 1 sola vez)
+                        header('Location: ' . PLATFORM_PAGES_URL . '/configuracion-rapida.php?store=' . urlencode($slug));
                         exit;
                     }
                 }
@@ -138,45 +132,33 @@ require_once __DIR__ . '/_inc/header.php';
             <small>Tu tienda estará en: <strong>www.somostiendi.com/<span id="slugPreview"><?= htmlspecialchars($old['slug'] ?: 'tu-tienda') ?></span>/</strong></small>
         </div>
 
-        <div class="form-t-row">
-            <div class="form-t-group">
-                <label for="whatsapp">WhatsApp</label>
-                <input type="text" id="whatsapp" name="whatsapp" class="form-t-input"
-                       placeholder="+54 11 1234-5678" value="<?= htmlspecialchars($old['whatsapp']) ?>">
-            </div>
-            <div class="form-t-group">
-                <label for="instagram">Instagram</label>
-                <input type="text" id="instagram" name="instagram" class="form-t-input"
-                       placeholder="@tu_tienda" value="<?= htmlspecialchars($old['instagram']) ?>">
-            </div>
-        </div>
-
-        <div class="form-t-group">
-            <label for="description">Descripción breve</label>
-            <textarea id="description" name="description" class="form-t-input" rows="3"
-                      placeholder="Contá brevemente de qué se trata tu tienda..."><?= htmlspecialchars($old['description']) ?></textarea>
-        </div>
-
         <hr style="border:none; border-top:1px solid var(--t-border); margin:1.5rem 0;">
 
         <h2 style="font-size:1.15rem; font-weight:700; color:var(--t-dark); margin-bottom:1.25rem;">
             Administrador de la tienda
         </h2>
         <p style="color:var(--t-muted); font-size:0.9rem; margin-bottom:1.25rem;">
-            Estas credenciales se usarán para acceder al panel de administración de esta tienda.
+            Credenciales para acceder al panel de administración. El email se usa para recuperar la contraseña.
         </p>
 
-        <div class="form-t-row">
-            <div class="form-t-group">
-                <label for="admin_username">Usuario del admin *</label>
-                <input type="text" id="admin_username" name="admin_username" class="form-t-input" required
-                       placeholder="admin" value="<?= htmlspecialchars($old['admin_username']) ?>">
-            </div>
-            <div class="form-t-group">
-                <label for="admin_password">Contraseña del admin *</label>
-                <input type="password" id="admin_password" name="admin_password" class="form-t-input" required
-                       placeholder="Mínimo 6 caracteres" minlength="6">
-            </div>
+        <div class="form-t-group">
+            <label for="admin_username">Usuario del admin *</label>
+            <input type="text" id="admin_username" name="admin_username" class="form-t-input" required
+                   placeholder="admin" value="<?= htmlspecialchars($old['admin_username']) ?>">
+            <small>Con este usuario vas a iniciar sesión en el panel</small>
+        </div>
+
+        <div class="form-t-group">
+            <label for="admin_password">Contraseña del admin *</label>
+            <input type="password" id="admin_password" name="admin_password" class="form-t-input" required
+                   placeholder="Mínimo 6 caracteres" minlength="6">
+        </div>
+
+        <div class="form-t-group">
+            <label for="admin_email">Email de recuperación del panel *</label>
+            <input type="email" id="admin_email" name="admin_email" class="form-t-input" required
+                   placeholder="tu@email.com" value="<?= htmlspecialchars($old['admin_email']) ?>">
+            <small>Se usa para recuperar la contraseña si la olvidás</small>
         </div>
 
         <button type="submit" class="btn-t btn-t-primary btn-t-full" style="margin-top:0.5rem;">

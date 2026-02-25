@@ -14,9 +14,14 @@ $primaryColor = '#5672E1'; // Color fijo del panel admin
 
 $error = '';
 
-// Si ya está autenticado, redirigir al dashboard
+// Si ya está autenticado, redirigir al dashboard o a la URL indicada
 if (isAuthenticated()) {
-    header('Location: ' . ADMIN_URL . '/index.php');
+    $redirect = $_GET['redirect'] ?? '';
+    if ($redirect && preg_match('/^[a-z0-9\-_\.]+\.php$/i', $redirect)) {
+        header('Location: ' . ADMIN_URL . '/' . $redirect);
+    } else {
+        header('Location: ' . ADMIN_URL . '/index.php');
+    }
     exit;
 }
 
@@ -38,7 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Por favor, completa todos los campos';
         } else {
             if (login($username, $password)) {
-                header('Location: ' . ADMIN_URL . '/index.php');
+                $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '';
+                if ($redirect && preg_match('/^[a-z0-9\-_\.]+\.php$/i', $redirect)) {
+                    header('Location: ' . ADMIN_URL . '/' . $redirect);
+                } else {
+                    header('Location: ' . ADMIN_URL . '/index.php');
+                }
                 exit;
             } else {
                 $error = 'Usuario o contraseña incorrectos';
@@ -211,6 +221,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
         
         <form method="POST" action="">
+            <?php if (!empty($_GET['redirect']) && preg_match('/^[a-z0-9\-_\.]+\.php$/i', $_GET['redirect'])): ?>
+                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect']) ?>">
+            <?php endif; ?>
             <div class="form-group">
                 <label for="username">Usuario</label>
                 <input type="text" id="username" name="username" required autofocus>

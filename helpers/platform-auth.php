@@ -161,8 +161,10 @@ function platformGetCurrentUser() {
 
 function platformGetUserStores($userId) {
     return platformFetchAll(
-        'SELECT s.*, sm.role FROM stores s
+        'SELECT s.*, sm.role, COALESCE(ss.configuracion_rapida_completada, 0) AS configuracion_rapida_completada
+         FROM stores s
          INNER JOIN store_members sm ON sm.store_id = s.id
+         LEFT JOIN shop_settings ss ON ss.store_id = s.id
          WHERE sm.user_id = :uid ORDER BY s.created_at DESC',
         ['uid' => $userId]
     );

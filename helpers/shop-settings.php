@@ -52,7 +52,8 @@ function updateShopSettings($data, &$outError = null) {
         'footer_description', 'footer_copyright', 'creation_year',
         'transfer_alias', 'transfer_cbu', 'transfer_titular',
         'mercadopago_access_token', 'mercadopago_public_key', 'mercadopago_test_mode',
-        'telegram_bot_token', 'telegram_chat_id', 'telegram_enabled'
+        'telegram_bot_token', 'telegram_chat_id', 'telegram_enabled',
+        'configuracion_rapida_completada'
     ];
     
     // Obtener columnas existentes de la tabla para verificar qué campos podemos actualizar
