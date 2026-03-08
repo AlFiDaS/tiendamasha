@@ -107,14 +107,14 @@ import Icon from '../components/Icon.astro';
                       <input type="radio" name="envio" value="Correo Argentino - Sucursal" required />
                       <span class="envio-option-content">
                         <span class="envio-option-text">Correo Argentino - Envío a Sucursal</span>
-                        <span class="envio-precio" data-precio-transferencia="6500" data-precio-tarjeta="8100">($8.100)</span>
+                        <span class="envio-precio" data-precio-transferencia="6500">($8.100)</span>
                       </span>
                     </label>
                     <label class="envio-option">
                       <input type="radio" name="envio" value="Correo Argentino - Domicilio" required />
                       <span class="envio-option-content">
                         <span class="envio-option-text">Correo Argentino - Envío a Domicilio</span>
-                        <span class="envio-precio" data-precio-transferencia="8500" data-precio-tarjeta="10600">($10.600)</span>
+                        <span class="envio-precio" data-precio-transferencia="8500">($10.600)</span>
                       </span>
                     </label>
                   </div>
@@ -257,6 +257,9 @@ import Icon from '../components/Icon.astro';
             shop = data.shop;
             const cacheKey = 'shop_settings' + (window.__STORE_BASE || '');
             localStorage.setItem(cacheKey, JSON.stringify(shop));
+            const discount = (shop.transfer_discount_percent ?? 20);
+            window.__transferDiscountPercent = discount;
+            window.__cardMultiplier = (discount > 0 && discount < 100) ? (1 / (1 - discount / 100)) : 1.25;
           }
           if (shop) {
             const aliasEl = document.getElementById('transfer-alias');
@@ -326,17 +329,17 @@ import Icon from '../components/Icon.astro';
     function actualizarPreciosEnvio() {
       const pago = document.getElementById('pago')?.value || '';
       const isTransferencia = (pago === 'transferencia_directa');
+      const mult = window.__cardMultiplier ?? 1.25;
       
       const precioElements = document.querySelectorAll('.envio-precio');
       precioElements.forEach(el => {
         const precioTransferencia = el.getAttribute('data-precio-transferencia');
-        const precioTarjeta = el.getAttribute('data-precio-tarjeta');
-        
-        if (precioTransferencia && precioTarjeta) {
-          const precioMostrar = isTransferencia ? precioTransferencia : precioTarjeta;
-          const precioFormateado = '$' + parseInt(precioMostrar).toLocaleString('es-AR');
-          el.textContent = `(${precioFormateado})`;
-        }
+        if (!precioTransferencia) return;
+        const transferNum = parseInt(precioTransferencia, 10) || 0;
+        const precioTarjeta = Math.round((transferNum * mult) / 100) * 100;
+        const precioMostrar = isTransferencia ? transferNum : precioTarjeta;
+        const precioFormateado = '$' + precioMostrar.toLocaleString('es-AR');
+        el.textContent = `(${precioFormateado})`;
       });
     }
 
@@ -350,7 +353,8 @@ import Icon from '../components/Icon.astro';
 
     // Función para calcular precio de tarjeta desde precio de transferencia (redondeado al 100)
     function calculateCardPriceFromTransfer(transferPrice) {
-      return Math.round((transferPrice * 1.25) / 100) * 100;
+      const mult = window.__cardMultiplier ?? 1.25;
+      return Math.round((transferPrice * mult) / 100) * 100;
     }
 
     // Función para validar la visibilidad de los productos del carrito
@@ -606,10 +610,9 @@ import Icon from '../components/Icon.astro';
       let envioCalculado = envioCosto;
       
       if (isTarjeta) {
-        // Si elige tarjeta, aplicar 25% más al subtotal (redondeado al 100)
-        subtotalCalculado = Math.round((totalCarrito * 1.25) / 100) * 100;
-        // También aplicar 25% más al envío (redondeado al 100)
-        envioCalculado = envioCosto > 0 ? Math.round((envioCosto * 1.25) / 100) * 100 : 0;
+        const mult = window.__cardMultiplier ?? 1.25;
+        subtotalCalculado = Math.round((totalCarrito * mult) / 100) * 100;
+        envioCalculado = envioCosto > 0 ? Math.round((envioCosto * mult) / 100) * 100 : 0;
       }
       // Si es transferencia directa, el precio ya es el de transferencia (sin cambios)
       
@@ -1116,7 +1119,8 @@ Gracias!`);
         const pago = document.getElementById('pago')?.value || '';
         // Si es tarjeta, aplicar 25% más para la validación del cupón
         if (pago === 'tarjeta') {
-          totalCarrito = Math.round((totalCarrito * 1.25) / 100) * 100;
+          const mult = window.__cardMultiplier ?? 1.25;
+          totalCarrito = Math.round((totalCarrito * mult) / 100) * 100;
         }
         // Revalidar asíncronamente y actualizar descuento
         revalidarCupon(couponData.coupon.code, totalCarrito, carrito).then(result => {
@@ -1171,7 +1175,8 @@ Gracias!`);
       const pago = document.getElementById('pago')?.value || '';
       // Si es tarjeta, aplicar 25% más para la validación del cupón
       if (pago === 'tarjeta') {
-        totalCarrito = Math.round((totalCarrito * 1.25) / 100) * 100;
+        const mult = window.__cardMultiplier ?? 1.25;
+        totalCarrito = Math.round((totalCarrito * mult) / 100) * 100;
       }
       
       // Preparar items para validación

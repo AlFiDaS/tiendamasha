@@ -82,15 +82,20 @@ try {
     $isTarjeta = ($paymentMethod === 'tarjeta');
     $isMercadoPagoTransferencia = ($paymentMethod === 'mercadopago_transferencia');
     
+    // Descuento por transferencia: precio base es transferencia, tarjeta = transferencia / (1 - discount/100)
+    $transferDiscount = (float)($settings['transfer_discount_percent'] ?? 20);
+    $transferDiscount = max(0, min(50, $transferDiscount));
+    $cardMultiplier = ($transferDiscount > 0 && $transferDiscount < 100) ? (1 / (1 - $transferDiscount / 100)) : 1.25;
+
     // Preparar items para MercadoPago
     $preferenceItems = [];
     foreach ($items as $item) {
         // Extraer precio numérico (remover $ y convertir a número)
         $price = floatval(str_replace(['$', ',', '.'], '', $item['price']));
         
-        // Si es tarjeta, aplicar 25% adicional
+        // Si es tarjeta, aplicar multiplicador según descuento configurado
         if ($isTarjeta) {
-            $price = round($price * 1.25);
+            $price = round($price * $cardMultiplier);
         }
         
         // En Argentina, MercadoPago espera el precio en pesos como número decimal
@@ -123,9 +128,9 @@ try {
         $envioCosto = 8500;
     }
     
-    // Aplicar 25% al envío si es tarjeta
+    // Aplicar multiplicador de tarjeta al envío si es tarjeta
     if ($isTarjeta && $envioCosto > 0) {
-        $envioCosto = round($envioCosto * 1.25);
+        $envioCosto = round($envioCosto * $cardMultiplier);
     }
     
     // Agregar envío como item adicional si tiene costo

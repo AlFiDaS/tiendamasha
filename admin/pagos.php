@@ -24,10 +24,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validateCSRFToken($_POST['csrf_token'] ?? '')) {
         $error = 'Token de seguridad inválido. Por favor, recarga la página.';
     } elseif (isset($_POST['save_transferencia'])) {
+        $discount = (float)($_POST['transfer_discount_percent'] ?? 20);
+        $discount = max(0, min(50, $discount)); // Entre 0 y 50%
         $formData = [
             'transfer_alias' => trim(sanitize($_POST['transfer_alias'] ?? '')),
             'transfer_cbu' => preg_replace('/\D/', '', sanitize($_POST['transfer_cbu'] ?? '')),
-            'transfer_titular' => trim(sanitize($_POST['transfer_titular'] ?? ''))
+            'transfer_titular' => trim(sanitize($_POST['transfer_titular'] ?? '')),
+            'transfer_discount_percent' => $discount
         ];
         if (updateShopSettings($formData)) {
             $success = 'Datos de transferencia guardados correctamente';
@@ -93,6 +96,14 @@ require_once '_inc/header.php';
                     value="<?= htmlspecialchars($settings['transfer_titular'] ?? '') ?>" 
                     placeholder="Ej: Juan Pérez">
                 <small>Nombre del titular de la cuenta</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="transfer_discount_percent">Descuento por transferencia (%)</label>
+                <input type="number" id="transfer_discount_percent" name="transfer_discount_percent" 
+                    value="<?= htmlspecialchars($settings['transfer_discount_percent'] ?? '20') ?>" 
+                    min="0" max="50" step="0.5" placeholder="20">
+                <small>Porcentaje de descuento al pagar por transferencia vs. tarjeta. Ej: 20 = transferencia 20% más barata que tarjeta. Si el precio transferencia es $10.000, con 20% el precio tarjeta será $12.500.</small>
             </div>
             
             <div id="transfer-buttons" class="pagos-buttons-wrap" style="display: none;">
@@ -235,13 +246,14 @@ document.getElementById('guia-header').addEventListener('click', function() {
         }
     }
     setupSection(
-        ['transfer_alias', 'transfer_cbu', 'transfer_titular'],
+        ['transfer_alias', 'transfer_cbu', 'transfer_titular', 'transfer_discount_percent'],
         'transfer-buttons',
         'btn-cancelar-transfer',
         [
             '<?= addslashes($settings['transfer_alias'] ?? '') ?>',
             '<?= addslashes($settings['transfer_cbu'] ?? '') ?>',
-            '<?= addslashes($settings['transfer_titular'] ?? '') ?>'
+            '<?= addslashes($settings['transfer_titular'] ?? '') ?>',
+            '<?= addslashes($settings['transfer_discount_percent'] ?? '20') ?>'
         ]
     );
     setupSection(

@@ -84,6 +84,7 @@ try {
         'transfer_alias' => $settings['transfer_alias'] ?? '',
         'transfer_cbu' => $settings['transfer_cbu'] ?? '',
         'transfer_titular' => $settings['transfer_titular'] ?? '',
+        'transfer_discount_percent' => (float)($settings['transfer_discount_percent'] ?? 20),
         'mercadopago_configured' => $mercadopagoConfigured
     ];
     

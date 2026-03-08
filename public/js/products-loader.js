@@ -85,15 +85,29 @@
         return parseInt(cleaned, 10) || 0;
     }
     
+    function getCardMultiplier() {
+        try {
+            const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                const shop = parsed.data || parsed;
+                const discount = shop.transfer_discount_percent ?? 20;
+                return (discount > 0 && discount < 100) ? (1 / (1 - discount / 100)) : 1.25;
+            }
+        } catch (e) {}
+        return 1.25;
+    }
+    
     /**
-     * Calcular precio con tarjeta (25% más, redondeado al 100 más cercano)
-     * @param {string} priceString - Precio como string (ej: "$15900")
+     * Calcular precio con tarjeta según descuento configurado (redondeado al 100 más cercano)
+     * @param {string} priceString - Precio transferencia (ej: "$15900")
      * @returns {string} Precio con tarjeta formateado (ej: "$19900")
      */
     function calculateCardPrice(priceString) {
         const basePrice = extractPriceValue(priceString);
         if (basePrice === 0) return '';
-        const cardPrice = Math.round((basePrice * 1.25) / 100) * 100;
+        const mult = getCardMultiplier();
+        const cardPrice = Math.round((basePrice * mult) / 100) * 100;
         return '$' + cardPrice.toLocaleString('es-AR');
     }
     
@@ -156,7 +170,8 @@
             }
             
             // Calcular precio de tarjeta del precio en descuento
-            const discountCardPrice = discountTransferPrice > 0 ? Math.round((discountTransferPrice * 1.25) / 100) * 100 : 0;
+            const mult = getCardMultiplier();
+            const discountCardPrice = discountTransferPrice > 0 ? Math.round((discountTransferPrice * mult) / 100) * 100 : 0;
             const discountCardFormatted = discountCardPrice > 0 ? '$' + discountCardPrice.toLocaleString('es-AR') : '';
             
             // Badges para la imagen

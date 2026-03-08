@@ -10,15 +10,21 @@
 (function() {
     'use strict';
     
-    // Detectar si estamos en desarrollo local y ajustar la URL de la API
+    // Obtener base de tienda (igual que products-loader.js) para multi-tenant
+    function getStoreBase() {
+        if (window.__STORE_BASE) return window.__STORE_BASE;
+        var m = (window.location.pathname || '').match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+        return m ? '/' + m[1] : '';
+    }
+    
     const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const currentPort = window.location.port;
     
-    // Si estamos en el servidor de Astro (puerto 4321), usar el servidor PHP directamente (puerto 8080)
-    let API_BASE = '/api/products.php';
+    let API_BASE;
     if (isLocalDev && (currentPort === '4321' || currentPort === '')) {
-        // Desde Astro, usar el servidor PHP directamente
-        API_BASE = 'http://localhost:8080/api/products.php';
+        API_BASE = 'http://localhost:8080' + getStoreBase() + '/api/products.php';
+    } else {
+        API_BASE = getStoreBase() + '/api/products.php';
     }
     
     /**
@@ -65,15 +71,29 @@
         return parseInt(cleaned, 10) || 0;
     }
     
+    function getCardMultiplier() {
+        try {
+            const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                const shop = parsed.data || parsed;
+                const discount = shop.transfer_discount_percent ?? 20;
+                return (discount > 0 && discount < 100) ? (1 / (1 - discount / 100)) : 1.25;
+            }
+        } catch (e) {}
+        return 1.25;
+    }
+    
     /**
-     * Calcular precio con tarjeta (25% más, redondeado al 100 más cercano)
-     * @param {string} priceString - Precio como string (ej: "$15900")
+     * Calcular precio con tarjeta según descuento configurado (redondeado al 100 más cercano)
+     * @param {string} priceString - Precio transferencia (ej: "$15900")
      * @returns {string} Precio con tarjeta formateado (ej: "$19900")
      */
     function calculateCardPrice(priceString) {
         const basePrice = extractPriceValue(priceString);
         if (basePrice === 0) return '';
-        const cardPrice = Math.round((basePrice * 1.25) / 100) * 100;
+        const mult = getCardMultiplier();
+        const cardPrice = Math.round((basePrice * mult) / 100) * 100;
         return '$' + cardPrice.toLocaleString('es-AR');
     }
     
@@ -119,6 +139,7 @@
             const originalTransferPrice = extractPriceValue(product.price);
             const discountTransferPrice = extractPriceValue(discountPrice);
             const originalTransferFormatted = originalTransferPrice > 0 ? '$' + originalTransferPrice.toLocaleString('es-AR') : '';
+            const mult = getCardMultiplier();
             
             // Calcular porcentaje de descuento
             let discountPercentage = 0;
@@ -241,8 +262,8 @@
                             const discountTransferPrice = extractPriceValue(discountPrice);
                             const discountTransferFormatted = discountTransferPrice > 0 ? '$' + discountTransferPrice.toLocaleString('es-AR') : '';
                             
-                            // Calcular precio de tarjeta del precio en descuento
-                            const discountCardPrice = discountTransferPrice > 0 ? Math.round((discountTransferPrice * 1.25) / 100) * 100 : 0;
+            // Calcular precio de tarjeta del precio en descuento
+            const discountCardPrice = discountTransferPrice > 0 ? Math.round((discountTransferPrice * mult) / 100) * 100 : 0;
                             const discountCardFormatted = discountCardPrice > 0 ? '$' + discountCardPrice.toLocaleString('es-AR') : '';
                             
                             return `
@@ -259,12 +280,10 @@
                         } else {
                             // Producto normal
                             if (!product.price) return '<span class="price">N/A</span>';
-                            // Formatear precio de transferencia (extraer número y formatear con separadores de miles)
                             const transferPriceValue = extractPriceValue(product.price);
                             const transferPriceFormatted = transferPriceValue > 0 ? '$' + transferPriceValue.toLocaleString('es-AR') : product.price;
-                            
-                            // Calcular precio de tarjeta (25% más)
-                            const cardPrice = Math.round((transferPriceValue * 1.25) / 100) * 100;
+                            const mult = getCardMultiplier();
+                            const cardPrice = Math.round((transferPriceValue * mult) / 100) * 100;
                             const cardPriceFormatted = '$' + cardPrice.toLocaleString('es-AR');
                             
                             return `
@@ -410,6 +429,21 @@
      * @param {string} slug - Slug del producto
      * @param {Object} options
      */
+    async function ensureShopSettings() {
+        try {
+            const base = (window.__STORE_BASE || getStoreBase());
+            const cacheKey = 'shop_settings' + base;
+            // Siempre fetch fresco en detalle de producto: evita mostrar % desactualizado
+            const shopApiUrl = API_BASE.startsWith('http') ? API_BASE.replace('products.php', 'shop.php') : (base + '/api/shop.php');
+            const sep = shopApiUrl.indexOf('?') >= 0 ? '&' : '?';
+            const res = await fetch(shopApiUrl + sep + 't=' + Date.now());
+            const data = await res.json();
+            if (data.success && data.shop) {
+                localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: data.shop }));
+            }
+        } catch (e) {}
+    }
+    
     window.initProductDetail = async function(slug, options = {}) {
         const {
             containerSelector = '.product-detail-container',
@@ -431,6 +465,7 @@
         if (autoLoad) {
             try {
                 showLoading(container);
+                await ensureShopSettings();
                 const product = await loadProductBySlug(slug);
                 
                 if (!product) {

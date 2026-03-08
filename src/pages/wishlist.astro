@@ -86,10 +86,34 @@ import Icon from '../components/Icon.astro';
               return parseInt(cleaned, 10) || 0;
             }
             
+            function getCardMultiplier() {
+              try {
+                const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+                if (cached) {
+                  const parsed = JSON.parse(cached);
+                  const shop = parsed.data || parsed;
+                  const discount = shop.transfer_discount_percent ?? 20;
+                  return (discount > 0 && discount < 100) ? (1 / (1 - discount / 100)) : 1.25;
+                }
+              } catch (e) {}
+              return 1.25;
+            }
+            function getTransferDiscountPercent() {
+              try {
+                const cached = localStorage.getItem('shop_settings' + (window.__STORE_BASE || ''));
+                if (cached) {
+                  const parsed = JSON.parse(cached);
+                  const shop = parsed.data || parsed;
+                  return Math.round(shop.transfer_discount_percent ?? 20);
+                }
+              } catch (e) {}
+              return 20;
+            }
             function calculateCardPrice(priceString) {
               const transferPrice = extractPriceValue(priceString);
               if (transferPrice === 0) return '';
-              const cardPrice = Math.round((transferPrice * 1.25) / 100) * 100;
+              const mult = getCardMultiplier();
+              const cardPrice = Math.round((transferPrice * mult) / 100) * 100;
               return '$' + cardPrice.toLocaleString('es-AR');
             }
             
@@ -110,8 +134,8 @@ import Icon from '../components/Icon.astro';
             if (product.price) {
               const transferPriceValue = extractPriceValue(product.price);
               if (transferPriceValue > 0) {
-                // Precio de tarjeta = transferencia * 1.25, redondeado al 100
-                const cardPrice = Math.round((transferPriceValue * 1.25) / 100) * 100;
+                const mult = getCardMultiplier();
+                const cardPrice = Math.round((transferPriceValue * mult) / 100) * 100;
                 cardPriceFormatted = '$' + cardPrice.toLocaleString('es-AR');
                 transferPriceFormatted = '$' + transferPriceValue.toLocaleString('es-AR');
               }
@@ -123,7 +147,7 @@ import Icon from '../components/Icon.astro';
                 <p class="price-card-text">hasta en 3 cuotas</p>
                 ${transferPriceFormatted ? `
                   <p class="price-card">
-                    <span class="price-label">Transferencia (-25%):</span> ${escapeHtml(transferPriceFormatted)}
+                    <span class="price-label">Transferencia (-${getTransferDiscountPercent()}%):</span> ${escapeHtml(transferPriceFormatted)}
                   </p>
                 ` : ''}
               </div>

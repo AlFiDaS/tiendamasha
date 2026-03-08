@@ -72,7 +72,19 @@ const { categoria, slug } = Astro.params;
             updateBreadcrumb(result.categoria);
           });
         } else {
-          setTimeout(initDetail, 100);
+          var script = document.createElement('script');
+          script.src = '/js/product-detail.js?v=2.1.10-2026-01-03T17-30-00';
+          script.onload = function() {
+            if (window.initProductDetail) {
+              window.initProductDetail(result.slug, {
+                containerSelector: '#product-detail-container',
+                autoLoad: true
+              }).then(function() {
+                updateBreadcrumb(result.categoria);
+              });
+            }
+          };
+          document.body.appendChild(script);
         }
       }
       
@@ -84,8 +96,8 @@ const { categoria, slug } = Astro.params;
           const h1 = productContainer.querySelector('h1');
           const productName = h1 ? h1.textContent : 'Producto';
           
-          // Cargar nombre de categoría desde la API
-          fetch('/api/categories.php')
+          // Cargar nombre de categoría desde la API (store-context reescribe /api/ con __STORE_BASE)
+          fetch((window.__STORE_BASE || '') + '/api/categories.php')
             .then(res => res.json())
             .then(data => {
               if (data.success && data.categories) {
