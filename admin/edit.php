@@ -121,10 +121,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         // Si también cambió el slug, renombrar la carpeta en la nueva categoría
                         if ($slugCambio) {
-                            $oldFolder = IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen;
-                            $newFolder = IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugDestino;
+                            $storePath = getStoreImagesPath() . '/categorias/' . $categoriaDestino;
+                            $oldFolder = is_dir($storePath . '/' . $slugOrigen) ? $storePath . '/' . $slugOrigen
+                                : (is_dir(IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen) ? IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen : null);
+                            $newFolder = $storePath . '/' . $slugDestino;
                             
-                            if (is_dir($oldFolder) && !is_dir($newFolder)) {
+                            if ($oldFolder && is_dir($oldFolder) && !is_dir($newFolder)) {
                                 if (@rename($oldFolder, $newFolder)) {
                                     // Actualizar rutas de imágenes con el nuevo slug
                                     if (!empty($formData['image'])) {
@@ -143,10 +145,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 // Caso 2: Solo cambió el slug (sin cambiar categoría)
                 elseif ($slugCambio) {
-                    $oldFolder = IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen;
-                    $newFolder = IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugDestino;
+                    $storePath = getStoreImagesPath() . '/categorias/' . $categoriaDestino;
+                    $oldFolder = is_dir($storePath . '/' . $slugOrigen) ? $storePath . '/' . $slugOrigen
+                        : (is_dir(IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen) ? IMAGES_PATH . '/' . $categoriaDestino . '/' . $slugOrigen : null);
+                    $newFolder = $storePath . '/' . $slugDestino;
                     
-                    if (is_dir($oldFolder) && !is_dir($newFolder)) {
+                    if ($oldFolder && is_dir($oldFolder) && !is_dir($newFolder)) {
                         if (@rename($oldFolder, $newFolder)) {
                             // Actualizar rutas de imágenes
                             if (!empty($formData['image'])) {

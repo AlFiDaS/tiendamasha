@@ -162,6 +162,11 @@ import Icon from '../components/Icon.astro';
                   <Icon name="bar-chart" size={18} /> Ver resumen
                 </button>
 
+                <div id="no-pagos-mensaje" class="no-pagos-mensaje" style="display: none; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;">
+                  <p style="color: #856404; font-weight: 600; margin: 0;">No hay medios de pago habilitados</p>
+                  <p style="color: #856404; font-size: 0.9rem; margin: 0.5rem 0 0;">El administrador debe configurar Alias, CBU y titular en Configurar Pagos, o activar MercadoPago.</p>
+                </div>
+                <div id="formas-pago-wrap">
                 <div class="form-group">
                   <label for="pago">Forma de pago</label>
                   <select id="pago">
@@ -200,6 +205,7 @@ import Icon from '../components/Icon.astro';
                 <button id="btn-finalizar-directa" class="btn-finalizar-directa" type="button" style="display: none;">
                   <Icon name="check" size={18} /> Confirmar pedido
                 </button>
+                </div>
               </form>
             </div>
           </div>
@@ -266,26 +272,38 @@ import Icon from '../components/Icon.astro';
             const cbuEl = document.getElementById('transfer-cbu');
             const cbuRow = document.getElementById('transfer-cbu-row');
             const titularEl = document.getElementById('transfer-titular');
-            if (aliasEl) aliasEl.textContent = shop.transfer_alias || '-';
-            if (titularEl) titularEl.textContent = shop.transfer_titular || '-';
-            if (cbuEl && shop.transfer_cbu) {
-              cbuEl.textContent = shop.transfer_cbu;
-              if (cbuRow) cbuRow.style.display = 'block';
-            }
-            // Si MercadoPago no está configurado, ocultar opción y botón
-            const pagoSelect = document.getElementById('pago');
-            const btnFinalizar = document.getElementById('btn-finalizar');
-            const btnFinalizarDirecta = document.getElementById('btn-finalizar-directa');
-            const datosBancarios = document.getElementById('datos-bancarios');
-            const totalTransferir = document.getElementById('total-transferir');
-            if (!shop.mercadopago_configured) {
-              const optTarjeta = pagoSelect?.querySelector('option[value="tarjeta"]');
-              if (optTarjeta) optTarjeta.remove();
-              if (pagoSelect) pagoSelect.value = 'transferencia_directa';
-              if (btnFinalizar) btnFinalizar.style.display = 'none';
-              if (btnFinalizarDirecta) btnFinalizarDirecta.style.display = 'inline-block';
-              if (datosBancarios) datosBancarios.style.display = 'block';
-              if (totalTransferir) totalTransferir.textContent = '$0'; // Se actualizará en renderCarrito
+            const transferOk = !!(shop.transfer_alias && shop.transfer_cbu && shop.transfer_titular);
+            const mpOk = !!shop.mercadopago_configured;
+            const hayMediosPago = transferOk || mpOk;
+
+            const noPagosMsg = document.getElementById('no-pagos-mensaje');
+            const formasPagoWrap = document.getElementById('formas-pago-wrap');
+            if (!hayMediosPago) {
+              if (noPagosMsg) noPagosMsg.style.display = 'block';
+              if (formasPagoWrap) formasPagoWrap.style.display = 'none';
+            } else {
+              if (noPagosMsg) noPagosMsg.style.display = 'none';
+              if (formasPagoWrap) formasPagoWrap.style.display = 'block';
+              if (aliasEl) aliasEl.textContent = shop.transfer_alias || '-';
+              if (titularEl) titularEl.textContent = shop.transfer_titular || '-';
+              if (cbuEl && shop.transfer_cbu) {
+                cbuEl.textContent = shop.transfer_cbu;
+                if (cbuRow) cbuRow.style.display = 'block';
+              }
+              const pagoSelect = document.getElementById('pago');
+              const btnFinalizar = document.getElementById('btn-finalizar');
+              const btnFinalizarDirecta = document.getElementById('btn-finalizar-directa');
+              const datosBancarios = document.getElementById('datos-bancarios');
+              const totalTransferir = document.getElementById('total-transferir');
+              if (!mpOk) {
+                const optTarjeta = pagoSelect?.querySelector('option[value="tarjeta"]');
+                if (optTarjeta) optTarjeta.remove();
+                if (pagoSelect) pagoSelect.value = 'transferencia_directa';
+                if (btnFinalizar) btnFinalizar.style.display = 'none';
+                if (btnFinalizarDirecta) btnFinalizarDirecta.style.display = 'inline-block';
+                if (datosBancarios) datosBancarios.style.display = 'block';
+                if (totalTransferir) totalTransferir.textContent = '$0';
+              }
             }
           }
         } catch (e) { console.warn('No se pudieron cargar datos de transferencia:', e); }

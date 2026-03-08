@@ -23,6 +23,15 @@ require_once __DIR__ . '/_inc/header.php';
     <p>Administrá todas tus tiendas desde un solo lugar</p>
 </div>
 
+<?php if (!empty($_SESSION['platform_flash_success'])): ?>
+    <div class="alert-t alert-t-success" style="margin-bottom: 1.5rem;"><?= htmlspecialchars($_SESSION['platform_flash_success']) ?></div>
+    <?php unset($_SESSION['platform_flash_success']); ?>
+<?php endif; ?>
+<?php if (!empty($_SESSION['platform_flash_error'])): ?>
+    <div class="alert-t alert-t-error" style="margin-bottom: 1.5rem;"><?= htmlspecialchars($_SESSION['platform_flash_error']) ?></div>
+    <?php unset($_SESSION['platform_flash_error']); ?>
+<?php endif; ?>
+
 <?php if (isset($_GET['config_ok'])): ?>
     <div class="alert-t alert-t-success" style="margin-bottom: 1.5rem;">
         ¡Configuración rápida completada correctamente!

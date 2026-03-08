@@ -24,6 +24,18 @@ if (!defined('OPTIMIZE_QUALITY')) {
 }
 
 /**
+ * Obtiene la ruta base de imágenes de la tienda actual.
+ * Estructura: images/tiendas/{storeSlug}/ con subcarpetas: categorias, galeria, logos, hero, sobrenosotros, proofs
+ * @return string Ruta física (ej: IMAGES_PATH/tiendas/wemasha)
+ */
+function getStoreImagesPath() {
+    $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+        ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+        : 'default';
+    return rtrim(IMAGES_PATH, '/\\') . '/tiendas/' . $storeSlug;
+}
+
+/**
  * Comprueba si GD y WebP están disponibles para optimización
  * @return array ['gd' => bool, 'webp' => bool]
  */
@@ -305,19 +317,19 @@ function uploadProductImage($file, $slug, $categoria, $filename = 'main') {
         return ['success' => false, 'path' => null, 'error' => 'Categoría no especificada'];
     }
     
-    // Crear estructura de directorios: images/categoria/slug/
-    $uploadDir = IMAGES_PATH . '/' . $categoria . '/' . $slug;
+    // Crear estructura: images/tiendas/{store}/categorias/{categoria}/{slug}/
+    $storePath = getStoreImagesPath();
+    $uploadDir = $storePath . '/categorias/' . $categoria . '/' . $slug;
     
     // Verificar que el directorio base de imágenes existe
     if (!is_dir(IMAGES_PATH)) {
-        // Intentar crear el directorio base si no existe
         if (!mkdir(IMAGES_PATH, 0755, true)) {
             return ['success' => false, 'path' => null, 'error' => 'No se pudo crear el directorio base de imágenes: ' . IMAGES_PATH];
         }
     }
     
     // Verificar que el directorio de categoría existe
-    $categoriaDir = IMAGES_PATH . '/' . $categoria;
+    $categoriaDir = $storePath . '/categorias/' . $categoria;
     if (!is_dir($categoriaDir)) {
         if (!mkdir($categoriaDir, 0755, true)) {
             return ['success' => false, 'path' => null, 'error' => 'No se pudo crear el directorio de categoría: ' . $categoriaDir];
@@ -351,9 +363,12 @@ function uploadProductImage($file, $slug, $categoria, $filename = 'main') {
     
     // Optimizar imagen (redimensionar, WebP/JPEG, comprimir)
     $optimized = optimizeImage($destination, OPTIMIZE_PRODUCT_MAX_DIM, OPTIMIZE_QUALITY);
+    $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+        ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+        : 'default';
     $relativePath = ($optimized['success'] && !empty($optimized['relativePath']))
         ? $optimized['relativePath']
-        : '/images/' . $categoria . '/' . $slug . '/' . $newFilename;
+        : '/images/tiendas/' . $storeSlug . '/categorias/' . $categoria . '/' . $slug . '/' . $newFilename;
     
     return ['success' => true, 'path' => $relativePath, 'error' => null];
 }
@@ -371,8 +386,8 @@ function uploadProofImage($file, $orderId) {
         return ['success' => false, 'path' => null, 'error' => $validation['error']];
     }
     
-    // Crear directorio de comprobantes si no existe
-    $proofsDir = IMAGES_PATH . '/proofs';
+    // Crear directorio de comprobantes: images/tiendas/{store}/proofs/
+    $proofsDir = getStoreImagesPath() . '/proofs';
     if (!is_dir($proofsDir)) {
         if (!mkdir($proofsDir, 0755, true)) {
             return ['success' => false, 'path' => null, 'error' => 'No se pudo crear el directorio de comprobantes'];
@@ -393,8 +408,11 @@ function uploadProofImage($file, $orderId) {
     // Asegurar permisos
     chmod($destination, 0644);
     
-    // Retornar ruta relativa: /images/proofs/order_{id}_{timestamp}.ext
-    $relativePath = '/images/proofs/' . $filename;
+    // Retornar ruta relativa: /images/tiendas/{store}/proofs/order_{id}_{timestamp}.ext
+    $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+        ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+        : 'default';
+    $relativePath = '/images/tiendas/' . $storeSlug . '/proofs/' . $filename;
     
     return ['success' => true, 'path' => $relativePath, 'error' => null];
 }
@@ -448,11 +466,18 @@ function moveProductImages($slug, $categoriaAnterior, $categoriaNueva) {
         return ['success' => false, 'imagePath' => null, 'hoverImagePath' => null, 'error' => 'Categorías no especificadas'];
     }
     
-    $oldFolder = IMAGES_PATH . '/' . $categoriaAnterior . '/' . $slug;
-    $newFolder = IMAGES_PATH . '/' . $categoriaNueva . '/' . $slug;
+    // Buscar carpeta origen: nueva estructura primero, luego legacy
+    $oldFolderNew = getStoreImagesPath() . '/categorias/' . $categoriaAnterior . '/' . $slug;
+    $oldFolderLegacy = IMAGES_PATH . '/' . $categoriaAnterior . '/' . $slug;
+    $oldFolder = is_dir($oldFolderNew) ? $oldFolderNew : (is_dir($oldFolderLegacy) ? $oldFolderLegacy : null);
+    
+    $newFolder = getStoreImagesPath() . '/categorias/' . $categoriaNueva . '/' . $slug;
+    $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+        ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+        : 'default';
     
     // Si la carpeta antigua no existe, no hay nada que mover
-    if (!is_dir($oldFolder)) {
+    if (!$oldFolder || !is_dir($oldFolder)) {
         return ['success' => true, 'imagePath' => null, 'hoverImagePath' => null, 'error' => null];
     }
     
@@ -486,8 +511,8 @@ function moveProductImages($slug, $categoriaAnterior, $categoriaNueva) {
             if (@rename($oldPath, $newPath)) {
                 chmod($newPath, 0644);
                 
-                // Actualizar rutas según el nombre del archivo
-                $relativePath = '/images/' . $categoriaNueva . '/' . $slug . '/' . $file;
+                // Actualizar rutas según el nombre del archivo (nueva estructura)
+                $relativePath = '/images/tiendas/' . $storeSlug . '/categorias/' . $categoriaNueva . '/' . $slug . '/' . $file;
                 if (strpos($file, 'main.') === 0 || $file === 'main.jpg' || $file === 'main.png' || $file === 'main.webp') {
                     $newImagePath = $relativePath;
                 } elseif (strpos($file, 'hover.') === 0 || $file === 'hover.jpg' || $file === 'hover.png' || $file === 'hover.webp') {
@@ -523,9 +548,11 @@ function cleanupImageFolder($slug, $categoria) {
         return true;
     }
     
-    // Nueva estructura: images/categoria/slug/
-    $folderPath = IMAGES_PATH . '/' . $categoria . '/' . $slug;
-    
+    // Buscar carpeta: nueva estructura primero, luego legacy
+    $folderPath = getStoreImagesPath() . '/categorias/' . $categoria . '/' . $slug;
+    if (!is_dir($folderPath)) {
+        $folderPath = IMAGES_PATH . '/' . $categoria . '/' . $slug;
+    }
     if (!is_dir($folderPath)) {
         return true;
     }
@@ -561,6 +588,7 @@ function cleanupImageFolder($slug, $categoria) {
 
 /**
  * Subir imagen de galería
+ * Cada tienda tiene su propia carpeta en 0_galeria/{storeSlug} para evitar mezclar fotos entre tiendas.
  * @param array $file ($_FILES['campo'])
  * @param string $nombre (nombre del archivo sin extensión, ej: 'idea1', 'idea100')
  * @return array ['success' => bool, 'path' => string|null, 'error' => string|null]
@@ -577,8 +605,11 @@ function uploadGaleriaImage($file, $nombre) {
         return ['success' => false, 'path' => null, 'error' => $validation['error']];
     }
     
-    // Crear directorio si no existe
-    $uploadDir = IMAGES_PATH . '/0_galeria';
+    // Carpeta por tienda: images/tiendas/{store}/galeria/
+    $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+        ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+        : 'default';
+    $uploadDir = getStoreImagesPath() . '/galeria';
     if (!is_dir($uploadDir)) {
         if (!@mkdir($uploadDir, 0755, true)) {
             $errorMsg = 'No se pudo crear el directorio de destino: ' . $uploadDir;
@@ -625,37 +656,38 @@ function uploadGaleriaImage($file, $nombre) {
     $optimized = optimizeImage($destination, OPTIMIZE_GALERIA_MAX_DIM, OPTIMIZE_QUALITY);
     $relativePath = ($optimized['success'] && !empty($optimized['relativePath']))
         ? $optimized['relativePath']
-        : '/images/0_galeria/' . $newFilename;
+        : '/images/tiendas/' . $storeSlug . '/galeria/' . $newFilename;
     
     return ['success' => true, 'path' => $relativePath, 'error' => null];
 }
 
 /**
  * Eliminar imagen de galería
- * @param string $imagePath (ruta relativa desde raíz, ej: '/images/0_galeria/idea1.webp')
+ * Soporta rutas legacy (/images/0_galeria/...) y nuevas (/images/tiendas/{store}/galeria/...)
+ * @param string $imagePath (ruta relativa desde raíz)
  * @return bool
  */
 function deleteGaleriaImage($imagePath) {
     if (empty($imagePath)) {
         return true; // No hay imagen que eliminar
     }
-    
-    // Construir ruta completa
-    $fullPath = BASE_PATH . '/public' . $imagePath;
-    
-    // Verificar que el archivo existe y está en el directorio de galería
-    if (file_exists($fullPath) && strpos($imagePath, '/images/0_galeria/') === 0) {
-        // Intentar eliminar con manejo de errores
+    $imagePath = preg_replace('/\?.*$/', '', $imagePath); // Quitar cache busting
+    $isLegacy = (strpos($imagePath, '/images/0_galeria/') === 0);
+    $isNew = (strpos($imagePath, '/images/tiendas/') === 0 && strpos($imagePath, '/galeria/') !== false);
+    if (!$isLegacy && !$isNew) {
+        return true; // Ruta inválida o no es de galería
+    }
+    $relativePart = substr($imagePath, strlen('/images/'));
+    $fullPath = rtrim(IMAGES_PATH, '/') . '/' . $relativePart;
+    if (file_exists($fullPath)) {
         $result = @unlink($fullPath);
-        // Si falla, esperar un momento y reintentar una vez
         if (!$result && file_exists($fullPath)) {
-            usleep(200000); // 200ms
+            usleep(200000);
             $result = @unlink($fullPath);
         }
         return $result;
     }
-    
-    return true; // Si no existe, considerarlo como éxito
+    return true;
 }
 
 /**
@@ -668,8 +700,10 @@ function deleteProofImage($proofImagePath) {
         return true; // No hay imagen que eliminar
     }
     
-    // Verificar que la ruta es de comprobantes
-    if (strpos($proofImagePath, '/images/proofs/') !== 0) {
+    // Verificar que la ruta es de comprobantes (legacy o nueva estructura)
+    $isLegacyProof = (strpos($proofImagePath, '/images/proofs/') === 0);
+    $isNewProof = (strpos($proofImagePath, '/images/tiendas/') === 0 && strpos($proofImagePath, '/proofs/') !== false);
+    if (!$isLegacyProof && !$isNewProof) {
         return false; // Ruta inválida
     }
     
@@ -684,10 +718,9 @@ function deleteProofImage($proofImagePath) {
     
     // Verificar que el archivo existe y está en el directorio de comprobantes
     if (file_exists($fullPath)) {
-        // Verificar seguridad: asegurar que la ruta está dentro de IMAGES_PATH/proofs/
         $realPath = realpath($fullPath);
-        $imagesPathReal = realpath(IMAGES_PATH . '/proofs');
-        
+        $imagesPathReal = realpath(IMAGES_PATH);
+        // Seguridad: debe estar dentro de IMAGES_PATH (legacy proofs/ o tiendas/.../proofs/)
         if ($realPath && $imagesPathReal && strpos($realPath, $imagesPathReal) === 0) {
             return @unlink($fullPath);
         }

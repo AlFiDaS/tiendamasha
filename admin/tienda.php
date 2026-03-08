@@ -89,9 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 if ($isValid && empty($error)) {
-                    // Subcarpeta por tienda para que cada una tenga su propio logo
+                    // Estructura: images/tiendas/{store}/logos/
                     $storeSlug = defined('CURRENT_STORE_SLUG') ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG)) : 'default';
-                    $logoDir = IMAGES_PATH . '/logo/' . $storeSlug;
+                    $logoDir = getStoreImagesPath() . '/logos';
                     if (!is_dir($logoDir)) {
                         if (!mkdir($logoDir, 0755, true)) {
                             $error = 'No se pudo crear el directorio de logos';
@@ -102,7 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $filename = 'logo.' . $ext;
                         $destination = $logoDir . '/' . $filename;
                         
-                        // Eliminar solo los logos de ESTA tienda (no de otras)
+                        // Eliminar logo anterior si existe (ruta legacy o nueva)
+                        if (!empty($settings['shop_logo'])) {
+                            $oldFullPath = str_replace('/images/', IMAGES_PATH . '/', $settings['shop_logo']);
+                            if (file_exists($oldFullPath)) {
+                                @unlink($oldFullPath);
+                            }
+                        }
                         $existingLogos = glob($logoDir . '/logo.*');
                         foreach ($existingLogos as $existingLogo) {
                             @unlink($existingLogo);
@@ -110,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         if (move_uploaded_file($_FILES['shop_logo']['tmp_name'], $destination)) {
                             chmod($destination, 0644);
-                            $formData['shop_logo'] = '/images/logo/' . $storeSlug . '/' . $filename;
+                            $formData['shop_logo'] = '/images/tiendas/' . $storeSlug . '/logos/' . $filename;
                         } else {
                             $error = 'Error al mover el archivo del logo';
                         }

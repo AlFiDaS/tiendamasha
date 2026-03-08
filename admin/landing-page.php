@@ -70,6 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+            ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+            : 'default';
+        $heroDir = getStoreImagesPath() . '/hero';
         if (!empty($_POST['carousel_change_image_index']) && is_array($_POST['carousel_change_image_index'])) {
             foreach ($_POST['carousel_change_image_index'] as $index => $changeIndex) {
                 if (isset($_FILES['carousel_change_image_' . $changeIndex]) && $_FILES['carousel_change_image_' . $changeIndex]['error'] === UPLOAD_ERR_OK) {
@@ -82,11 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                         $newFilename = 'hero_' . time() . '_' . $changeIndex . '.' . $ext;
-                        $uploadDir = IMAGES_PATH . '/';
-                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                        $destination = $uploadDir . $newFilename;
+                        if (!is_dir($heroDir)) mkdir($heroDir, 0755, true);
+                        $destination = $heroDir . '/' . $newFilename;
                         if (move_uploaded_file($file['tmp_name'], $destination)) {
-                            $carouselData[$changeIndex]['image'] = '/images/' . $newFilename;
+                            $carouselData[$changeIndex]['image'] = '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename;
                         }
                     }
                 }
@@ -110,9 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($result['valid']) {
                         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                         $newFilename = 'hero_' . time() . '_' . $index . '.' . $ext;
-                        $uploadDir = IMAGES_PATH . '/';
-                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                        $destination = $uploadDir . $newFilename;
+                        if (!is_dir($heroDir)) mkdir($heroDir, 0755, true);
+                        $destination = $heroDir . '/' . $newFilename;
                         if (move_uploaded_file($file['tmp_name'], $destination)) {
                             $linkType = $_POST['new_carousel_link_type'][$index] ?? 'none';
                             $linkValue = $_POST['new_carousel_link_value'][$index] ?? '';
@@ -121,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $category = getCategoryBySlug($linkValue);
                                 $link = $category ? '/' . $linkValue : '';
                             } elseif ($linkType === 'ideas' && !empty($linkValue)) { $link = '/galeria'; }
-                            $carouselData[] = ['image' => '/images/' . $newFilename, 'link' => $link];
+                            $carouselData[] = ['image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename, 'link' => $link];
                         }
                     }
                 }
@@ -141,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'stat_3_label' => sanitize($_POST['sobre_stat_3_label'] ?? '')
         ];
 
+        $sobreDir = getStoreImagesPath() . '/sobrenosotros';
         if (isset($_FILES['sobre_image']) && $_FILES['sobre_image']['error'] === UPLOAD_ERR_OK) {
             $result = validateUploadedFile($_FILES['sobre_image'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
             if ($result['valid']) {
@@ -150,11 +153,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $ext = strtolower(pathinfo($_FILES['sobre_image']['name'], PATHINFO_EXTENSION));
                 $newFilename = 'sobre_' . time() . '.' . $ext;
-                $uploadDir = IMAGES_PATH . '/';
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                $destination = $uploadDir . $newFilename;
+                if (!is_dir($sobreDir)) mkdir($sobreDir, 0755, true);
+                $destination = $sobreDir . '/' . $newFilename;
                 if (move_uploaded_file($_FILES['sobre_image']['tmp_name'], $destination)) {
-                    $sobreData['image'] = '/images/' . $newFilename;
+                    $sobreData['image'] = '/images/tiendas/' . $storeSlug . '/sobrenosotros/' . $newFilename;
                 }
             }
         } elseif (!empty($settings['sobre_image'])) {
@@ -231,6 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!preg_match('/^#[a-fA-F0-9]{6}$/', $primaryColorLight)) $primaryColorLight = '#ff8c00';
         if (!preg_match('/^#[a-fA-F0-9]{6}$/', $primaryColorDark)) $primaryColorDark = '#ff8c00';
 
+        $galeriaLandingDir = getStoreImagesPath() . '/galeria';
         if (isset($_FILES['galeria_image']) && $_FILES['galeria_image']['error'] === UPLOAD_ERR_OK) {
             $result = validateUploadedFile($_FILES['galeria_image'], ['image/jpeg', 'image/png', 'image/webp'], 5 * 1024 * 1024);
             if ($result['valid']) {
@@ -240,11 +243,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $ext = strtolower(pathinfo($_FILES['galeria_image']['name'], PATHINFO_EXTENSION));
                 $newFilename = 'galeria_ideas_' . time() . '.' . $ext;
-                $uploadDir = IMAGES_PATH . '/';
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                $destination = $uploadDir . $newFilename;
+                if (!is_dir($galeriaLandingDir)) mkdir($galeriaLandingDir, 0755, true);
+                $destination = $galeriaLandingDir . '/' . $newFilename;
                 if (move_uploaded_file($_FILES['galeria_image']['tmp_name'], $destination)) {
-                    $galeriaData['image'] = '/images/' . $newFilename;
+                    $galeriaData['image'] = '/images/tiendas/' . $storeSlug . '/galeria/' . $newFilename;
                 }
             }
         } elseif (!empty($settings['galeria_image'])) {

@@ -66,7 +66,11 @@ if (!$store) {
             $transferCbu = preg_replace('/\D/', '', platformSanitize($_POST['transfer_cbu'] ?? ''));
             $transferTitular = trim(platformSanitize($_POST['transfer_titular'] ?? ''));
 
-            if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if (empty($transferAlias) || empty($transferCbu) || empty($transferTitular)) {
+                $error = 'Alias, CBU y Titular son obligatorios para poder recibir pagos por transferencia.';
+            } elseif (strlen($transferCbu) !== 22) {
+                $error = 'El CBU debe tener exactamente 22 dígitos.';
+            } elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = 'El email de contacto no es válido';
             } else {
                 $shopLogo = $settings['shop_logo'] ?? null;
@@ -94,7 +98,8 @@ if (!$store) {
                     if ($isValid && empty($error)) {
                         $basePath = dirname(PLATFORM_BASE_PATH);
                         $imagesPath = is_dir($basePath . '/public/images') ? $basePath . '/public/images' : $basePath . '/images';
-                        $logoDir = $imagesPath . '/logo/' . preg_replace('/[^a-z0-9\-]/', '', strtolower($storeSlug));
+                        $storeSlugSafe = preg_replace('/[^a-z0-9\-]/', '', strtolower($storeSlug));
+                        $logoDir = $imagesPath . '/tiendas/' . $storeSlugSafe . '/logos';
                         if (!is_dir($logoDir)) {
                             @mkdir($logoDir, 0755, true);
                         }
@@ -106,7 +111,7 @@ if (!$store) {
                             }
                             if (move_uploaded_file($file['tmp_name'], $destination)) {
                                 chmod($destination, 0644);
-                                $shopLogo = '/images/logo/' . $storeSlug . '/' . $filename;
+                                $shopLogo = '/images/tiendas/' . $storeSlugSafe . '/logos/' . $filename;
                             }
                         }
                     }
@@ -252,30 +257,34 @@ require_once __DIR__ . '/_inc/header.php';
 
         <hr style="border:none; border-top:1px solid var(--t-border); margin:1.5rem 0;">
 
-        <h2 style="font-size:1.15rem; font-weight:700; color:var(--t-dark); margin-bottom:1.25rem;">Transferencia directa</h2>
-        <p style="color:var(--t-muted); font-size:0.9rem; margin-bottom:1rem;">Estos datos se mostrarán en el carrito cuando el cliente elija pagar por transferencia.</p>
+        <h2 style="font-size:1.15rem; font-weight:700; color:var(--t-dark); margin-bottom:1.25rem;">Transferencia directa <span style="color:#dc3545;">*</span></h2>
+        <p style="color:var(--t-muted); font-size:0.9rem; margin-bottom:1rem;">Estos datos son obligatorios. Se mostrarán en el carrito cuando el cliente elija pagar por transferencia.</p>
 
         <div class="form-t-group">
-            <label for="transfer_alias">Alias</label>
-            <input type="text" id="transfer_alias" name="transfer_alias" class="form-t-input"
+            <label for="transfer_alias">Alias <span style="color:#dc3545;">*</span></label>
+            <input type="text" id="transfer_alias" name="transfer_alias" class="form-t-input" required
                    value="<?= htmlspecialchars($settings['transfer_alias'] ?? '') ?>" placeholder="Ej: lume.co.mp">
         </div>
 
         <div class="form-t-group">
-            <label for="transfer_cbu">CBU</label>
-            <input type="text" id="transfer_cbu" name="transfer_cbu" class="form-t-input"
-                   value="<?= htmlspecialchars($settings['transfer_cbu'] ?? '') ?>" placeholder="22 dígitos" maxlength="22">
+            <label for="transfer_cbu">CBU (22 dígitos) <span style="color:#dc3545;">*</span></label>
+            <input type="text" id="transfer_cbu" name="transfer_cbu" class="form-t-input" required
+                   value="<?= htmlspecialchars($settings['transfer_cbu'] ?? '') ?>" placeholder="22 dígitos" maxlength="24" title="El CBU debe tener exactamente 22 dígitos (podés pegar con espacios)">
         </div>
 
         <div class="form-t-group">
-            <label for="transfer_titular">Titular</label>
-            <input type="text" id="transfer_titular" name="transfer_titular" class="form-t-input"
+            <label for="transfer_titular">Titular <span style="color:#dc3545;">*</span></label>
+            <input type="text" id="transfer_titular" name="transfer_titular" class="form-t-input" required
                    value="<?= htmlspecialchars($settings['transfer_titular'] ?? '') ?>" placeholder="Ej: Juan Pérez">
         </div>
 
         <div class="platform-form-actions">
             <button type="submit" class="btn-t btn-t-primary">Guardar Configuración</button>
+            <?php if (empty($settings['configuracion_rapida_completada'])): ?>
+            <a href="<?= PLATFORM_PAGES_URL ?>/cancelar-creacion.php?store=<?= urlencode($storeSlug) ?>" class="btn-t btn-t-secondary" onclick="return confirm('¿Cancelar la creación de la tienda? Se eliminará la tienda y todos sus datos.');">Cancelar creación</a>
+            <?php else: ?>
             <a href="<?= PLATFORM_PAGES_URL ?>/dashboard.php" class="btn-t btn-t-secondary">Volver al Dashboard</a>
+            <?php endif; ?>
         </div>
     </form>
 </div>

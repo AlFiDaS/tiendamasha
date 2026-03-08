@@ -45,6 +45,10 @@ $imagesToDelete = [];
 try {
     switch ($section) {
         case 'carousel':
+            $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+                ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+                : 'default';
+            $heroDir = getStoreImagesPath() . '/hero';
             $carouselImages = !empty($settings['carousel_images']) ? json_decode($settings['carousel_images'], true) : [];
             $carouselData = [];
             $originalCarouselImages = $carouselImages;
@@ -88,11 +92,10 @@ try {
                             }
                             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                             $newFilename = 'hero_' . time() . '_' . $changeIndex . '.' . $ext;
-                            $uploadDir = IMAGES_PATH . '/';
-                            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                            $destination = $uploadDir . $newFilename;
+                            if (!is_dir($heroDir)) mkdir($heroDir, 0755, true);
+                            $destination = $heroDir . '/' . $newFilename;
                             if (move_uploaded_file($file['tmp_name'], $destination)) {
-                                $carouselData[$changeIndex]['image'] = '/images/' . $newFilename;
+                                $carouselData[$changeIndex]['image'] = '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename;
                             }
                         }
                     }
@@ -116,9 +119,8 @@ try {
                         if ($result['valid']) {
                             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                             $newFilename = 'hero_' . time() . '_' . $index . '.' . $ext;
-                            $uploadDir = IMAGES_PATH . '/';
-                            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                            $destination = $uploadDir . $newFilename;
+                            if (!is_dir($heroDir)) mkdir($heroDir, 0755, true);
+                            $destination = $heroDir . '/' . $newFilename;
                             if (move_uploaded_file($file['tmp_name'], $destination)) {
                                 $linkType = $_POST['new_carousel_link_type'][$index] ?? 'none';
                                 $linkValue = $_POST['new_carousel_link_value'][$index] ?? '';
@@ -127,7 +129,7 @@ try {
                                     $cat = getCategoryBySlug($linkValue);
                                     $link = $cat ? '/' . $linkValue : '';
                                 } elseif ($linkType === 'ideas' && !empty($linkValue)) { $link = '/galeria'; }
-                                $carouselData[] = ['image' => '/images/' . $newFilename, 'link' => $link];
+                                $carouselData[] = ['image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename, 'link' => $link];
                             }
                         }
                     }
@@ -163,6 +165,10 @@ try {
             break;
 
         case 'sobre':
+            $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+                ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+                : 'default';
+            $sobreDir = getStoreImagesPath() . '/sobrenosotros';
             $sobreData = [
                 'title' => sanitize($_POST['sobre_title'] ?? 'Sobre LUME'),
                 'text_1' => sanitize($_POST['sobre_text_1'] ?? ''),
@@ -183,11 +189,10 @@ try {
                     }
                     $ext = strtolower(pathinfo($_FILES['sobre_image']['name'], PATHINFO_EXTENSION));
                     $newFilename = 'sobre_' . time() . '.' . $ext;
-                    $uploadDir = IMAGES_PATH . '/';
-                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                    $destination = $uploadDir . $newFilename;
+                    if (!is_dir($sobreDir)) mkdir($sobreDir, 0755, true);
+                    $destination = $sobreDir . '/' . $newFilename;
                     if (move_uploaded_file($_FILES['sobre_image']['tmp_name'], $destination)) {
-                        $sobreData['image'] = '/images/' . $newFilename;
+                        $sobreData['image'] = '/images/tiendas/' . $storeSlug . '/sobrenosotros/' . $newFilename;
                     }
                 }
             } elseif (!empty($settings['sobre_image'])) {
@@ -243,6 +248,10 @@ try {
             break;
 
         case 'galeria':
+            $storeSlug = (defined('CURRENT_STORE_SLUG') && CURRENT_STORE_SLUG)
+                ? preg_replace('/[^a-z0-9\-]/', '', strtolower(CURRENT_STORE_SLUG))
+                : 'default';
+            $galeriaLandingDir = getStoreImagesPath() . '/galeria';
             $featuresData = [];
             if (!empty($_POST['galeria_feature_icon']) && !empty($_POST['galeria_feature_text'])) {
                 $icons = $_POST['galeria_feature_icon'];
@@ -280,11 +289,10 @@ try {
                     }
                     $ext = strtolower(pathinfo($_FILES['galeria_image']['name'], PATHINFO_EXTENSION));
                     $newFilename = 'galeria_ideas_' . time() . '.' . $ext;
-                    $uploadDir = IMAGES_PATH . '/';
-                    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-                    $destination = $uploadDir . $newFilename;
+                    if (!is_dir($galeriaLandingDir)) mkdir($galeriaLandingDir, 0755, true);
+                    $destination = $galeriaLandingDir . '/' . $newFilename;
                     if (move_uploaded_file($_FILES['galeria_image']['tmp_name'], $destination)) {
-                        $galeriaData['image'] = '/images/' . $newFilename;
+                        $galeriaData['image'] = '/images/tiendas/' . $storeSlug . '/galeria/' . $newFilename;
                     }
                 }
             } elseif (!empty($settings['galeria_image'])) {
