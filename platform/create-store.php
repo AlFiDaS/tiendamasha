@@ -55,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($existingStore) {
                 $error = 'Ya existe una tienda con ese slug. Elegí otro.';
+            } elseif (!canUserCreateStore($userId)) {
+                $error = 'Alcanzaste el límite de tiendas. El plan gratuito permite solo 1 tienda. Actualizá tu plan para crear más.';
             } else {
                 $dbName = PLATFORM_DB_NAME;
 

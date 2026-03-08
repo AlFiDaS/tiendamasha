@@ -7,6 +7,7 @@ require_once '../config.php';
 require_once '../helpers/upload.php';
 require_once '../helpers/slugify.php';
 require_once '../helpers/categories.php';
+require_once __DIR__ . '/../helpers/plans.php';
 
 // Necesitamos autenticación pero sin incluir el header todavía
 if (!defined('LUME_ADMIN')) {
@@ -49,6 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        if (empty($error)) {
+            // Verificar límite de productos según plan
+            $planCheck = canStoreAddProduct(null, null, null);
+            if (!$planCheck['allowed']) {
+                $error = $planCheck['error'];
+            }
+        }
+
         if (empty($error)) {
             // Generar slug si está vacío
             if (empty($formData['slug'])) {
@@ -144,6 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once '_inc/header.php';
 
 $csrfToken = generateCSRFToken();
+$planCheck = canStoreAddProduct(null, null, null);
+$planLimits = getPlanLimits(defined('CURRENT_STORE_PLAN') ? CURRENT_STORE_PLAN : 'free');
 ?>
 
 <div class="admin-content add-product-page">
@@ -151,6 +162,11 @@ $csrfToken = generateCSRFToken();
         <div class="page-header-left">
             <h1 class="page-title">Agregar Producto</h1>
             <p class="page-desc">Crea un nuevo producto para tu catálogo</p>
+            <?php if ($planCheck['limit'] !== null): ?>
+                <p class="page-desc" style="font-size:0.85rem; color:var(--muted, #666); margin-top:0.25rem;">
+                    Plan <?= htmlspecialchars($planLimits['name']) ?>: <?= $planCheck['current'] ?> / <?= $planCheck['limit'] ?> productos
+                </p>
+            <?php endif; ?>
         </div>
         <div class="page-header-actions">
             <a href="list.php" class="btn btn-secondary">← Volver a lista</a>

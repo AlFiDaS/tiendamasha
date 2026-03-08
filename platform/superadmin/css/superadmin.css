@@ -257,6 +257,10 @@ body {
 .sa-badge-setup { background: #fef3c7; color: #92400e; }
 .sa-badge-suspended { background: #fee2e2; color: #991b1b; }
 .sa-badge-free { background: #f1f5f9; color: #475569; }
+.sa-badge-bronze { background: #fed7aa; color: #9a3412; }
+.sa-badge-silver { background: #e5e7eb; color: #374151; }
+.sa-badge-gold { background: #fef3c7; color: #92400e; }
+.sa-badge-platinum { background: #e0e7ff; color: #3730a3; }
 .sa-badge-basic { background: #dbeafe; color: #1e40af; }
 .sa-badge-pro { background: #f3e8ff; color: #7c3aed; }
 

@@ -24,8 +24,10 @@ $statusLabels = [
     'active' => 'Activa', 'setup' => 'En configuración', 'suspended' => 'Suspendida',
 ];
 $planLabels = [
-    'free' => 'Free', 'basic' => 'Basic', 'pro' => 'Pro',
+    'free' => 'Gratuito', 'bronze' => 'Bronze', 'silver' => 'Silver',
+    'gold' => 'Gold', 'platinum' => 'Platinum',
 ];
+$allPlans = ['free', 'bronze', 'silver', 'gold', 'platinum'];
 
 require_once __DIR__ . '/_inc/header.php';
 
@@ -110,7 +112,17 @@ $impersonateErrorMsg = [
         </div>
         <div class="sa-detail-row">
             <span class="sa-detail-label">Plan</span>
-            <span class="sa-badge sa-badge-<?= $store['plan'] ?>"><?= strtoupper($store['plan']) ?></span>
+            <span>
+                <span class="sa-badge sa-badge-<?= $store['plan'] ?>" id="currentPlanBadge"><?= strtoupper($store['plan']) ?></span>
+                <form id="planForm" style="display:inline-block; margin-left:0.5rem;">
+                    <select name="plan" id="planSelect" class="sa-select" style="padding:0.25rem 0.5rem; font-size:0.85rem;">
+                        <?php foreach ($allPlans as $p): ?>
+                            <option value="<?= htmlspecialchars($p) ?>" <?= $store['plan'] === $p ? 'selected' : '' ?>><?= $planLabels[$p] ?? $p ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="sa-btn sa-btn-sm" style="margin-left:0.25rem;">Actualizar</button>
+                </form>
+            </span>
         </div>
         <div class="sa-detail-row">
             <span class="sa-detail-label">Estado</span>
@@ -212,6 +224,43 @@ $impersonateErrorMsg = [
 </div>
 
 <script>
+(function(){
+    var planForm = document.getElementById('planForm');
+    var planSelect = document.getElementById('planSelect');
+    var planBadge = document.getElementById('currentPlanBadge');
+    if (planForm) {
+        planForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            var btn = planForm.querySelector('button[type="submit"]');
+            var origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Guardando…';
+            fetch('<?= PLATFORM_PAGES_URL ?>/superadmin/api/update-store-plan.php', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({store_id: <?= (int)$store['id'] ?>, plan: planSelect.value})
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if (data.success) {
+                    planBadge.textContent = data.plan.toUpperCase();
+                    planBadge.className = 'sa-badge sa-badge-' + data.plan;
+                    btn.textContent = 'Actualizado';
+                    setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 1500);
+                } else {
+                    alert(data.error || 'Error al actualizar');
+                    btn.disabled = false;
+                    btn.textContent = origText;
+                }
+            })
+            .catch(function(){
+                alert('Error de conexión');
+                btn.disabled = false;
+                btn.textContent = origText;
+            });
+        });
+    }
+})();
 (function(){
     var slug = <?= json_encode($store['slug']) ?>;
     var storeId = <?= (int)$store['id'] ?>;

@@ -17,8 +17,9 @@ $scriptFile = $_SERVER['SCRIPT_FILENAME'] ?? __FILE__;
 $isProduction = (strpos($host, 'localhost') === false && strpos($host, '127.0.0.1') === false) ||
                 (strpos($scriptFile, 'htdocs') !== false && strpos($host, 'localhost') === false);
 
-// Errores
-if ($isProduction) {
+// Errores (?_debug_errors=1 en cualquier URL de platform/ muestra el error real - eliminar en prod)
+$forceShowErrors = !empty($_GET['_debug_errors']);
+if ($isProduction && !$forceShowErrors) {
     error_reporting(0);
     ini_set('display_errors', 0);
     ini_set('log_errors', 1);
@@ -76,4 +77,5 @@ date_default_timezone_set('America/Argentina/Buenos_Aires');
 // Helpers de plataforma
 require_once PLATFORM_BASE_PATH . '/helpers/platform-db.php';
 require_once PLATFORM_BASE_PATH . '/helpers/platform-auth.php';
+require_once PLATFORM_BASE_PATH . '/helpers/plans.php';
 require_once PLATFORM_BASE_PATH . '/helpers/superadmin.php';

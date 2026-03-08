@@ -160,16 +160,55 @@ function platformGetCurrentUser() {
 }
 
 function platformGetUserStores($userId) {
-    return platformFetchAll(
-        'SELECT s.*, sm.role, COALESCE(ss.configuracion_rapida_completada, 0) AS configuracion_rapida_completada
+    $userId = (int) $userId;
+    if ($userId < 1) {
+        return [];
+    }
+    // Tiendas donde el usuario es miembro O es owner (evitar GROUP BY por compatibilidad MySQL)
+    $rows = platformFetchAll(
+        "SELECT s.*, COALESCE(sm.role, 'owner') AS role,
+                COALESCE(ss.configuracion_rapida_completada, 0) AS configuracion_rapida_completada
          FROM stores s
-         INNER JOIN store_members sm ON sm.store_id = s.id
+         LEFT JOIN store_members sm ON sm.store_id = s.id AND sm.user_id = :uid1
          LEFT JOIN shop_settings ss ON ss.store_id = s.id
-         WHERE sm.user_id = :uid ORDER BY s.created_at DESC',
-        ['uid' => $userId]
+         WHERE sm.user_id = :uid2 OR s.owner_id = :uid3
+         ORDER BY s.created_at DESC",
+        ['uid1' => $userId, 'uid2' => $userId, 'uid3' => $userId]
     );
+    if (!$rows) {
+        return [];
+    }
+    // Deduplicar por store id (por si hay múltiples filas en store_members)
+    $seen = [];
+    $stores = [];
+    foreach ($rows as $row) {
+        if (!isset($seen[$row['id']])) {
+            $seen[$row['id']] = true;
+            $stores[] = $row;
+        }
+    }
+    return $stores;
 }
 
 function platformSanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Verifica si el usuario puede crear una nueva tienda
+ * Cuenta tiendas donde es miembro O owner (consistente con platformGetUserStores)
+ * Plan free: máximo 1 tienda. Planes pagos: 1 tienda por suscripción (por ahora mismo límite)
+ */
+function canUserCreateStore($userId) {
+    if (!defined('TIENDI_PLATFORM')) {
+        return false;
+    }
+    $count = platformFetchOne(
+        'SELECT COUNT(DISTINCT s.id) as c FROM stores s
+         LEFT JOIN store_members sm ON sm.store_id = s.id AND sm.user_id = :uid
+         WHERE sm.user_id = :uid2 OR s.owner_id = :uid3',
+        ['uid' => (int) $userId, 'uid2' => (int) $userId, 'uid3' => (int) $userId]
+    );
+    $storeCount = (int) ($count['c'] ?? 0);
+    return $storeCount < 1; // Por ahora todos los planes = 1 tienda max
 }

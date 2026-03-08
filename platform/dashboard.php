@@ -38,6 +38,19 @@ require_once __DIR__ . '/_inc/header.php';
     </div>
 <?php endif; ?>
 
+<?php
+// DEBUG temporal: ?_debug=1 muestra estado (eliminar después de resolver)
+if (isset($_GET['_debug'])):
+    $storesCount = is_array($stores) ? count($stores) : 0;
+    ?>
+    <div class="alert-t" style="margin-bottom:1rem; background:#1e293b; color:#e2e8f0; padding:1rem; border-radius:8px; font-family:monospace; font-size:0.9rem;">
+        <strong>DEBUG</strong><br>
+        $stores es array: <?= is_array($stores) ? 'SÍ' : 'NO' ?><br>
+        Cantidad: <?= $storesCount ?><br>
+        empty($stores): <?= empty($stores) ? 'SÍ (mostrará "No tenés tiendas")' : 'NO (debería mostrar tarjetas)' ?>
+    </div>
+<?php endif; ?>
+
 <?php if (empty($stores)): ?>
     <div class="platform-card">
         <div class="empty-state">
@@ -49,11 +62,19 @@ require_once __DIR__ . '/_inc/header.php';
             </a>
         </div>
     </div>
-<?php else: ?>
+<?php else:
+    $stores = array_values($stores); // reindexar por si hay keys raros
+?>
     <div class="platform-dashboard-actions">
-        <a href="<?= PLATFORM_PAGES_URL ?>/create-store.php" class="btn-t btn-t-primary btn-t-sm">
-            + Nueva Tienda
-        </a>
+        <?php if (canUserCreateStore($userId)): ?>
+            <a href="<?= PLATFORM_PAGES_URL ?>/create-store.php" class="btn-t btn-t-primary btn-t-sm">
+                + Nueva Tienda
+            </a>
+        <?php else: ?>
+            <span class="btn-t btn-t-secondary btn-t-sm" style="opacity:0.8;" title="Límite alcanzado. Actualizá tu plan para crear más tiendas.">
+                + Nueva Tienda (límite alcanzado)
+            </span>
+        <?php endif; ?>
     </div>
 
     <div class="stores-grid">
