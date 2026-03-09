@@ -16,6 +16,9 @@
  * - custom_domain: si puede usar dominio personalizado
  * - custom_design: si tiene diseño 100% personalizado (platinum)
  */
+/** Máximo de tiendas con plan Platinum (cupo limitado) */
+define('PLATINUM_MAX_STORES', 2);
+
 function getPlanLimits($plan) {
     $plans = [
         'free' => [
@@ -27,48 +30,8 @@ function getPlanLimits($plan) {
             'templates'    => false,
             'custom_domain'=> false,
             'custom_design'=> false,
+            'min_duration' => 1,
         ],
-        'bronze' => [
-            'name'         => 'Bronze',
-            'price'        => 20000,
-            'price_label'  => '$20.000/mes',
-            'max_stores'   => 1,
-            'max_products' => 100,
-            'templates'    => false,
-            'custom_domain'=> false,
-            'custom_design'=> false,
-        ],
-        'silver' => [
-            'name'         => 'Silver',
-            'price'        => 30000,
-            'price_label'  => '$30.000/mes',
-            'max_stores'   => 1,
-            'max_products' => 500,
-            'templates'    => true,
-            'custom_domain'=> false,
-            'custom_design'=> false,
-        ],
-        'gold' => [
-            'name'         => 'Gold',
-            'price'        => 50000,
-            'price_label'  => '$50.000/mes',
-            'max_stores'   => 1,
-            'max_products' => null, // ilimitado
-            'templates'    => true,
-            'custom_domain'=> true,
-            'custom_design'=> false,
-        ],
-        'platinum' => [
-            'name'         => 'Platinum',
-            'price'        => 1000000,
-            'price_label'  => '$1.000.000/mes',
-            'max_stores'   => 1,
-            'max_products' => null,
-            'templates'    => true,
-            'custom_domain'=> true,
-            'custom_design'=> true,
-        ],
-        // Planes del enum stores.plan (basic, pro) - mapean a límites similares
         'basic' => [
             'name'         => 'Basic',
             'price'        => 15000,
@@ -78,6 +41,7 @@ function getPlanLimits($plan) {
             'templates'    => false,
             'custom_domain'=> false,
             'custom_design'=> false,
+            'min_duration' => 1,
         ],
         'pro' => [
             'name'         => 'Pro',
@@ -88,6 +52,18 @@ function getPlanLimits($plan) {
             'templates'    => true,
             'custom_domain'=> false,
             'custom_design'=> false,
+            'min_duration' => 1,
+        ],
+        'platinum' => [
+            'name'         => 'Platinum',
+            'price'        => 1000000,
+            'price_label'  => '$1.000.000/año',
+            'max_stores'   => 1,
+            'max_products' => null,
+            'templates'    => true,
+            'custom_domain'=> true,
+            'custom_design'=> true,
+            'min_duration' => 12,
         ],
     ];
     $plan = strtolower(trim($plan ?? 'free'));
@@ -141,6 +117,46 @@ function canStoreAddProduct($storeId = null, $plan = null, $currentProductCount 
         'current' => $currentProductCount,
         'error'   => null,
     ];
+}
+
+/**
+ * Verifica si hay cupo disponible para el plan Platinum
+ * @param int|null $excludeStoreId Excluir esta tienda del conteo (para upgrades)
+ * @return array ['available' => bool, 'current' => int, 'max' => int]
+ */
+function isPlatinumAvailable($excludeStoreId = null) {
+    $max = defined('PLATINUM_MAX_STORES') ? PLATINUM_MAX_STORES : 2;
+    if (defined('TIENDI_PLATFORM')) {
+        $sql = "SELECT COUNT(*) as c FROM stores WHERE (plan = 'platinum' OR subscription_plan = 'platinum')";
+        $params = [];
+        if ($excludeStoreId) {
+            $sql .= " AND id != :sid";
+            $params['sid'] = (int) $excludeStoreId;
+        }
+        $row = platformFetchOne($sql, $params);
+    } else {
+        $row = ['c' => 0];
+    }
+    $current = (int) ($row['c'] ?? 0);
+    return ['available' => $current < $max, 'current' => $current, 'max' => $max];
+}
+
+/**
+ * Obtiene las duraciones válidas para un plan
+ */
+function getValidDurationsForPlan($plan) {
+    $limits = getPlanLimits($plan);
+    $minDuration = $limits['min_duration'] ?? 1;
+    $allDurations = function_exists('getSubscriptionDurations') ? getSubscriptionDurations() : [
+        1 => ['months' => 1], 6 => ['months' => 6], 12 => ['months' => 12], 36 => ['months' => 36]
+    ];
+    $valid = [];
+    foreach ($allDurations as $months => $d) {
+        if ($months >= $minDuration) {
+            $valid[$months] = $d;
+        }
+    }
+    return $valid;
 }
 
 /**

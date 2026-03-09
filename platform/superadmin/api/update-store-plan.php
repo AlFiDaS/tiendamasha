@@ -20,19 +20,35 @@ $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $storeId = (int) ($input['store_id'] ?? 0);
 $plan = trim(strtolower($input['plan'] ?? ''));
 
-$validPlans = ['free', 'bronze', 'silver', 'gold', 'platinum'];
+$validPlans = ['free', 'basic', 'pro', 'platinum'];
 if (!$storeId || !in_array($plan, $validPlans, true)) {
-    echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
+    echo json_encode(['success' => false, 'error' => 'Parámetros inválidos. Planes válidos: free, basic, pro, platinum']);
     exit;
 }
 
-$store = platformFetchOne('SELECT id FROM stores WHERE id = :id', ['id' => $storeId]);
+require_once __DIR__ . '/../../../helpers/plans.php';
+
+if ($plan === 'platinum') {
+    $platCheck = isPlatinumAvailable($storeId);
+    if (!$platCheck['available']) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Cupo Platinum agotado (' . $platCheck['current'] . '/' . $platCheck['max'] . '). No se pueden asignar más tiendas a este plan.'
+        ]);
+        exit;
+    }
+}
+
+$store = platformFetchOne('SELECT id, plan FROM stores WHERE id = :id', ['id' => $storeId]);
 if (!$store) {
     echo json_encode(['success' => false, 'error' => 'Tienda no encontrada']);
     exit;
 }
 
-$ok = platformQuery('UPDATE stores SET plan = :plan WHERE id = :id', ['plan' => $plan, 'id' => $storeId]);
+$ok = platformQuery(
+    'UPDATE stores SET plan = :plan, subscription_plan = :plan WHERE id = :id',
+    ['plan' => $plan, 'id' => $storeId]
+);
 if (!$ok) {
     echo json_encode(['success' => false, 'error' => 'Error al actualizar el plan']);
     exit;

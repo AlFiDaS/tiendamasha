@@ -71,6 +71,10 @@ define('PLATFORM_LOGIN_LOCKOUT_TIME', 900);
 // Podés agregar más separados por coma en el .env: "email1@x.com,email2@x.com"
 define('PLATFORM_SUPERADMIN_EMAILS', env('SUPERADMIN_EMAILS', ''));
 
+// MercadoPago para cobro de membresías (cuenta de la plataforma)
+define('PLATFORM_MP_ACCESS_TOKEN', env('PLATFORM_MP_ACCESS_TOKEN', ''));
+define('PLATFORM_MP_PUBLIC_KEY', env('PLATFORM_MP_PUBLIC_KEY', ''));
+
 // Zona horaria
 date_default_timezone_set('America/Argentina/Buenos_Aires');
 

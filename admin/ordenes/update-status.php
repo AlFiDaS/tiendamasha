@@ -58,53 +58,55 @@ if (!$orden) {
 }
 
 // Si el nuevo estado es "finalizado" y existe un comprobante, eliminarlo
-if ($nuevoEstado === 'finalizado' && !empty($orden['proof_image'])) {
-    // Eliminar imagen del comprobante
+$shouldDeleteProof = $nuevoEstado === 'finalizado' && !empty($orden['proof_image']);
+if ($shouldDeleteProof) {
     $proofPath = BASE_PATH . '/public' . $orden['proof_image'];
     if (file_exists($proofPath)) {
         @unlink($proofPath);
     }
-    // Actualizar orden: cambiar estado y eliminar referencia a la imagen
-    updateOrder($ordenId, [
-        'status' => $nuevoEstado,
-        'status_detail' => 'Pedido finalizado y entregado',
-        'proof_image' => null // Eliminar referencia a la imagen
-    ]);
-    $_SESSION['success_message'] = 'Estado actualizado y comprobante eliminado';
-} else {
-    // Solo actualizar estado
-    $statusDetails = [
-        'a_confirmar' => 'Esperando confirmación de transferencia',
-        'approved' => 'Pago aprobado',
-        'pending' => 'Pago pendiente',
-        'rejected' => 'Pago rechazado',
-        'cancelled' => 'Orden cancelada',
-        'finalizado' => 'Pedido finalizado y entregado'
-    ];
-    
-    updateOrder($ordenId, [
-        'status' => $nuevoEstado,
-        'status_detail' => $statusDetails[$nuevoEstado] ?? ''
-    ]);
-    
-    // Descontar stock cuando la orden pasa a aprobada (transferencias confirmadas)
-    if ($nuevoEstado === 'approved' && ($orden['status'] ?? '') !== 'approved') {
-        $stockResult = processOrderStockOnApproval($ordenId);
-        if (!$stockResult['success'] && !empty($stockResult['errors'])) {
-            $_SESSION['warning_message'] = 'Estado actualizado, pero hubo problemas al descontar stock: ' . implode('; ', $stockResult['errors']);
-        }
+    $proofPathAlt = BASE_PATH . $orden['proof_image'];
+    if (file_exists($proofPathAlt)) {
+        @unlink($proofPathAlt);
     }
-    
-    // Restaurar stock cuando una orden aprobada pasa a CUALQUIER otro estado (rechazada, cancelada, pendiente, etc.)
-    if (($orden['status'] ?? '') === 'approved' && $nuevoEstado !== 'approved') {
-        $stockResult = processOrderStockOnRejection($ordenId);
-        if (!$stockResult['success'] && !empty($stockResult['errors'])) {
-            $_SESSION['warning_message'] = 'Estado actualizado, pero hubo problemas al restaurar stock: ' . implode('; ', $stockResult['errors']);
-        }
-    }
-    
-    $_SESSION['success_message'] = 'Estado actualizado correctamente';
 }
+
+$statusDetails = [
+    'a_confirmar' => 'Esperando confirmación de transferencia',
+    'approved' => 'Pago aprobado',
+    'pending' => 'Pago pendiente',
+    'rejected' => 'Pago rechazado',
+    'cancelled' => 'Orden cancelada',
+    'finalizado' => 'Pedido finalizado y entregado'
+];
+
+$updateData = [
+    'status' => $nuevoEstado,
+    'status_detail' => $statusDetails[$nuevoEstado] ?? ''
+];
+
+if ($shouldDeleteProof) {
+    $updateData['proof_image'] = null;
+}
+
+updateOrder($ordenId, $updateData);
+
+// Descontar stock cuando la orden pasa a aprobada (transferencias confirmadas)
+if ($nuevoEstado === 'approved' && ($orden['status'] ?? '') !== 'approved') {
+    $stockResult = processOrderStockOnApproval($ordenId);
+    if (!$stockResult['success'] && !empty($stockResult['errors'])) {
+        $_SESSION['warning_message'] = 'Estado actualizado, pero hubo problemas al descontar stock: ' . implode('; ', $stockResult['errors']);
+    }
+}
+
+// Restaurar stock cuando una orden aprobada pasa a CUALQUIER otro estado
+if (($orden['status'] ?? '') === 'approved' && $nuevoEstado !== 'approved') {
+    $stockResult = processOrderStockOnRejection($ordenId);
+    if (!$stockResult['success'] && !empty($stockResult['errors'])) {
+        $_SESSION['warning_message'] = 'Estado actualizado, pero hubo problemas al restaurar stock: ' . implode('; ', $stockResult['errors']);
+    }
+}
+
+$_SESSION['success_message'] = $shouldDeleteProof ? 'Estado actualizado y comprobante eliminado' : 'Estado actualizado correctamente';
 
 if ($isAjax) {
     header('Content-Type: application/json; charset=utf-8');

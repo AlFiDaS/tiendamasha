@@ -494,19 +494,42 @@ require_once '../_inc/header.php';
                 <?php endif; ?>
             </div>
 
-            <!-- Comprobante de pago (solo si existe y no está finalizado) -->
-            <?php if (!empty($orden['proof_image']) && $orden['status'] !== 'finalizado'): ?>
+            <!-- Comprobante de pago -->
+            <?php
+            $hasProofRecord = !empty($orden['proof_image']);
+            $proofFileExists = false;
+            if ($hasProofRecord) {
+                $proofFullPath = BASE_PATH . '/public' . $orden['proof_image'];
+                $proofFullPathAlt = BASE_PATH . $orden['proof_image'];
+                $proofFileExists = file_exists($proofFullPath) || file_exists($proofFullPathAlt);
+            }
+            $isTransferOrder = ($orden['payment_method'] ?? '') === 'transferencia_directa';
+            $showProofSection = $hasProofRecord || ($isTransferOrder && $orden['status'] === 'finalizado');
+            ?>
+            <?php if ($showProofSection): ?>
             <div class="detail-section">
                 <h3>Comprobante de Pago</h3>
+                <?php if ($hasProofRecord && $proofFileExists): ?>
                 <div style="margin-top: 1rem;">
                     <img src="<?= BASE_URL . $orden['proof_image'] ?>" 
                          alt="Comprobante de pago" 
                          style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd; cursor: pointer;"
                          onclick="window.open('<?= BASE_URL . $orden['proof_image'] ?>', '_blank')">
-                    <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #666;">
+                    <div style="margin-top: 0.5rem; display: flex; gap: 1rem; font-size: 0.875rem;">
                         <a href="<?= BASE_URL . $orden['proof_image'] ?>" target="_blank" style="color: #007bff;">Ver imagen completa</a>
+                        <a href="<?= BASE_URL . $orden['proof_image'] ?>" download style="color: #059669;">Descargar comprobante</a>
+                    </div>
+                    <?php if ($orden['status'] !== 'finalizado'): ?>
+                    <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #856404;">
+                        El comprobante se eliminará automáticamente al finalizar el pedido para ahorrar espacio. Descargalo antes si lo necesitás.
                     </p>
+                    <?php endif; ?>
                 </div>
+                <?php else: ?>
+                <div style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; color: #64748b;">
+                    <p style="margin: 0; font-size: 0.9rem;">El comprobante fue eliminado al finalizar el pedido.</p>
+                </div>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
 
@@ -523,7 +546,7 @@ require_once '../_inc/header.php';
                 </div>
                 
                 <!-- Formulario para cambiar estado -->
-                <form method="POST" action="update-status.php" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+                <form method="POST" action="update-status.php" id="statusForm" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
                     <input type="hidden" name="order_id" value="<?= $orden['id'] ?>">
                     <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                         <label for="status" style="font-weight: 500;">Cambiar estado:</label>
@@ -539,9 +562,9 @@ require_once '../_inc/header.php';
                             Actualizar
                         </button>
                     </div>
-                    <?php if ($orden['status'] !== 'finalizado' && !empty($orden['proof_image'])): ?>
+                    <?php if ($orden['status'] !== 'finalizado' && !empty($orden['proof_image']) && $proofFileExists): ?>
                         <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #856404;">
-                            <?= icon('alert', 16) ?> Al cambiar a "Finalizada", se eliminará el comprobante de pago para ahorrar espacio.
+                            Al cambiar a "Finalizada", se eliminará el comprobante de pago para ahorrar espacio. Descargalo antes si lo necesitás.
                         </p>
                     <?php endif; ?>
                 </form>
@@ -625,6 +648,25 @@ require_once '../_inc/header.php';
         </div>
     </div>
 </div>
+
+<?php if (!empty($orden['proof_image']) && $proofFileExists && $orden['status'] !== 'finalizado'): ?>
+<script>
+(function(){
+    var form = document.getElementById('statusForm');
+    if (!form) return;
+    form.addEventListener('submit', function(e){
+        var select = form.querySelector('#status');
+        if (select && select.value === 'finalizado') {
+            var ok = confirm('Al finalizar este pedido se eliminará el comprobante de pago del servidor.\n\n¿Descargaste el comprobante? Si no, cancelá y descargalo primero.');
+            if (!ok) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+})();
+</script>
+<?php endif; ?>
 
 <?php require_once '../_inc/footer.php'; ?>
 

@@ -24,10 +24,9 @@ $statusLabels = [
     'active' => 'Activa', 'setup' => 'En configuración', 'suspended' => 'Suspendida',
 ];
 $planLabels = [
-    'free' => 'Gratuito', 'bronze' => 'Bronze', 'silver' => 'Silver',
-    'gold' => 'Gold', 'platinum' => 'Platinum',
+    'free' => 'Gratuito', 'basic' => 'Basic', 'pro' => 'Pro', 'platinum' => 'Platinum',
 ];
-$allPlans = ['free', 'bronze', 'silver', 'gold', 'platinum'];
+$allPlans = ['free', 'basic', 'pro', 'platinum'];
 
 require_once __DIR__ . '/_inc/header.php';
 

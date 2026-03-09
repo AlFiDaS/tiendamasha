@@ -681,6 +681,7 @@ require_once '../_inc/header.php';
                                 <select class="status-select <?= $statusClass ?>" 
                                         data-order-id="<?= (int)$orden['id'] ?>" 
                                         data-current="<?= htmlspecialchars($orden['status'] ?? '') ?>"
+                                        data-has-proof="<?= !empty($orden['proof_image']) ? '1' : '0' ?>"
                                         title="Cambiar estado">
                                     <option value="a_confirmar" <?= ($orden['status'] ?? '') === 'a_confirmar' ? 'selected' : '' ?>>A Confirmar</option>
                                     <option value="pending" <?= ($orden['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pendiente</option>
@@ -726,6 +727,14 @@ require_once '../_inc/header.php';
             const newStatus = this.value;
             const currentStatus = this.dataset.current;
             if (newStatus === currentStatus) return;
+
+            if (newStatus === 'finalizado' && this.dataset.hasProof === '1') {
+                var ok = confirm('Al finalizar este pedido se eliminará el comprobante de pago del servidor.\n\n¿Descargaste el comprobante? Si no, cancelá, entrá al detalle del pedido y descargalo primero.');
+                if (!ok) {
+                    this.value = currentStatus;
+                    return;
+                }
+            }
 
             this.disabled = true;
 
