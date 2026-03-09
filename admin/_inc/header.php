@@ -16,6 +16,11 @@ $lowStockProducts = getLowStockProducts();
 $outOfStockProducts = getOutOfStockProducts();
 $stockNotificationsCount = count($lowStockProducts) + count($outOfStockProducts);
 
+// Plan actual (para el badge en topbar) + verificar si aplicar downgrade por vencimiento
+require_once __DIR__ . '/../../helpers/subscription.php';
+checkAndApplySubscriptionDowngrade();
+$currentSubscription = getStoreSubscription();
+
 // Obtener configuración de la tienda
 require_once __DIR__ . '/../../helpers/shop-settings.php';
 $shopSettings = getShopSettings();
@@ -122,6 +127,7 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                     <div class="menu-label">Configuración</div>
                     <a href="<?= ADMIN_URL ?>/landing-page.php"><span class="nav-icon"><?= icon('home', 20) ?></span> Página de inicio</a>
                     <a href="<?= ADMIN_URL ?>/tienda.php"><span class="nav-icon"><?= icon('settings', 20) ?></span> Datos de la tienda</a>
+                    <a href="<?= ADMIN_URL ?>/planes.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'planes.php') ? 'active' : '' ?>"><span class="nav-icon"><?= icon('star', 20) ?></span> Plan y Suscripción</a>
                     <a href="<?= ADMIN_URL ?>/pagos.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'pagos.php' || strpos($_SERVER['REQUEST_URI'] ?? '', 'pagos') !== false) ? 'active' : '' ?>"><span class="nav-icon"><?= icon('credit-card', 20) ?></span> Configurar pagos</a>
                     <a href="<?= ADMIN_URL ?>/notificaciones.php" class="<?= (basename($_SERVER['PHP_SELF']) == 'notificaciones.php') ? 'active' : '' ?>"><span class="nav-icon"><?= icon('smartphone', 20) ?></span> Notificaciones</a>
                 </section>
@@ -140,6 +146,9 @@ $primaryColorLight = adjustBrightness($primaryColor, 20);
                     <button class="admin-sidebar-toggle" id="admin-sidebar-toggle" aria-label="Alternar menú"><?= icon('menu', 24) ?></button>
                 </div>
                 <div class="admin-topbar-right">
+                    <a href="<?= ADMIN_URL ?>/planes.php" class="admin-plan-badge" title="Ver planes y suscripción">
+                        <?= htmlspecialchars($currentSubscription['label']) ?>
+                    </a>
                     <div class="admin-notifications">
                         <button class="admin-notifications-btn" id="admin-notifications-btn" aria-label="Notificaciones">
                             <?= icon('bell', 20) ?>

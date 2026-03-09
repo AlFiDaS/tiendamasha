@@ -184,6 +184,21 @@ body {
     gap: 1.25rem;
 }
 
+.admin-plan-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--primary-color, #5672E1) 0%, #7c3aed 100%);
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+.admin-plan-badge:hover {
+    opacity: 0.9;
+    color: white;
+}
+
 .admin-notifications {
     position: relative;
 }
