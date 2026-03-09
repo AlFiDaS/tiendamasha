@@ -45,12 +45,25 @@ if (!$store) {
     exit;
 }
 
-$ok = platformQuery(
-    'UPDATE stores SET plan = :plan, subscription_plan = :plan WHERE id = :id',
-    ['plan' => $plan, 'id' => $storeId]
-);
-if (!$ok) {
-    echo json_encode(['success' => false, 'error' => 'Error al actualizar el plan']);
+try {
+    $pdo = getPlatformDB();
+
+    try {
+        $pdo->exec("ALTER TABLE stores MODIFY COLUMN plan VARCHAR(20) NOT NULL DEFAULT 'free'");
+    } catch (Throwable $e) {
+        // ya es VARCHAR o no se puede cambiar, ignorar
+    }
+    try {
+        $pdo->exec("ALTER TABLE stores MODIFY COLUMN subscription_plan VARCHAR(20) DEFAULT NULL");
+    } catch (Throwable $e) {
+        // ya es VARCHAR o no se puede cambiar, ignorar
+    }
+
+    $stmt = $pdo->prepare('UPDATE stores SET plan = ?, subscription_plan = ? WHERE id = ?');
+    $stmt->execute([$plan, $plan, $storeId]);
+} catch (Throwable $e) {
+    error_log('[UpdateStorePlan] Error: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'Error al actualizar el plan: ' . $e->getMessage()]);
     exit;
 }
 

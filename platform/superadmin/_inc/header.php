@@ -51,6 +51,9 @@ require_once __DIR__ . '/icon.php';
             <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/payments.php" class="<?= $_saCurrentPage === 'payments' ? 'active' : '' ?>">
                 <span class="sa-nav-icon"><?= icon('dollar', 20) ?></span> Pagos
             </a>
+            <a href="<?= PLATFORM_PAGES_URL ?>/superadmin/platinum-requests.php" class="<?= $_saCurrentPage === 'platinum-requests' ? 'active' : '' ?>">
+                <span class="sa-nav-icon"><?= icon('star', 20) ?></span> Platinum
+            </a>
         </nav>
         <div class="sa-sidebar-footer">
             <a href="<?= PLATFORM_PAGES_URL ?>/dashboard.php">← Volver a mi panel</a>

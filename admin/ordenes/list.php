@@ -85,39 +85,41 @@ require_once '../_inc/header.php';
 }
 
 .stat-card {
-    background: white;
-    padding: 0.875rem 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--admin-card, #fff);
+    padding: 1rem;
+    border-radius: var(--admin-radius, 12px);
+    border: 1px solid var(--admin-border, #e2e8f0);
 }
 
 .stat-card h3 {
     margin: 0 0 0.25rem 0;
-    color: #666;
-    font-size: 0.75rem;
-    font-weight: normal;
+    color: var(--admin-muted, #94a3b8);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .stat-card .stat-value {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
+    font-weight: 800;
+    color: var(--admin-dark, #0f172a);
     line-height: 1.2;
 }
 
-.stat-card.total .stat-value { color: #007bff; }
-.stat-card.approved .stat-value { color: #28a745; }
-.stat-card.pending .stat-value { color: #ffc107; }
-.stat-card.a_confirmar .stat-value { color: #fd7e14; }
-.stat-card.rejected .stat-value { color: #dc3545; }
-.stat-card.finalizado .stat-value { color: #6c757d; }
+.stat-card.total .stat-value { color: #4f46e5; }
+.stat-card.approved .stat-value { color: #059669; }
+.stat-card.pending .stat-value { color: #d97706; }
+.stat-card.a_confirmar .stat-value { color: #ea580c; }
+.stat-card.rejected .stat-value { color: #dc2626; }
+.stat-card.finalizado .stat-value { color: #64748b; }
 
 .filters-container {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--admin-card, #fff);
+    padding: 1.25rem;
+    border-radius: var(--admin-radius, 12px);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--admin-border, #e2e8f0);
 }
 
 .filters-form {
@@ -134,24 +136,37 @@ require_once '../_inc/header.php';
 
 .filters-form label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: var(--admin-muted, #94a3b8);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .filters-form input,
 .filters-form select {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.filters-form input:focus,
+.filters-form select:focus {
+    outline: none;
+    border-color: var(--admin-primary, #6366f1);
+    box-shadow: 0 0 0 3px var(--admin-primary-light, #eef2ff);
 }
 
 .ordenes-table {
     width: 100%;
-    background: white;
-    border-radius: 8px;
+    background: var(--admin-card, #fff);
+    border-radius: var(--admin-radius, 12px);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid var(--admin-border, #e2e8f0);
 }
 
 .ordenes-table table {
@@ -160,18 +175,22 @@ require_once '../_inc/header.php';
 }
 
 .ordenes-table th {
-    background: linear-gradient(135deg, #1e2746 0%, #252d4a 100%);
-    color: white;
-    padding: 1rem;
+    background: #fafbfc;
+    color: var(--admin-muted, #94a3b8);
+    padding: 0.75rem 1rem;
     text-align: left;
     font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--admin-border, #e2e8f0);
 }
 
 .ordenes-table td {
-    padding: 1rem;
-    border-bottom: 1px solid #dee2e6;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--admin-bg, #f1f5f9);
     display: table-cell;
+    font-size: 0.88rem;
 }
 
 /* Asegurar que en desktop todo se muestre como tabla normal */
@@ -209,52 +228,34 @@ require_once '../_inc/header.php';
     color: #155724;
 }
 
-.status-pending {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.status-rejected {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.status-cancelled {
-    background: #e2e3e5;
-    color: #383d41;
-}
-
-.status-a_confirmar {
-    background: #ffeaa7;
-    color: #6c5700;
-}
-
-.status-finalizado {
-    background: #d1ecf1;
-    color: #0c5460;
-}
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+.status-cancelled { background: #f1f5f9; color: #475569; }
+.status-a_confirmar { background: #fff7ed; color: #c2410c; }
+.status-finalizado { background: #dbeafe; color: #1e40af; }
 
 .status-select {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    border: 1px solid rgba(0,0,0,0.1);
+    padding: 0.3rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(0,0,0,0.06);
     cursor: pointer;
     min-width: 130px;
     appearance: auto;
+    font-family: inherit;
 }
 
-.status-select.status-approved { background: #d4edda; color: #155724; }
-.status-select.status-pending { background: #fff3cd; color: #856404; }
-.status-select.status-rejected { background: #f8d7da; color: #721c24; }
-.status-select.status-cancelled { background: #e2e3e5; color: #383d41; }
-.status-select.status-a_confirmar { background: #ffeaa7; color: #6c5700; }
-.status-select.status-finalizado { background: #d1ecf1; color: #0c5460; }
+.status-select.status-approved { background: #d1fae5; color: #065f46; }
+.status-select.status-pending { background: #fef3c7; color: #92400e; }
+.status-select.status-rejected { background: #fee2e2; color: #991b1b; }
+.status-select.status-cancelled { background: #f1f5f9; color: #475569; }
+.status-select.status-a_confirmar { background: #fff7ed; color: #c2410c; }
+.status-select.status-finalizado { background: #dbeafe; color: #1e40af; }
 
 .status-select:focus {
-    outline: 2px solid var(--primary-color);
+    outline: 2px solid var(--admin-primary, #6366f1);
     outline-offset: 1px;
 }
 

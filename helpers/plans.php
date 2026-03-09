@@ -56,8 +56,8 @@ function getPlanLimits($plan) {
         ],
         'platinum' => [
             'name'         => 'Platinum',
-            'price'        => 1000000,
-            'price_label'  => '$1.000.000/año',
+            'price'        => 5000000,
+            'price_label'  => '$5.000.000/año',
             'max_stores'   => 1,
             'max_products' => null,
             'templates'    => true,

@@ -28,7 +28,7 @@ $storeId = (int) ($input['store_id'] ?? 0);
 $plan = preg_replace('/[^a-z]/', '', strtolower($input['plan'] ?? ''));
 $durationMonths = (int) ($input['duration_months'] ?? 1);
 
-$validPlans = ['basic', 'pro', 'platinum'];
+$validPlans = ['basic', 'pro'];
 $validDurations = [1, 6, 12, 36];
 if (!$storeId || !in_array($plan, $validPlans) || !in_array($durationMonths, $validDurations)) {
     echo json_encode(['success' => false, 'error' => 'Parámetros inválidos']);
@@ -40,14 +40,6 @@ $minDuration = $planLimits['min_duration'] ?? 1;
 if ($durationMonths < $minDuration) {
     echo json_encode(['success' => false, 'error' => 'El plan ' . ucfirst($plan) . ' requiere un mínimo de ' . $minDuration . ' meses']);
     exit;
-}
-
-if ($plan === 'platinum') {
-    $platCheck = isPlatinumAvailable($storeId);
-    if (!$platCheck['available']) {
-        echo json_encode(['success' => false, 'error' => 'El cupo de Platinum está agotado (' . $platCheck['current'] . '/' . $platCheck['max'] . ')']);
-        exit;
-    }
 }
 
 $store = platformFetchOne('SELECT id, slug, owner_id FROM stores WHERE id = :id', ['id' => $storeId]);

@@ -63,148 +63,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Panel Administrativo <?= htmlspecialchars($shopName) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
         }
-        
         .login-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 3rem;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 2.5rem;
             max-width: 400px;
             width: 100%;
         }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
+        .login-header { text-align: center; margin-bottom: 2rem; }
         .login-header h1 {
-            color: <?= htmlspecialchars($primaryColor) ?>;
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            color: #0f172a;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
         }
-        
-        .login-header p {
-            color: #666;
-            font-size: 0.95rem;
-            margin: 0;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
+        .login-header p { color: #94a3b8; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.25rem; }
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 600;
+            display: block; margin-bottom: 0.4rem;
+            color: #334155; font-weight: 600; font-size: 0.88rem;
         }
-        
         .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            width: 100%; padding: 0.65rem 0.85rem;
+            border: 1px solid #e2e8f0; border-radius: 10px;
+            font-size: 0.95rem; font-family: inherit;
+            color: #334155; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
         .form-group input:focus {
-            outline: none;
-            border-color: <?= htmlspecialchars($primaryColor) ?>;
+            outline: none; border-color: #6366f1;
+            box-shadow: 0 0 0 3px #eef2ff;
         }
-        
-        .password-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        
-        .password-input-wrapper .password-input {
-            width: 100%;
-            padding-right: 45px;
-        }
-        
+        .password-input-wrapper { position: relative; }
+        .password-input-wrapper .password-input { width: 100%; padding-right: 45px; }
         .toggle-password {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            color: #666;
-            transition: color 0.3s;
-            z-index: 10;
+            position: absolute; right: 8px; top: 50%;
+            transform: translateY(-50%); background: none; border: none;
+            cursor: pointer; padding: 0.5rem; display: flex;
+            align-items: center; justify-content: center;
+            color: #94a3b8; transition: color 0.2s; z-index: 10;
         }
-        
-        .toggle-password:hover {
-            color: #333;
-        }
-        
-        .toggle-password:focus {
-            outline: none;
-        }
-        
-        .toggle-password .eye-icon {
-            width: 20px;
-            height: 20px;
-            transition: opacity 0.3s;
-        }
-        
-        .toggle-password .eye-icon.hidden {
-            display: none;
-        }
-        
+        .toggle-password:hover { color: #334155; }
+        .toggle-password:focus { outline: none; }
+        .toggle-password .eye-icon { width: 20px; height: 20px; }
         .btn-login {
-            width: 100%;
-            padding: 0.75rem;
-            background: <?= htmlspecialchars($primaryColor) ?>;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%; padding: 0.7rem;
+            background: #6366f1; color: white;
+            border: none; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            transition: background 0.2s;
         }
-        
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(224, 164, 206, 0.4);
-        }
-        
+        .btn-login:hover { background: #4f46e5; }
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #f5c6cb;
+            background: #fee2e2; color: #991b1b;
+            padding: 0.85rem 1rem; border-radius: 10px;
+            margin-bottom: 1.25rem; border: 1px solid #fecaca;
+            font-size: 0.88rem;
         }
+        .login-footer-link {
+            color: #94a3b8; text-decoration: none;
+            font-size: 0.85rem; transition: color 0.2s;
+        }
+        .login-footer-link:hover { color: #6366f1; }
     </style>
 </head>
 <body>
@@ -245,8 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn-login">Iniciar Sesión</button>
         </form>
         
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <a href="<?= ADMIN_URL ?>/forgot-password.php" style="color: #666; text-decoration: none; font-size: 0.9rem;">
+        <div style="text-align: center; margin-top: 1.25rem;">
+            <a href="<?= ADMIN_URL ?>/forgot-password.php" class="login-footer-link">
                 ¿Olvidaste tu contraseña?
             </a>
         </div>

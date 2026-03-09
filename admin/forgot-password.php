@@ -78,108 +78,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Contraseña - Panel Administrativo <?= htmlspecialchars($shopName) ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center; padding: 2rem;
         }
-        
         .login-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 3rem;
-            max-width: 400px;
-            width: 100%;
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 2.5rem; max-width: 400px; width: 100%;
         }
-        
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .login-header h1 {
-            color: <?= htmlspecialchars($primaryColor) ?>;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .login-header p {
-            color: #666;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-header h1 { color: #0f172a; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.35rem; }
+        .login-header p { color: #94a3b8; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.25rem; }
         .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
-            font-weight: 600;
+            display: block; margin-bottom: 0.4rem;
+            color: #334155; font-weight: 600; font-size: 0.88rem;
         }
-        
         .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            width: 100%; padding: 0.65rem 0.85rem;
+            border: 1px solid #e2e8f0; border-radius: 10px;
+            font-size: 0.95rem; font-family: inherit; color: #334155;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: <?= htmlspecialchars($primaryColor) ?>;
-        }
-        
+        .form-group input:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px #eef2ff; }
         .btn-primary {
-            width: 100%;
-            padding: 0.75rem;
-            background: <?= htmlspecialchars($primaryColor) ?>;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%; padding: 0.7rem;
+            background: #6366f1; color: white;
+            border: none; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; font-family: inherit; transition: background 0.2s;
         }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(224, 164, 206, 0.4);
-        }
-        
-        .alert {
-            padding: 1rem;
-            border-radius: 6px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
+        .btn-primary:hover { background: #4f46e5; }
+        .alert { padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.88rem; }
+        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
         .back-link {
             text-align: center;
             margin-top: 1.5rem;
