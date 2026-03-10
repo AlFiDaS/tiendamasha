@@ -429,29 +429,35 @@ body.landing-editor-page .admin-main-wrapper {
 /* Controles de edición */
 .landing-editor-preview .edit-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.4);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(15,23,42,0.5), rgba(15,23,42,0.3));
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
   opacity: 0;
-  transition: opacity var(--transition-normal);
+  transition: opacity 0.25s ease;
   z-index: 2;
   border-radius: inherit;
 }
 .landing-editor-preview .edit-overlay:hover { opacity: 1; }
 .landing-editor-preview .edit-overlay .btn-change-img {
   background: #fff;
-  color: #333;
+  color: var(--admin-dark, #0f172a);
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
   font-weight: 600;
+  font-size: 0.88rem;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.landing-editor-preview .edit-overlay .btn-change-img:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 .landing-editor-preview .editable-text {
   position: relative;
@@ -459,75 +465,199 @@ body.landing-editor-page .admin-main-wrapper {
 }
 .landing-editor-preview .btn-edit-pencil {
   position: absolute;
-  top: 2px;
-  right: -28px;
-  width: 28px;
-  height: 28px;
+  top: 50%;
+  right: -36px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: none;
-  background: var(--primary);
+  background: var(--admin-primary, #6366f1);
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.9;
-  transition: opacity 0.2s;
+  opacity: 0;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
 }
-.landing-editor-preview .btn-edit-pencil svg {
-  width: 14px;
-  height: 14px;
+.landing-editor-preview .btn-edit-pencil svg { width: 14px; height: 14px; }
+.landing-editor-preview .editable-text:hover .btn-edit-pencil,
+.landing-editor-preview .btn-edit-pencil:focus { opacity: 1; }
+.landing-editor-preview .btn-edit-pencil:hover {
+  background: var(--admin-primary-hover, #4f46e5);
+  transform: translateY(-50%) scale(1.1);
 }
-.landing-editor-preview .btn-edit-pencil:hover { opacity: 1; }
 .landing-editor-preview .editable-text.edit-mode .text-display { display: none; }
+.landing-editor-preview .editable-text.edit-mode .btn-edit-pencil { display: none !important; }
 .landing-editor-preview .editable-text.edit-mode .edit-inline { display: block; }
 .landing-editor-preview .edit-inline { display: none; margin-top: 4px; }
-  .landing-editor-preview .edit-inline input,
-  .landing-editor-preview .edit-inline textarea {
-    width: 100%;
-    max-width: 100%;
-    padding: 6px 8px;
-    border: 2px solid var(--primary);
-    border-radius: 4px;
-    font-size: inherit;
-    box-sizing: border-box;
-  }
-.landing-editor-preview .image-wrapper { position: relative; }
-
-/* Splide carrusel (igual que index) */
-.landing-editor-preview .splide {
-  position: relative;
+.landing-editor-preview .edit-inline input,
+.landing-editor-preview .edit-inline textarea {
   width: 100%;
-  height: 70vh;
-  overflow: hidden;
-  margin-bottom: var(--space-xl);
+  max-width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--admin-primary, #6366f1);
+  border-radius: 8px;
+  font-size: inherit;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  transition: box-shadow 0.2s;
 }
-.landing-editor-preview .splide__pagination {
-  bottom: 1.25rem;
+.landing-editor-preview .edit-inline input:focus,
+.landing-editor-preview .edit-inline textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
 }
-.landing-editor-preview .splide__slide { position: relative; }
-.landing-editor-preview .splide__slide::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.4) 100%);
-  z-index: 1;
+.landing-editor-preview .image-wrapper { position: relative; }
+.landing-editor-preview .placeholder-text { opacity: 0.5; font-style: italic; }
+
+/* ===== CAROUSEL EDITOR ===== */
+.ce-wrapper {
+  background: var(--admin-card, #fff); border-radius: 16px;
+  border: 1px solid var(--admin-border, #e2e8f0); padding: 1.5rem;
+  margin-bottom: 1rem; position: relative;
 }
-.landing-editor-preview .splide__slide img {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 500px !important;
-  object-fit: cover !important;
-  display: block !important;
+.ce-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.ce-title { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--admin-dark, #0f172a); }
+.ce-count {
+  font-size: 0.82rem; font-weight: 600; color: var(--admin-muted, #94a3b8);
+  background: var(--admin-bg, #f1f5f9); padding: 0.25rem 0.65rem; border-radius: 50px;
 }
-.landing-editor-preview .splide__slide .edit-overlay { z-index: 3; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center; }
-.landing-editor-preview .splide__slide .btn-eliminar-slide { padding: 0.35rem 0.75rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
-.landing-editor-preview .splide__slide .btn-eliminar-slide:hover { background: #c82333; }
-@media (max-width: 768px) {
-  .landing-editor-preview .splide { height: 40vh; min-height: 300px; }
-  .landing-editor-preview .splide__slide img { min-height: 300px !important; }
+
+.ce-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 280px; background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-radius: 12px; border: 2px dashed var(--admin-border, #e2e8f0);
+  color: var(--admin-muted, #94a3b8); gap: 0.75rem; text-align: center; padding: 2rem;
+  transition: border-color 0.2s;
 }
+.ce-empty:hover { border-color: var(--admin-primary, #6366f1); }
+.ce-empty svg { opacity: 0.35; }
+.ce-empty p { margin: 0; font-size: 1.05rem; font-weight: 600; color: var(--admin-text, #334155); }
+.ce-empty-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.7rem 1.5rem; background: var(--admin-primary, #6366f1); color: #fff;
+  border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+  font-size: 0.92rem; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.25); margin-top: 0.5rem;
+}
+.ce-empty-btn:hover { background: var(--admin-primary-hover, #4f46e5); transform: translateY(-1px); }
+.ce-empty-hint { font-size: 0.8rem; opacity: 0.6; }
+
+.ce-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.ce-card {
+  position: relative; border-radius: 12px; overflow: hidden;
+  aspect-ratio: 16/9; background: var(--admin-bg, #f1f5f9);
+  border: 1px solid var(--admin-border, #e2e8f0);
+  transition: all 0.2s;
+}
+.ce-card img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.ce-card-number {
+  position: absolute; top: 0.5rem; left: 0.5rem; width: 26px; height: 26px;
+  background: rgba(0,0,0,0.6); color: #fff; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; z-index: 2;
+}
+.ce-card-link-badge {
+  position: absolute; bottom: 0.5rem; left: 0.5rem;
+  background: rgba(0,0,0,0.6); color: #fff; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; z-index: 2;
+  max-width: calc(100% - 1rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ce-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(15,23,42,0.55), rgba(15,23,42,0.35));
+  backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  opacity: 0; transition: opacity 0.2s; z-index: 3;
+}
+.ce-card:hover .ce-card-overlay { opacity: 1; }
+.ce-btn {
+  width: 40px; height: 40px; border-radius: 10px; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; color: #fff;
+}
+.ce-btn-change { background: rgba(255,255,255,0.2); }
+.ce-btn-change:hover { background: rgba(255,255,255,0.4); }
+.ce-btn-link { background: rgba(99,102,241,0.7); }
+.ce-btn-link:hover { background: rgba(99,102,241,0.9); }
+.ce-btn-delete { background: rgba(239,68,68,0.7); }
+.ce-btn-delete:hover { background: rgba(239,68,68,0.9); }
+
+/* Link popover */
+.ce-link-popover {
+  display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); z-index: 10;
+  background: var(--admin-card, #fff); border-radius: 12px;
+  border: 1px solid var(--admin-border, #e2e8f0);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1rem;
+  min-width: 220px;
+}
+.ce-link-popover.open { display: block; }
+.ce-link-popover::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 8px solid transparent; border-top-color: var(--admin-card, #fff);
+}
+.ce-link-popover-title {
+  font-size: 0.82rem; font-weight: 700; color: var(--admin-dark, #0f172a);
+  margin-bottom: 0.65rem; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.ce-link-type, .ce-link-value {
+  width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--admin-border, #e2e8f0);
+  border-radius: 8px; font-size: 0.85rem; font-family: 'Inter', sans-serif;
+  margin-bottom: 0.5rem; background: var(--admin-card, #fff);
+}
+.ce-link-type:focus, .ce-link-value:focus {
+  outline: none; border-color: var(--admin-primary, #6366f1);
+}
+.ce-link-done {
+  width: 100%; padding: 0.45rem; background: var(--admin-primary, #6366f1); color: #fff;
+  border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+  font-size: 0.85rem; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.ce-link-done:hover { background: var(--admin-primary-hover, #4f46e5); }
+
+/* Add card */
+.ce-card-add {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.5rem; border: 2px dashed var(--admin-border, #e2e8f0);
+  background: transparent; cursor: pointer; color: var(--admin-muted, #94a3b8);
+  transition: all 0.2s; font-size: 0.85rem; font-weight: 600;
+}
+.ce-card-add:hover {
+  border-color: var(--admin-primary, #6366f1); color: var(--admin-primary, #6366f1);
+  background: var(--admin-primary-light, #eef2ff);
+}
+
+/* Sticky save bar */
+.ce-save-bar {
+  position: sticky; bottom: 1rem; z-index: 20;
+  display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+  background: var(--admin-dark, #0f172a); color: #fff;
+  padding: 0.85rem 1.5rem; border-radius: 14px; margin-top: 1.25rem;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  animation: ceSlideUp 0.3s ease;
+}
+@keyframes ceSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.ce-save-text { font-size: 0.85rem; font-weight: 500; opacity: 0.8; }
+.ce-save-bar .btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 8px; }
+
+@media (max-width: 640px) {
+  .ce-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .ce-wrapper { padding: 1rem; }
+  .ce-link-popover { min-width: 180px; }
+  .ce-save-bar { flex-wrap: wrap; padding: 0.75rem 1rem; }
+}
+
+/* Splide styles removed - carousel editor uses .ce-* card grid */
 
 /* Sección productos - grid igual que index */
 .landing-editor-preview .productos {
@@ -1028,8 +1158,7 @@ body.landing-editor-page .admin-main-wrapper {
   margin-bottom: var(--space-md);
   flex-grow: 1;
 }
-#btn-agregar-testimonial:disabled,
-#btn-agregar-carousel:disabled { opacity: 0.6; cursor: not-allowed; }
+#btn-agregar-testimonial:disabled { opacity: 0.6; cursor: not-allowed; }
 .landing-editor-preview .client-name {
   font-weight: 600;
   color: var(--primary);
@@ -1236,58 +1365,133 @@ body.landing-editor-page .admin-main-wrapper {
   .landing-editor-preview #galeria-section .section-header label span {
     font-size: 0.85rem;
   }
-  .landing-editor-preview #carousel-config-details {
-    margin: 0 0.5rem;
-  }
-  .landing-editor-preview #carousel-links-config {
-    flex-direction: column;
-  }
+  /* carousel responsive handled in .ce-* section */
 }
 
 .landing-section-divider {
-  margin: 2rem 0;
+  margin: 2.5rem 0;
   border: none;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px dashed var(--admin-border, #e2e8f0);
   max-width: 100%;
+  opacity: 0.6;
 }
 
-/* Botones de sección */
 .section-actions {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   margin-top: 1.5rem;
-  padding: 1rem 0;
+  padding: 1rem 1.5rem;
   justify-content: center;
+  background: var(--admin-bg, #f1f5f9);
+  border-radius: 12px;
 }
-.section-actions .btn { margin: 0; }
+.section-actions .btn {
+  margin: 0; padding: 0.6rem 1.5rem; font-weight: 600; font-size: 0.88rem;
+  border-radius: 10px; font-family: 'Inter', sans-serif; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
 .section-actions .btn-save-section {
-  background: #22c55e;
-  color: white;
-  border-radius: 8px;
+  background: var(--admin-success, #10b981); color: white;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.25);
 }
-.section-actions .btn-save-section:hover {
-  background: #16a34a;
-}
+.section-actions .btn-save-section:hover { background: #059669; transform: translateY(-1px); }
 .section-actions .btn-cancel-section {
-  background: #dc3545;
-  color: white;
-  border-radius: 8px;
+  background: var(--admin-bg, #f1f5f9); color: var(--admin-text, #334155);
+  border: 1px solid var(--admin-border, #e2e8f0);
 }
-.section-actions .btn-cancel-section:hover {
-  background: #c82333;
+.section-actions .btn-cancel-section:hover { border-color: var(--admin-danger, #ef4444); color: var(--admin-danger, #ef4444); }
+
+/* Carousel config panel */
+/* Legacy carousel config styles removed - replaced by .ce-* classes */
+
+/* Shared action button for add areas */
+.btn-landing-action {
+  padding: 0.55rem 1.25rem; background: var(--admin-primary, #6366f1); color: #fff;
+  border: none; border-radius: 10px; cursor: pointer; font-weight: 600;
+  font-size: 0.88rem; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+}
+.btn-landing-action:hover { background: var(--admin-primary-hover, #4f46e5); transform: translateY(-1px); }
+.btn-landing-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Testimonial styles */
+.btn-eliminar-testimonial {
+  margin-top: 0.5rem; padding: 0.35rem 0.85rem;
+  background: transparent; color: var(--admin-danger, #ef4444);
+  border: 1px solid var(--admin-danger, #ef4444); border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.btn-eliminar-testimonial:hover { background: var(--admin-danger, #ef4444); color: white; }
+.testimonial-add-area { margin-top: 1.25rem; text-align: center; }
+.testimonial-add-hint { margin-top: 0.5rem; font-size: 0.82rem; color: var(--admin-muted, #94a3b8); }
+
+/* Colors section */
+.landing-colors-section {
+  padding: 2rem; background: var(--admin-card, #fff); border-radius: 16px;
+  margin: 2rem auto; max-width: 1200px; border: 1px solid var(--admin-border, #e2e8f0);
+}
+.landing-colors-title { margin-bottom: 0.5rem; color: var(--admin-dark, #0f172a); font-size: 1.1rem; }
+.landing-colors-desc { color: var(--admin-muted, #94a3b8); margin-bottom: 1.5rem; font-size: 0.9rem; }
+.landing-colors-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+.color-picker-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.92rem; color: var(--admin-dark, #0f172a); }
+.color-picker-row { display: flex; gap: 0.5rem; align-items: center; }
+.color-picker-input { width: 56px; height: 40px; border: 2px solid var(--admin-border, #e2e8f0); border-radius: 10px; cursor: pointer; padding: 2px; }
+.color-hex-input { flex: 1; padding: 0.5rem 0.75rem; border: 1px solid var(--admin-border, #e2e8f0); border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+.color-hex-input:focus { outline: none; border-color: var(--admin-primary, #6366f1); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.landing-colors-actions { margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+
+/* Testimonial editor styles */
+.testimonial-stars-row {
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;
+}
+.testimonial-stars-row label { font-size: 0.85rem; color: var(--admin-muted, #94a3b8); font-weight: 500; }
+.testimonial-stars-select {
+  padding: 0.3rem 0.5rem; border: 1px solid var(--admin-border, #e2e8f0);
+  border-radius: 8px; font-size: 1.1rem; background: var(--admin-card, #fff);
+}
+.testimonial-stars-select:focus { outline: none; border-color: var(--admin-primary, #6366f1); }
+.testimonial-edit-group { margin-bottom: 0.5rem; }
+.testimonial-edit-group textarea,
+.testimonial-edit-group input {
+  width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--admin-border, #e2e8f0);
+  border-radius: 8px; resize: vertical; font-family: 'Inter', sans-serif;
+  font-size: 0.9rem; box-sizing: border-box;
+}
+.testimonial-edit-group textarea:focus,
+.testimonial-edit-group input:focus {
+  outline: none; border-color: var(--admin-primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+/* Testimonials section header */
+.landing-editor-preview .testimonials .section-header {
+  display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;
+}
+.landing-editor-preview .testimonials .section-header label {
+  display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+  font-size: 0.88rem; color: var(--admin-muted, #94a3b8);
+}
+
+@media (max-width: 768px) {
+  /* carousel responsive handled by .ce-* classes above */
+  .landing-colors-grid { grid-template-columns: 1fr; }
+  .landing-colors-section { padding: 1.25rem; margin: 1rem auto; }
 }
 </style>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css" />
+<!-- Splide removed: carousel editor uses card grid -->
 
 <div class="admin-content">
-    <div class="landing-page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+    <div class="page-header">
         <div>
-            <h2 style="margin: 0;">Editor de Landing Page</h2>
-            <p style="color: #666; margin: 0.25rem 0 0 0; font-size: 0.9rem;">Vista idéntica al index. Usá los botones "Cambiar imagen" y el lápiz para editar textos.</p>
+            <h1 class="page-title">Editor de Landing Page</h1>
+            <p class="page-desc">Pasá el mouse sobre las imágenes o textos para editarlos. Los cambios se guardan por sección.</p>
         </div>
-        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary" style="text-decoration: none;">← Volver al panel</a>
+        <div class="page-header-actions">
+            <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al panel</a>
+        </div>
     </div>
 
     <?php if ($error): ?>
@@ -1301,75 +1505,88 @@ body.landing-editor-page .admin-main-wrapper {
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
 
         <div class="landing-editor-preview">
-            <!-- CARRUSEL (igual que index) -->
+            <!-- CARRUSEL - Editor de imágenes -->
             <div class="landing-section" data-section="carousel">
-            <div class="splide" id="hero-slider">
-                <div class="splide__track">
-                    <ul class="splide__list">
-                        <?php if (empty($carouselImages)): ?>
-                            <li class="splide__slide" style="display:flex;align-items:center;justify-content:center;min-height:200px;background:#f9fafb;color:#6b7280;">
-                                <p style="margin:0;font-size:1rem;">Sin imágenes. Hacé clic en &quot;+ Agregar imagen(s)&quot; abajo para subir imágenes al carrusel.</p>
-                            </li>
-                        <?php endif; ?>
-                        <?php foreach ($carouselImages as $index => $item): ?>
-                            <li class="splide__slide">
-                                <div class="image-wrapper" style="width:100%;height:100%;position:relative;">
-                                    <img src="<?= htmlspecialchars($item['image'] ?? '') ?>" alt="Carrusel" width="1920" height="1080" loading="lazy" />
-                                    <div class="edit-overlay">
-                                        <button type="button" class="btn-change-img" data-slide-index="<?= $index ?>">Cambiar imagen</button>
-                                        <button type="button" class="btn-eliminar-slide" data-slide-index="<?= $index ?>" title="Eliminar esta imagen">Eliminar imagen</button>
-                                    </div>
-                                </div>
-                                <input type="file" name="carousel_change_image_<?= $index ?>" accept="image/jpeg,image/png,image/webp" class="carousel-file-input" data-slide-index="<?= $index ?>" style="display:none;">
-                                <input type="hidden" name="carousel_change_image_index[]" value="<?= $index ?>">
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
+            <div class="ce-wrapper">
+                <div class="ce-header">
+                    <h3 class="ce-title">Carrusel de imágenes</h3>
+                    <span class="ce-count" id="ce-count"><?= count($carouselImages) ?>/5</span>
                 </div>
-            </div>
-            <div id="carousel-form-groups" style="display: none;">
-            <?php foreach ($carouselImages as $index => $item):
-                $linkType = empty($item['link']) ? 'none' : ($item['link'] === '/galeria' ? 'ideas' : 'category');
-                $linkVal = $item['link'] === '/galeria' ? '/galeria' : ltrim($item['link'] ?? '', '/');
-            ?>
-                <div class="carousel-item-form-group">
-                    <input type="hidden" name="carousel_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>">
-                    <div class="carousel-link-row" data-index="<?= $index ?>" style="display: none;">
-                        <select name="carousel_link_type[]" class="carousel-link-type-select">
-                            <option value="none" <?= $linkType === 'none' ? 'selected' : '' ?>>Sin link</option>
-                            <option value="category" <?= $linkType === 'category' ? 'selected' : '' ?>>Categoría</option>
-                            <option value="ideas" <?= $linkType === 'ideas' ? 'selected' : '' ?>>Galería de Ideas</option>
-                        </select>
-                        <select name="carousel_link_value[]" class="carousel-link-value-select" style="<?= $linkType !== 'category' ? 'display:none;' : '' ?>">
-                            <option value="">Seleccionar categoría</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= htmlspecialchars($cat['slug']) ?>" <?= $linkVal === $cat['slug'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
-                            <?php endforeach; ?>
-                            <option value="/galeria" <?= $linkVal === '/galeria' ? 'selected' : '' ?>>Galería de ideas</option>
-                        </select>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-            </div>
 
-            <!-- Config links carrusel (colapsable debajo del slider; abierto por defecto si está vacío) -->
-            <div style="max-width: 1200px; margin: 0 auto var(--space-lg); padding: 0 var(--space-md);">
-                <details style="background: #f5f5f5; padding: 0.75rem 1rem; border-radius: 8px;" id="carousel-config-details"<?= empty($carouselImages) ? ' open' : '' ?>>
-                    <summary style="cursor: pointer; font-weight: 600;"><?= empty($carouselImages) ? 'Agregar imágenes al carrusel' : 'Configurar links del carrusel' ?></summary>
-                    <div id="carousel-links-config" style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1rem;"></div>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
-                        <p style="margin-bottom: 0.5rem; font-weight: 600;">Agregar imagen(s) al carrusel</p>
-                        <input type="file" id="new-carousel-images-input" name="new_carousel_images[]" accept="image/jpeg,image/png,image/webp" multiple style="display: none;">
-                        <button type="button" id="btn-agregar-carousel" style="padding: 0.5rem 1rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">+ Agregar imagen(s)</button>
-                        <span style="margin-left: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">Máximo 5 imágenes en el carrusel. Elige las imágenes, configura el link y guarda el formulario.</span>
-                        <div id="new-carousel-rows" style="margin-top: 0.75rem;"></div>
+                <div class="ce-empty" id="ce-empty" <?= !empty($carouselImages) ? 'style="display:none;"' : '' ?>>
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <p>No hay imágenes en el carrusel</p>
+                    <button type="button" class="ce-empty-btn" id="ce-empty-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Agregar imagen
+                    </button>
+                    <span class="ce-empty-hint">JPG, PNG o WebP — Máximo 5 imágenes</span>
+                </div>
+
+                <div class="ce-grid" id="ce-grid" <?= empty($carouselImages) ? 'style="display:none;"' : '' ?>>
+                    <?php foreach ($carouselImages as $index => $item):
+                        $linkType = empty($item['link']) ? 'none' : ($item['link'] === '/galeria' ? 'ideas' : 'category');
+                        $linkVal = $item['link'] === '/galeria' ? '/galeria' : ltrim($item['link'] ?? '', '/');
+                        $linkLabel = $linkType === 'none' ? '' : ($linkType === 'ideas' ? 'Galería' : ucfirst($linkVal));
+                    ?>
+                    <div class="ce-card" data-index="<?= $index ?>">
+                        <img src="<?= htmlspecialchars($item['image'] ?? '') ?>" alt="Imagen <?= $index + 1 ?>" />
+                        <div class="ce-card-number"><?= $index + 1 ?></div>
+                        <?php if ($linkLabel): ?>
+                        <div class="ce-card-link-badge" title="Link: <?= htmlspecialchars($linkLabel) ?>">🔗 <?= htmlspecialchars($linkLabel) ?></div>
+                        <?php endif; ?>
+                        <div class="ce-card-overlay">
+                            <button type="button" class="ce-btn ce-btn-change" data-idx="<?= $index ?>" title="Cambiar imagen">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </button>
+                            <button type="button" class="ce-btn ce-btn-link" data-idx="<?= $index ?>" title="Configurar link">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            </button>
+                            <button type="button" class="ce-btn ce-btn-delete" data-idx="<?= $index ?>" title="Eliminar imagen">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                        <!-- Link popover -->
+                        <div class="ce-link-popover" data-idx="<?= $index ?>">
+                            <div class="ce-link-popover-title">Configurar link</div>
+                            <select class="ce-link-type" data-idx="<?= $index ?>">
+                                <option value="none" <?= $linkType === 'none' ? 'selected' : '' ?>>Sin link</option>
+                                <option value="category" <?= $linkType === 'category' ? 'selected' : '' ?>>Categoría</option>
+                                <option value="ideas" <?= $linkType === 'ideas' ? 'selected' : '' ?>>Galería</option>
+                            </select>
+                            <select class="ce-link-value" data-idx="<?= $index ?>" <?= $linkType !== 'category' ? 'style="display:none;"' : '' ?>>
+                                <option value="">Seleccionar</option>
+                                <?php foreach ($categories as $cat): ?>
+                                <option value="<?= htmlspecialchars($cat['slug']) ?>" <?= $linkVal === $cat['slug'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="ce-link-done" data-idx="<?= $index ?>">Listo</button>
+                        </div>
+                        <!-- Hidden form fields -->
+                        <input type="hidden" name="carousel_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>">
+                        <input type="hidden" name="carousel_link_type[]" value="<?= htmlspecialchars($linkType) ?>">
+                        <input type="hidden" name="carousel_link_value[]" value="<?= htmlspecialchars($linkVal) ?>">
+                        <input type="file" name="carousel_change_image_<?= $index ?>" accept="image/jpeg,image/png,image/webp" class="ce-file-input" data-idx="<?= $index ?>" style="display:none;">
+                        <input type="hidden" name="carousel_change_image_index[]" value="<?= $index ?>">
                     </div>
-                </details>
+                    <?php endforeach; ?>
+
+                    <div class="ce-card ce-card-add" id="ce-add-card" <?= count($carouselImages) >= 5 ? 'style="display:none;"' : '' ?>>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Agregar</span>
+                    </div>
+                </div>
+
+                <input type="file" id="ce-new-input" name="new_carousel_images[]" accept="image/jpeg,image/png,image/webp" multiple style="display:none;">
+
+                <!-- Sticky save bar -->
+                <div class="ce-save-bar" id="ce-save-bar" style="display:none;">
+                    <span class="ce-save-text">Cambios sin guardar</span>
+                    <button type="button" class="btn btn-primary btn-save-section" data-section="carousel">Guardar cambios</button>
+                    <button type="button" class="btn btn-secondary btn-cancel-section" data-section="carousel">Cancelar</button>
+                </div>
             </div>
-            <div class="section-actions" style="display: none;">
-                <button type="button" class="btn btn-primary btn-save-section" data-section="carousel">Guardar cambios</button>
-                <button type="button" class="btn btn-secondary btn-cancel-section" data-section="carousel">Cancelar</button>
-            </div>
+            <div class="section-actions" style="display: none;"></div>
             </div>
 
             <hr class="landing-section-divider">
@@ -1446,18 +1663,26 @@ body.landing-editor-page .admin-main-wrapper {
                                 <div class="edit-inline"><input type="text" value="<?= htmlspecialchars($settings['sobre_title'] ?? 'Sobre LUME') ?>"></div>
                             </div>
                             <input type="hidden" name="sobre_title" value="<?= htmlspecialchars($settings['sobre_title'] ?? 'Sobre LUME') ?>">
+                            <?php
+                            $sobreText1Default = 'Somos una tienda dedicada a ofrecer los mejores productos con la calidad que merecés. Cada artículo es seleccionado con cuidado para brindarte una experiencia única.';
+                            $sobreText2Default = 'Nuestro compromiso es acompañarte en cada compra, ofreciendo atención personalizada y envíos rápidos a todo el país.';
+                            $sobreText1 = $settings['sobre_text_1'] ?? '';
+                            $sobreText2 = $settings['sobre_text_2'] ?? '';
+                            $sobreText1Display = !empty($sobreText1) ? $sobreText1 : $sobreText1Default;
+                            $sobreText2Display = !empty($sobreText2) ? $sobreText2 : $sobreText2Default;
+                            ?>
                             <div class="editable-text" data-input="sobre_text_1" style="display: block;">
-                                <p><span class="text-display"><?= htmlspecialchars($settings['sobre_text_1'] ?? '') ?></span></p>
+                                <p><span class="text-display<?= empty($sobreText1) ? ' placeholder-text' : '' ?>"><?= htmlspecialchars($sobreText1Display) ?></span></p>
                                 <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-                                <div class="edit-inline"><textarea rows="3"><?= htmlspecialchars($settings['sobre_text_1'] ?? '') ?></textarea></div>
+                                <div class="edit-inline"><textarea rows="3" placeholder="<?= htmlspecialchars($sobreText1Default) ?>"><?= htmlspecialchars($sobreText1) ?></textarea></div>
                             </div>
-                            <input type="hidden" name="sobre_text_1" value="<?= htmlspecialchars($settings['sobre_text_1'] ?? '') ?>">
+                            <input type="hidden" name="sobre_text_1" value="<?= htmlspecialchars($sobreText1) ?>">
                             <div class="editable-text" data-input="sobre_text_2" style="display: block;">
-                                <p><span class="text-display"><?= htmlspecialchars($settings['sobre_text_2'] ?? '') ?></span></p>
+                                <p><span class="text-display<?= empty($sobreText2) ? ' placeholder-text' : '' ?>"><?= htmlspecialchars($sobreText2Display) ?></span></p>
                                 <button type="button" class="btn-edit-pencil" title="Editar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-                                <div class="edit-inline"><textarea rows="3"><?= htmlspecialchars($settings['sobre_text_2'] ?? '') ?></textarea></div>
+                                <div class="edit-inline"><textarea rows="3" placeholder="<?= htmlspecialchars($sobreText2Default) ?>"><?= htmlspecialchars($sobreText2) ?></textarea></div>
                             </div>
-                            <input type="hidden" name="sobre_text_2" value="<?= htmlspecialchars($settings['sobre_text_2'] ?? '') ?>">
+                            <input type="hidden" name="sobre_text_2" value="<?= htmlspecialchars($sobreText2) ?>">
                             <div class="sobre-stats">
                                 <?php for ($i = 1; $i <= 3; $i++): ?>
                                     <div class="stat">
@@ -1521,9 +1746,9 @@ body.landing-editor-page .admin-main-wrapper {
                             }
                         ?>
                             <div class="testimonial-card testimonial-item" data-index="<?= $index ?>">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: var(--space-sm);">
-                                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Estrellas:</label>
-                                    <select name="testimonial_stars[]" class="testimonial-stars-select" style="padding: 0.25rem 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1.1rem;">
+                                <div class="testimonial-stars-row">
+                                    <label>Estrellas:</label>
+                                    <select name="testimonial_stars[]" class="testimonial-stars-select">
                                         <?php foreach ($starOptions as $opt): ?>
                                             <option value="<?= htmlspecialchars($opt) ?>" <?= $starsVal === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                                         <?php endforeach; ?>
@@ -1541,13 +1766,13 @@ body.landing-editor-page .admin-main-wrapper {
                                     <span class="edit-inline"><input type="text" value="<?= htmlspecialchars($t['client_name'] ?? '') ?>"></span>
                                 </div>
                                 <input type="hidden" name="testimonial_client_name[]" value="<?= htmlspecialchars($t['client_name'] ?? '') ?>">
-                                <button type="button" class="btn-eliminar-testimonial" style="margin-top: 0.5rem; padding: 0.35rem 0.75rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">Eliminar</button>
+                                <button type="button" class="btn-eliminar-testimonial">Eliminar</button>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <div style="margin-top: 1rem; text-align: center;">
-                        <button type="button" id="btn-agregar-testimonial" style="padding: 0.5rem 1.25rem; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">+ Agregar comentario</button>
-                        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">Máximo 5 comentarios</p>
+                    <div class="testimonial-add-area">
+                        <button type="button" id="btn-agregar-testimonial" class="btn-landing-action">+ Agregar comentario</button>
+                        <p class="testimonial-add-hint">Máximo 5 comentarios</p>
                     </div>
                 </div>
             </section>
@@ -1652,26 +1877,26 @@ body.landing-editor-page .admin-main-wrapper {
 
             <!-- COLORES -->
             <div class="landing-section" data-section="colors">
-            <section id="landing-save-area" style="padding: var(--space-xl) 0; background: #f5f5f5; border-radius: var(--radius-lg); margin: 2rem auto; max-width: 1200px; padding: 2rem;">
-                <h3 style="margin-bottom: 1rem; color: #333;">Configuración de colores</h3>
-                <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.9rem;">Estos colores se aplican en la página principal (modo claro y modo oscuro).</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
-                    <div>
-                        <label for="primary_color_light" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Color primario - Modo claro</label>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <input type="color" id="primary_color_light" name="primary_color_light" value="<?= htmlspecialchars($primaryLight) ?>" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">
-                            <input type="text" id="primary_color_light_hex" value="<?= htmlspecialchars($primaryLight) ?>" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;" placeholder="#ff8c00">
+            <section id="landing-save-area" class="landing-colors-section">
+                <h3 class="landing-colors-title">🎨 Configuración de colores</h3>
+                <p class="landing-colors-desc">Estos colores se aplican en la página principal (modo claro y modo oscuro).</p>
+                <div class="landing-colors-grid">
+                    <div class="color-picker-group">
+                        <label for="primary_color_light">Color primario - Modo claro</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="primary_color_light" name="primary_color_light" value="<?= htmlspecialchars($primaryLight) ?>" class="color-picker-input">
+                            <input type="text" id="primary_color_light_hex" value="<?= htmlspecialchars($primaryLight) ?>" class="color-hex-input" placeholder="#ff8c00">
                         </div>
                     </div>
-                    <div>
-                        <label for="primary_color_dark" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Color primario - Modo oscuro</label>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <input type="color" id="primary_color_dark" name="primary_color_dark" value="<?= htmlspecialchars($primaryDark) ?>" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer;">
-                            <input type="text" id="primary_color_dark_hex" value="<?= htmlspecialchars($primaryDark) ?>" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;" placeholder="#ff8c00">
+                    <div class="color-picker-group">
+                        <label for="primary_color_dark">Color primario - Modo oscuro</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="primary_color_dark" name="primary_color_dark" value="<?= htmlspecialchars($primaryDark) ?>" class="color-picker-input">
+                            <input type="text" id="primary_color_dark_hex" value="<?= htmlspecialchars($primaryDark) ?>" class="color-hex-input" placeholder="#ff8c00">
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div class="landing-colors-actions">
                     <?php if (!empty($success) && isset($_GET['updated'])): ?>
                     <div id="landing-success-msg" class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div>
                     <?php endif; ?>
@@ -1686,7 +1911,7 @@ body.landing-editor-page .admin-main-wrapper {
     </form>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
+<!-- Splide JS removed: carousel editor uses card grid -->
 <script src="/js/products-loader.js"></script>
 <script>
 var carouselCategories = <?= json_encode($categories ?? []) ?>;
@@ -1708,151 +1933,265 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  var heroSlider = document.getElementById('hero-slider');
-  var splideInstance = null;
-  function mountCarousel() {
-    if (splideInstance) { try { splideInstance.destroy(); } catch (e) {} }
-    var slides = document.querySelectorAll('#hero-slider .splide__slide');
-    if (slides.length > 0) {
-      splideInstance = new Splide('#hero-slider', {
-        type: 'fade',
-        autoplay: true,
-        interval: 4000,
-        rewind: true,
-        arrows: true,
-        pagination: true
-      });
-      splideInstance.mount();
-    }
-  }
-  mountCarousel();
+  // ===== CAROUSEL EDITOR =====
+  var MAX_CE = 5;
+  var ceGrid = document.getElementById('ce-grid');
+  var ceEmpty = document.getElementById('ce-empty');
+  var ceEmptyBtn = document.getElementById('ce-empty-btn');
+  var ceAddCard = document.getElementById('ce-add-card');
+  var ceNewInput = document.getElementById('ce-new-input');
+  var ceSaveBar = document.getElementById('ce-save-bar');
+  var ceCount = document.getElementById('ce-count');
 
-  // Cambiar imagen: carrusel
-  document.querySelectorAll('.btn-change-img[data-slide-index]').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
+  function ceGetExistingCount() {
+    return ceGrid ? ceGrid.querySelectorAll('.ce-card:not(.ce-card-add):not(.ce-card-new)').length : 0;
+  }
+  function ceGetNewCount() {
+    return ceGrid ? ceGrid.querySelectorAll('.ce-card-new').length : 0;
+  }
+  function ceGetTotal() { return ceGetExistingCount() + ceGetNewCount(); }
+
+  function ceUpdateUI() {
+    var total = ceGetTotal();
+    if (ceCount) ceCount.textContent = total + '/5';
+    if (ceEmpty) ceEmpty.style.display = total === 0 ? 'flex' : 'none';
+    if (ceGrid) ceGrid.style.display = total === 0 ? 'none' : 'grid';
+    if (ceAddCard) ceAddCard.style.display = total >= MAX_CE ? 'none' : '';
+    ceGrid.querySelectorAll('.ce-card:not(.ce-card-add):not(.ce-card-new)').forEach(function(card, i) {
+      var num = card.querySelector('.ce-card-number');
+      if (num) num.textContent = i + 1;
+    });
+  }
+
+  function ceShowSave() {
+    if (ceSaveBar) ceSaveBar.style.display = 'flex';
+    showSectionActions('carousel');
+  }
+
+  function ceCloseAllPopovers() {
+    document.querySelectorAll('.ce-link-popover.open').forEach(function(p) { p.classList.remove('open'); });
+  }
+
+  // Change image
+  if (ceGrid) ceGrid.addEventListener('click', function(e) {
+    var btnChange = e.target.closest('.ce-btn-change');
+    if (btnChange) {
       e.preventDefault();
-      var idx = this.getAttribute('data-slide-index');
-      var input = document.querySelector('.carousel-file-input[data-slide-index="' + idx + '"]');
+      var card = btnChange.closest('.ce-card');
+      var input = card && card.querySelector('.ce-file-input');
       if (input) input.click();
-    });
-  });
-  document.querySelectorAll('.carousel-file-input').forEach(function(input) {
-    input.addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var slide = input.closest('.splide__slide');
-          var img = slide && slide.querySelector('img');
-          if (img) img.src = e.target.result;
-        };
-        reader.readAsDataURL(this.files[0]);
-      }
-    });
-  });
-
-  // Eliminar imagen del carrusel
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.admin-topbar') || e.target.closest('.admin-nav-sidebar')) return;
-    var btn = e.target.closest('.btn-eliminar-slide');
-    if (!btn) return;
-    e.preventDefault();
-    var slide = btn.closest('.splide__slide');
-    if (!slide) return;
-    var list = slide.parentNode;
-    var idx = Array.prototype.indexOf.call(list.children, slide);
-    var formGroups = document.getElementById('carousel-form-groups');
-    var linksConfig = document.getElementById('carousel-links-config');
-    if (!formGroups || !linksConfig || idx < 0) return;
-    slide.remove();
-    if (formGroups.children[idx]) formGroups.children[idx].remove();
-    if (linksConfig.children[idx]) linksConfig.children[idx].remove();
-    for (var i = 0; i < linksConfig.children.length; i++) {
-      var label = linksConfig.children[i].querySelector('label');
-      if (label) label.textContent = 'Imagen ' + (i + 1) + ':';
+      return;
     }
-    mountCarousel();
-    if (typeof updateCarouselAddButton === 'function') updateCarouselAddButton();
+
+    // Delete existing image (new cards handle their own delete)
+    var btnDel = e.target.closest('.ce-btn-delete');
+    if (btnDel) {
+      var card = btnDel.closest('.ce-card');
+      if (!card || card.classList.contains('ce-card-new')) return;
+      e.preventDefault();
+      if (!confirm('¿Eliminar esta imagen del carrusel?')) return;
+      card.remove(); ceUpdateUI(); ceShowSave();
+      return;
+    }
+
+    // Link popover toggle
+    var btnLink = e.target.closest('.ce-btn-link');
+    if (btnLink) {
+      e.preventDefault();
+      var idx = btnLink.getAttribute('data-idx');
+      var popover = ceGrid.querySelector('.ce-link-popover[data-idx="' + idx + '"]');
+      if (popover) {
+        var isOpen = popover.classList.contains('open');
+        ceCloseAllPopovers();
+        if (!isOpen) popover.classList.add('open');
+      }
+      return;
+    }
+
+    // Link done button
+    var btnDone = e.target.closest('.ce-link-done');
+    if (btnDone) {
+      e.preventDefault();
+      var idx = btnDone.getAttribute('data-idx');
+      var card = btnDone.closest('.ce-card');
+      var popover = btnDone.closest('.ce-link-popover');
+      if (popover) popover.classList.remove('open');
+      if (card) {
+        var typeSelect = card.querySelector('.ce-link-type');
+        var valSelect = card.querySelector('.ce-link-value');
+        var isNew = card.classList.contains('ce-card-new');
+        var typeHidden = card.querySelector('input[name="' + (isNew ? 'new_carousel_link_type[]' : 'carousel_link_type[]') + '"]');
+        var valHidden = card.querySelector('input[name="' + (isNew ? 'new_carousel_link_value[]' : 'carousel_link_value[]') + '"]');
+        if (typeHidden && typeSelect) typeHidden.value = typeSelect.value;
+        if (valHidden) valHidden.value = (typeSelect.value === 'category' && valSelect) ? valSelect.value : '';
+        var badge = card.querySelector('.ce-card-link-badge');
+        var label = '';
+        if (typeSelect.value === 'ideas') label = '🔗 Galería';
+        else if (typeSelect.value === 'category' && valSelect && valSelect.value) {
+          var opt = valSelect.options[valSelect.selectedIndex];
+          label = '🔗 ' + (opt ? opt.textContent : valSelect.value);
+        }
+        if (label) {
+          if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'ce-card-link-badge';
+            card.appendChild(badge);
+          }
+          badge.textContent = label;
+          badge.title = 'Link: ' + label.replace('🔗 ', '');
+          badge.style.background = '';
+        } else if (badge) {
+          badge.remove();
+        }
+        ceShowSave();
+      }
+      return;
+    }
+
+    // Add card click
+    if (e.target.closest('.ce-card-add')) {
+      e.preventDefault();
+      if (ceNewInput) ceNewInput.click();
+      return;
+    }
   });
 
-  // Agregar imagen(s) al carrusel (máximo 5 en total)
-  var MAX_CAROUSEL_IMAGES = 5;
-  var newCarouselInput = document.getElementById('new-carousel-images-input');
-  var btnAgregarCarousel = document.getElementById('btn-agregar-carousel');
-  var newCarouselRows = document.getElementById('new-carousel-rows');
-  function getCarouselSlideCount() { return document.querySelectorAll('#hero-slider .splide__slide').length; }
-  function updateCarouselAddButton() {
-    if (!btnAgregarCarousel) return;
-    var n = getCarouselSlideCount();
-    btnAgregarCarousel.disabled = n >= MAX_CAROUSEL_IMAGES;
-    btnAgregarCarousel.title = n >= MAX_CAROUSEL_IMAGES ? 'Máximo 5 imágenes en el carrusel' : '';
-  }
-  if (btnAgregarCarousel && newCarouselInput && newCarouselRows) {
-    updateCarouselAddButton();
-    btnAgregarCarousel.addEventListener('click', function() {
-      if (this.disabled) return;
-      newCarouselInput.click();
-    });
-    newCarouselInput.addEventListener('change', function() {
-      var files = this.files;
-      if (!files || files.length === 0) return;
-      var currentCount = getCarouselSlideCount();
-      var maxNew = MAX_CAROUSEL_IMAGES - currentCount;
-      if (maxNew <= 0) {
-        newCarouselRows.innerHTML = '';
-        this.value = '';
-        return;
+  // Link type change → show/hide value select
+  if (ceGrid) ceGrid.addEventListener('change', function(e) {
+    if (e.target.classList.contains('ce-link-type')) {
+      var idx = e.target.getAttribute('data-idx');
+      var card = e.target.closest('.ce-card');
+      var valSelect = card && card.querySelector('.ce-link-value');
+      if (valSelect) {
+        valSelect.style.display = e.target.value === 'category' ? '' : 'none';
+        if (e.target.value !== 'category') valSelect.value = '';
       }
-      var toAdd = Math.min(files.length, maxNew);
-      newCarouselRows.innerHTML = '';
-      if (typeof showSectionActions === 'function') showSectionActions('carousel');
-      if (files.length > maxNew) {
-        var hint = document.createElement('p');
-        hint.className = 'carousel-new-hint';
-        hint.style.cssText = 'font-size:0.85rem;color:#856404;margin-bottom:0.5rem;';
-        hint.textContent = 'Solo se pueden agregar ' + maxNew + ' más (máximo 5 en total). Se usarán las primeras ' + toAdd + ' imágenes.';
-        newCarouselRows.appendChild(hint);
+    }
+  });
+
+  // File input change for existing images
+  if (ceGrid) ceGrid.addEventListener('change', function(e) {
+    if (e.target.classList.contains('ce-file-input') && e.target.files && e.target.files[0]) {
+      var card = e.target.closest('.ce-card');
+      var img = card && card.querySelector('img');
+      if (img) {
+        var reader = new FileReader();
+        reader.onload = function(ev) { img.src = ev.target.result; };
+        reader.readAsDataURL(e.target.files[0]);
       }
-      var maxInput = document.getElementById('new-carousel-max-input');
-      if (maxInput) maxInput.remove();
+      ceShowSave();
+    }
+  });
+
+  // Empty state button
+  if (ceEmptyBtn) ceEmptyBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (ceNewInput) ceNewInput.click();
+  });
+
+  // New images file input
+  if (ceNewInput) ceNewInput.addEventListener('change', function() {
+    var files = this.files;
+    if (!files || files.length === 0) return;
+    var total = ceGetTotal();
+    var maxNew = MAX_CE - total;
+    if (maxNew <= 0) { this.value = ''; return; }
+    var toAdd = Math.min(files.length, maxNew);
+
+    var maxInput = document.getElementById('ce-new-max');
+    if (!maxInput) {
       maxInput = document.createElement('input');
-      maxInput.type = 'hidden';
-      maxInput.name = 'new_carousel_max';
-      maxInput.id = 'new-carousel-max-input';
-      maxInput.value = toAdd;
-      newCarouselRows.appendChild(maxInput);
-      for (var i = 0; i < toAdd; i++) {
-        var row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;';
-        var label = document.createElement('label');
-        label.textContent = 'Nueva imagen ' + (i + 1) + ' (link):';
-        label.style.minWidth = '120px';
-        var typeSelect = document.createElement('select');
-        typeSelect.name = 'new_carousel_link_type[]';
-        typeSelect.className = 'carousel-link-type-select';
-        typeSelect.innerHTML = '<option value="none">Sin link</option><option value="category">Categoría</option><option value="ideas">Galería de Ideas</option>';
-        var valSelect = document.createElement('select');
-        valSelect.name = 'new_carousel_link_value[]';
-        valSelect.className = 'carousel-link-value-select';
-        valSelect.style.display = 'none';
-        valSelect.innerHTML = '<option value="">Seleccionar categoría</option>';
-        if (carouselCategories && carouselCategories.length) {
-          carouselCategories.forEach(function(c) {
-            valSelect.appendChild(new Option(c.name, c.slug));
-          });
-        }
-        valSelect.appendChild(new Option('Galería de ideas', '/galeria'));
-        typeSelect.addEventListener('change', function() {
-          valSelect.style.display = this.value === 'category' ? '' : 'none';
-          if (this.value !== 'category') valSelect.value = '/galeria';
+      maxInput.type = 'hidden'; maxInput.name = 'new_carousel_max'; maxInput.id = 'ce-new-max';
+      ceGrid.parentNode.appendChild(maxInput);
+    }
+    maxInput.value = toAdd;
+
+    for (var i = 0; i < toAdd; i++) {
+      (function(fileIndex) {
+        var card = document.createElement('div');
+        card.className = 'ce-card ce-card-new';
+        var img = document.createElement('img');
+        img.alt = 'Nueva imagen';
+        var reader = new FileReader();
+        reader.onload = function(ev) { img.src = ev.target.result; };
+        reader.readAsDataURL(files[fileIndex]);
+        card.appendChild(img);
+
+        var num = document.createElement('div');
+        num.className = 'ce-card-number';
+        num.textContent = ceGetTotal() + 1;
+        card.appendChild(num);
+
+        var newBadge = document.createElement('div');
+        newBadge.className = 'ce-card-link-badge';
+        newBadge.textContent = '✨ Nueva';
+        newBadge.style.background = 'rgba(99,102,241,0.8)';
+        card.appendChild(newBadge);
+
+        var overlay = document.createElement('div');
+        overlay.className = 'ce-card-overlay';
+        var btnLink = document.createElement('button');
+        btnLink.type = 'button'; btnLink.className = 'ce-btn ce-btn-link';
+        btnLink.setAttribute('data-idx', 'new-' + fileIndex);
+        btnLink.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+        var btnDel = document.createElement('button');
+        btnDel.type = 'button'; btnDel.className = 'ce-btn ce-btn-delete';
+        btnDel.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+        btnDel.addEventListener('click', function(e) {
+          e.preventDefault(); e.stopPropagation();
+          ceGrid.querySelectorAll('.ce-card-new').forEach(function(c) { c.remove(); });
+          if (ceNewInput) ceNewInput.value = '';
+          var mx = document.getElementById('ce-new-max');
+          if (mx) mx.remove();
+          ceUpdateUI();
+          ceShowSave();
         });
-        row.appendChild(label);
-        row.appendChild(typeSelect);
-        row.appendChild(valSelect);
-        newCarouselRows.appendChild(row);
-      }
-      // No vaciar el input: los archivos deben enviarse al guardar el formulario
-    });
-  }
+        overlay.appendChild(btnLink);
+        overlay.appendChild(btnDel);
+        card.appendChild(overlay);
+
+        // Link popover for new
+        var popover = document.createElement('div');
+        popover.className = 'ce-link-popover';
+        popover.setAttribute('data-idx', 'new-' + fileIndex);
+        popover.innerHTML = '<div class="ce-link-popover-title">Configurar link</div>' +
+          '<select class="ce-link-type" data-idx="new-' + fileIndex + '">' +
+            '<option value="none">Sin link</option><option value="category">Categoría</option><option value="ideas">Galería</option>' +
+          '</select>' +
+          '<select class="ce-link-value" data-idx="new-' + fileIndex + '" style="display:none;">' +
+            '<option value="">Seleccionar</option>' +
+            (carouselCategories || []).map(function(c) { return '<option value="' + c.slug + '">' + c.name + '</option>'; }).join('') +
+          '</select>' +
+          '<button type="button" class="ce-link-done" data-idx="new-' + fileIndex + '">Listo</button>';
+        card.appendChild(popover);
+
+        var typeH = document.createElement('input');
+        typeH.type = 'hidden'; typeH.name = 'new_carousel_link_type[]'; typeH.value = 'none';
+        card.appendChild(typeH);
+        var valH = document.createElement('input');
+        valH.type = 'hidden'; valH.name = 'new_carousel_link_value[]'; valH.value = '';
+        card.appendChild(valH);
+
+        btnLink.addEventListener('click', function(ev) {
+          ev.preventDefault();
+          ceCloseAllPopovers();
+          popover.classList.add('open');
+        });
+
+        ceGrid.insertBefore(card, ceAddCard);
+      })(i);
+    }
+
+    ceUpdateUI();
+    ceShowSave();
+  });
+
+  // Close popovers on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.ce-link-popover') && !e.target.closest('.ce-btn-link')) {
+      ceCloseAllPopovers();
+    }
+  });
 
   // Cambiar imagen: sobre
   var triggerSobre = document.getElementById('trigger-sobre-image');
@@ -1930,28 +2269,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Mover bloques de link del carrusel al panel "Configurar links"
-  var linksConfig = document.getElementById('carousel-links-config');
-  document.querySelectorAll('.carousel-link-row').forEach(function(row) {
-    row.style.display = 'flex';
-    row.style.gap = '0.5rem';
-    row.style.alignItems = 'center';
-    row.style.marginBottom = '0.5rem';
-    var idx = row.getAttribute('data-index');
-    var label = document.createElement('label');
-    label.textContent = 'Imagen ' + (parseInt(idx, 10) + 1) + ':';
-    label.style.minWidth = '70px';
-    row.insertBefore(label, row.firstChild);
-    linksConfig.appendChild(row);
-    var typeSelect = row.querySelector('.carousel-link-type-select');
-    var valSelect = row.querySelector('.carousel-link-value-select');
-    if (typeSelect && valSelect) {
-      typeSelect.addEventListener('change', function() {
-        if (this.value === 'category') { valSelect.style.display = ''; }
-        else { valSelect.style.display = 'none'; if (this.value === 'ideas') valSelect.value = '/galeria'; }
-      });
-    }
-  });
+  // Carousel link config is now handled by ce-link-popover on each card
 
   // Al cambiar la categoría del botón "Ver todos los productos", actualizar el href del preview
   var productosLinkSelect = document.getElementById('productos_button_link_select');
@@ -1997,17 +2315,17 @@ document.addEventListener('DOMContentLoaded', function() {
       card.dataset.index = count;
       var opts = starOptions.map(function(s) { return '<option value="' + s + '"' + (s === '⭐⭐⭐⭐⭐' ? ' selected' : '') + '>' + s + '</option>'; }).join('');
       card.innerHTML =
-        '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:var(--space-sm);">' +
-        '<label style="font-size:0.85rem;color:var(--text-secondary);">Estrellas:</label>' +
-        '<select name="testimonial_stars[]" class="testimonial-stars-select" style="padding:0.25rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:1.1rem;">' + opts + '</select>' +
+        '<div class="testimonial-stars-row">' +
+        '<label>Estrellas:</label>' +
+        '<select name="testimonial_stars[]" class="testimonial-stars-select">' + opts + '</select>' +
         '</div>' +
-        '<div class="editable-group" style="margin-bottom:0.5rem;">' +
-        '<textarea name="testimonial_text[]" rows="2" placeholder="Comentario" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;resize:vertical;"></textarea>' +
+        '<div class="testimonial-edit-group">' +
+        '<textarea name="testimonial_text[]" rows="2" placeholder="Comentario"></textarea>' +
         '</div>' +
-        '<div class="editable-group">' +
-        '<input type="text" name="testimonial_client_name[]" placeholder="Nombre del cliente" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;">' +
+        '<div class="testimonial-edit-group">' +
+        '<input type="text" name="testimonial_client_name[]" placeholder="Nombre del cliente">' +
         '</div>' +
-        '<button type="button" class="btn-eliminar-testimonial" style="margin-top:0.5rem;padding:0.25rem 0.5rem;font-size:0.8rem;border:1px solid #dc3545;color:#dc3545;background:transparent;border-radius:4px;cursor:pointer;">Eliminar</button>';
+        '<button type="button" class="btn-eliminar-testimonial">Eliminar</button>';
       testimonialContainer.appendChild(card);
       updateTestimonialAddButton();
     });
@@ -2119,20 +2437,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Mostrar botones solo cuando hay cambios en la sección
   function showSectionActions(sectionName) {
     var sectionEl = document.querySelector('.landing-section[data-section="' + sectionName + '"]');
-    if (sectionEl) {
-      var actions = sectionEl.querySelector('.section-actions');
-      if (actions) actions.style.display = 'flex';
+    if (!sectionEl) return;
+    if (sectionName === 'carousel') {
+      var bar = document.getElementById('ce-save-bar');
+      if (bar) bar.style.display = 'flex';
     }
+    var actions = sectionEl.querySelector('.section-actions');
+    if (actions) actions.style.display = 'flex';
   }
   function hideSectionActions(sectionName) {
     var sectionEl = document.querySelector('.landing-section[data-section="' + sectionName + '"]');
-    if (sectionEl) {
-      var actions = sectionEl.querySelector('.section-actions');
-      if (actions) actions.style.display = 'none';
+    if (!sectionEl) return;
+    if (sectionName === 'carousel') {
+      var bar = document.getElementById('ce-save-bar');
+      if (bar) bar.style.display = 'none';
     }
+    var actions = sectionEl.querySelector('.section-actions');
+    if (actions) actions.style.display = 'none';
   }
   document.querySelectorAll('.landing-section').forEach(function(sectionEl) {
     var sectionName = sectionEl.getAttribute('data-section');
@@ -2141,9 +2464,9 @@ document.addEventListener('DOMContentLoaded', function() {
     sectionEl.addEventListener('input', handler);
     sectionEl.addEventListener('change', handler);
     sectionEl.addEventListener('click', function(e) {
-      if (e.target.closest('.btn-eliminar-slide') || e.target.closest('.btn-eliminar-testimonial') ||
-          e.target.closest('#btn-agregar-carousel') || e.target.closest('#btn-agregar-testimonial') ||
-          e.target.closest('.btn-change-img')) {
+      if (e.target.closest('.ce-btn-delete') || e.target.closest('.btn-eliminar-testimonial') ||
+          e.target.closest('.ce-card-add') || e.target.closest('#btn-agregar-testimonial') ||
+          e.target.closest('.ce-btn-change') || e.target.closest('.btn-change-img')) {
         showSectionActions(sectionName);
       }
     });

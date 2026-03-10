@@ -109,7 +109,12 @@ $productCount = countProductsInCategory($categoria['slug']);
 ?>
 
 <div class="admin-content">
-    <h2>Editar Categoría</h2>
+    <div class="page-header">
+        <div>
+            <a href="list.php" class="btn-back"><?= icon('arrow-left', 16) ?> Volver a categorías</a>
+            <h1 class="page-title" style="margin-top: 0.75rem;">Editar Categoría</h1>
+        </div>
+    </div>
     
     <?php if ($productCount > 0): ?>
         <div class="alert alert-info">
@@ -123,7 +128,7 @@ $productCount = countProductsInCategory($categoria['slug']);
         </div>
     <?php endif; ?>
     
-    <form method="POST" style="max-width: 600px;">
+    <form method="POST" class="add-product-page">
         <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
         
         <div class="form-group">

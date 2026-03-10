@@ -79,7 +79,12 @@ $csrfToken = generateCSRFToken();
 ?>
 
 <div class="admin-content">
-    <h2>Agregar Nueva Categoría</h2>
+    <div class="page-header">
+        <div>
+            <a href="list.php" class="btn-back"><?= icon('arrow-left', 16) ?> Volver a categorías</a>
+            <h1 class="page-title" style="margin-top: 0.75rem;">Agregar Nueva Categoría</h1>
+        </div>
+    </div>
     
     <?php if ($error): ?>
         <div class="alert alert-error">
@@ -87,7 +92,7 @@ $csrfToken = generateCSRFToken();
         </div>
     <?php endif; ?>
     
-    <form method="POST" style="max-width: 600px;">
+    <form method="POST" class="add-product-page">
         <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
         
         <div class="form-group">
@@ -145,9 +150,9 @@ $csrfToken = generateCSRFToken();
             </small>
         </div>
         
-        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary">Guardar Categoría</button>
-            <a href="list.php" class="btn btn-secondary">Cancelar</a>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><?= icon('save', 18) ?> Guardar Categoría</button>
+            <a href="list.php" class="btn btn-secondary"><?= icon('x', 18) ?> Cancelar</a>
         </div>
     </form>
 </div>

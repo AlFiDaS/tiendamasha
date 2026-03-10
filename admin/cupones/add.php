@@ -224,18 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
+/* Styles in admin.css */
 </style>
 
 <?php require_once '../_inc/footer.php'; ?>

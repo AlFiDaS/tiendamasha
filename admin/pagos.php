@@ -167,7 +167,7 @@ require_once '_inc/header.php';
         <h3 id="guia-header" class="section-title" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
             <span id="guia-toggle-icon">▼</span> Guía de configuración de MercadoPago
         </h3>
-        <div id="guia-mercadopago" class="guia-mercadopago collapsed">
+        <div id="guia-mercadopago" class="guia-collapsible guia-mercadopago collapsed">
             <p><strong>1. Crear cuenta</strong> en <a href="https://www.mercadopago.com.ar/" target="_blank" rel="noopener">MercadoPago</a> si no tenés una.</p>
             <p><strong>2. Ir al panel de desarrolladores:</strong> <a href="https://www.mercadopago.com.ar/developers/panel" target="_blank" rel="noopener">mercadopago.com.ar/developers/panel</a></p>
             <p><strong>3. Crear una aplicación</strong> con producto "Checkout Pro" y plataforma Web.</p>
@@ -183,15 +183,7 @@ require_once '_inc/header.php';
 </div>
 
 <style>
-.guia-mercadopago.collapsed { display: none; }
-.guia-mercadopago { padding-top: 1rem; }
-.guia-mercadopago p { margin-bottom: 0.75rem; color: #444; line-height: 1.6; }
-.guia-mercadopago code { background: #f0f0f0; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9rem; }
-.guia-mercadopago a { color: var(--primary-color); }
-#guia-mercadopago:not(.collapsed) ~ .section-title #guia-toggle-icon,
-#guia-mercadopago.collapsed ~ * { }
 .mp-activar-wrap { padding: 0.5rem 0; }
-.btn-activar-mp { margin-top: 0.25rem; }
 .pagos-buttons-wrap { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
 </style>
 <script>

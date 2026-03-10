@@ -116,11 +116,9 @@ require_once '../_inc/header.php';
 
 <style>
 /* Ocultar información extra en desktop */
-.mobile-extra-info {
-    display: none;
-}
+.mobile-extra-info { display: none; }
 
-/* Estilos responsive para tabla de categorías */
+/* Estilos responsive para tabla de categorías - page-specific */
 @media (max-width: 768px) {
     .categories-table {
         width: 100%;

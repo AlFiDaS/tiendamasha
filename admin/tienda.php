@@ -147,8 +147,12 @@ require_once '_inc/header.php';
 ?>
 
 <div class="admin-content">
-    <h2>Configuración de la Tienda</h2>
-    <p style="color: #666; margin-bottom: 2rem;">Gestiona la información general de tu tienda que aparecerá en el sitio web</p>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Configuración de la Tienda</h1>
+            <p class="page-desc">Gestiona la información general de tu tienda que aparecerá en el sitio web</p>
+        </div>
+    </div>
     
     <?php if ($error): ?>
         <div class="alert alert-error">
@@ -166,7 +170,7 @@ require_once '_inc/header.php';
         <input type="hidden" name="csrf_token" value="<?= generateCSRFToken() ?>">
         
         <div class="form-group">
-            <label for="shop_name">Nombre de la Tienda <span style="color: red;">*</span></label>
+            <label for="shop_name">Nombre de la Tienda <span class="text-danger">*</span></label>
             <input 
                 type="text" 
                 id="shop_name" 
@@ -189,13 +193,13 @@ require_once '_inc/header.php';
                 $logoTime = file_exists($logoFullPath) ? filemtime($logoFullPath) : time();
                 $logoUrl = $logoPath . '?v=' . $logoTime;
                 ?>
-                <div style="margin-bottom: 1rem;">
-                    <p style="margin-bottom: 0.5rem; font-weight: 600;">Logo actual:</p>
-                    <div style="display: inline-block; background: #f5f5f5; padding: 15px; border-radius: 8px; border: 2px solid #ddd;">
+                <div class="logo-preview-wrap">
+                    <p class="logo-preview-label">Logo actual:</p>
+                    <div class="logo-preview-box">
                         <img 
                             src="<?= htmlspecialchars($logoUrl) ?>" 
                             alt="Logo actual" 
-                            style="max-width: 200px; max-height: 100px; display: block;"
+                            class="logo-preview-img"
                             onerror="this.style.display='none'"
                         >
                     </div>
@@ -210,9 +214,9 @@ require_once '_inc/header.php';
             <small>Formato: JPG, PNG, WEBP o SVG. Tamaño máximo: 2MB. Este logo aparecerá en el navbar del sitio web.</small>
         </div>
         
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        <hr>
         
-        <h3 style="margin-bottom: 1rem; color: #333;">Información de Contacto</h3>
+        <h3 class="section-title">Información de Contacto</h3>
         
         <div class="form-group">
             <label for="whatsapp_number">Número de WhatsApp</label>
@@ -270,9 +274,9 @@ require_once '_inc/header.php';
             <small>Dirección física del local (si aplica)</small>
         </div>
         
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        <hr>
         
-        <h3 style="margin-bottom: 1rem; color: #333;">Redes Sociales</h3>
+        <h3 class="section-title">Redes Sociales</h3>
         
         <div class="form-group">
             <label for="instagram">Instagram</label>
@@ -298,9 +302,9 @@ require_once '_inc/header.php';
             <small>Usuario o URL completa. Se guardará como enlace a facebook.com</small>
         </div>
         
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        <hr>
         
-        <h3 style="margin-bottom: 1rem; color: #333;">Información General</h3>
+        <h3 class="section-title">Información General</h3>
         
         <div class="form-group">
             <label for="description">Descripción para SEO</label>
@@ -313,9 +317,9 @@ require_once '_inc/header.php';
             <small>Se usa en meta description, Open Graph y Twitter. Afecta cómo aparece tu tienda en Google y al compartir en redes.</small>
         </div>
         
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;">
+        <hr>
         
-        <h3 style="margin-bottom: 1rem; color: #333;">Configuración del Footer</h3>
+        <h3 class="section-title">Configuración del Footer</h3>
         
         <div class="form-group">
             <label for="footer_description">Descripción del Footer</label>
@@ -349,7 +353,7 @@ require_once '_inc/header.php';
             value="<?= htmlspecialchars($settings['footer_copyright'] ?? '') ?>"
         >
         
-        <div style="display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap;">
+        <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <?= icon('save', 18) ?> Guardar Configuración
             </button>

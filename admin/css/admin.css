@@ -1175,3 +1175,445 @@ tbody td.desktop-only { display: table-cell; }
     .galeria-grid { grid-template-columns: 1fr !important; }
     .filters-form { gap: 0.35rem; }
 }
+
+/* ============================================
+ * SHARED: Product Form (add/edit)
+ * ============================================ */
+.add-product-page { max-width: 1000px; margin: 0 auto; }
+.add-product-form { display: flex; flex-direction: column; gap: 0; }
+
+.form-section {
+    background: var(--admin-card);
+    border-radius: var(--admin-radius);
+    padding: 1.75rem;
+    border: 1px solid var(--admin-border);
+    margin-bottom: 1.5rem;
+}
+
+.add-product-form .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--admin-dark);
+    margin: 0 0 1.25rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--admin-primary-light);
+}
+
+.section-subtitle {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--admin-text);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.input-with-icon { position: relative; }
+.input-icon {
+    position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+    color: var(--admin-muted); font-weight: 700; font-size: 1rem;
+    pointer-events: none; z-index: 1;
+}
+.input-with-icon input { padding-left: 2.25rem !important; font-weight: 500; }
+.form-group .input-with-icon input[type="text"] { padding-left: 2.25rem !important; }
+
+.image-upload-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.image-upload-item { display: flex; flex-direction: column; gap: 0.75rem; }
+.image-label { font-weight: 600; color: var(--admin-dark); font-size: 0.95rem; }
+
+.current-image {
+    position: relative; border-radius: var(--admin-radius);
+    overflow: hidden; background: var(--admin-bg); border: 1px solid var(--admin-border);
+}
+.preview-image { width: 100%; height: auto; max-height: 300px; object-fit: cover; display: block; }
+.image-actions {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); padding: 1rem;
+}
+.delete-checkbox { display: flex; align-items: center; gap: 0.5rem; color: white; cursor: pointer; font-size: 0.88rem; }
+.delete-checkbox input[type="checkbox"] { width: auto; margin: 0; }
+
+.file-input-wrapper { position: relative; }
+.file-input { position: absolute; opacity: 0; width: 0; height: 0; }
+.file-input-label {
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    padding: 1rem 1.25rem; background: var(--admin-card);
+    border: 2px dashed var(--admin-border); border-radius: var(--admin-radius);
+    cursor: pointer; transition: all 0.2s;
+    color: var(--admin-primary); font-weight: 600; font-size: 0.9rem;
+}
+.file-input-label:hover { background: var(--admin-primary-light); border-color: var(--admin-primary); }
+.file-icon { font-size: 1.35rem; }
+.image-preview { margin-top: 0.75rem; }
+.preview-image-new { max-width: 200px; border-radius: var(--admin-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.radio-group { display: flex; flex-direction: column; gap: 0.75rem; }
+.radio-option {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    padding: 1rem 1.25rem; border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius); cursor: pointer;
+    transition: all 0.2s; background: var(--admin-card); position: relative;
+}
+.radio-option:hover { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+.radio-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.radio-checkmark {
+    width: 20px; height: 20px; border: 2px solid var(--admin-border);
+    border-radius: 6px; position: relative; flex-shrink: 0;
+    transition: all 0.2s; margin-top: 2px; background: var(--admin-card);
+}
+.radio-option input[type="radio"]:checked + .radio-checkmark { background: var(--admin-primary); border-color: var(--admin-primary); }
+.radio-option input[type="radio"]:checked + .radio-checkmark::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 7px; height: 7px; background: white; border-radius: 50%;
+}
+.radio-content { display: flex; align-items: center; gap: 0.85rem; flex: 1; }
+.radio-icon {
+    font-size: 1.15rem; width: 34px; height: 34px; display: flex; align-items: center;
+    justify-content: center; background: var(--admin-bg); border-radius: 8px; transition: all 0.2s;
+}
+.radio-option input[type="radio"]:checked ~ .radio-content .radio-icon { background: var(--admin-primary); color: white; }
+.radio-option:has(input[type="radio"]:checked) { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+.radio-content strong { display: block; font-size: 0.92rem; margin-bottom: 0.15rem; color: var(--admin-dark); }
+.radio-content small { display: block; font-size: 0.82rem; color: var(--admin-muted); margin: 0; }
+
+.stock-limited-fields { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--admin-border); }
+
+.checkbox-group-modern { display: flex; flex-direction: column; gap: 0.75rem; }
+.checkbox-modern {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    padding: 1rem 1.25rem; border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius); cursor: pointer;
+    transition: all 0.2s; background: var(--admin-card); position: relative;
+}
+.checkbox-modern:hover { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+.checkbox-modern:has(input[type="checkbox"]:checked) { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+.checkbox-modern input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.checkmark {
+    width: 20px; height: 20px; border: 2px solid var(--admin-border);
+    border-radius: 6px; position: relative; flex-shrink: 0;
+    transition: all 0.2s; margin-top: 2px; background: var(--admin-card);
+}
+.checkbox-modern input[type="checkbox"]:checked + .checkmark { background: var(--admin-primary); border-color: var(--admin-primary); }
+.checkbox-modern input[type="checkbox"]:checked + .checkmark::after {
+    content: '\2713'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    color: white; font-weight: 700; font-size: 12px; line-height: 1;
+}
+.checkbox-modern strong { display: block; font-size: 0.92rem; margin-bottom: 0.15rem; color: var(--admin-dark); }
+.checkbox-modern small { display: block; font-size: 0.82rem; color: var(--admin-muted); margin: 0; }
+
+.form-actions {
+    display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem;
+    border-top: 1px solid var(--admin-border);
+}
+.btn-large {
+    padding: 0.85rem 2rem; font-size: 1rem; font-weight: 600; border-radius: 10px;
+    transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;
+    text-decoration: none; border: none; cursor: pointer; font-family: inherit;
+}
+.btn-primary.btn-large { background: var(--admin-primary); color: white; }
+.btn-primary.btn-large:hover { background: var(--admin-primary-hover); box-shadow: 0 4px 14px rgba(99,102,241,0.3); }
+.btn-secondary.btn-large { background: var(--admin-bg); color: var(--admin-text); border: 1px solid var(--admin-border); }
+.btn-secondary.btn-large:hover { border-color: var(--admin-primary); color: var(--admin-primary); }
+
+@media (max-width: 768px) {
+    .form-section { padding: 1.25rem; }
+    .form-row { grid-template-columns: 1fr; gap: 1rem; }
+    .image-upload-group { grid-template-columns: 1fr; gap: 1rem; }
+    .form-actions { flex-direction: column; }
+    .btn-large { width: 100%; }
+    .radio-option, .checkbox-modern { padding: 0.85rem 1rem; }
+}
+@media (max-width: 480px) {
+    .form-section { padding: 1rem; }
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group textarea,
+    .form-group select { font-size: 16px; }
+}
+
+/* ============================================
+ * SHARED: Status Badges (orders)
+ * ============================================ */
+.status-badge {
+    display: inline-block; padding: 0.25rem 0.75rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 600;
+}
+.status-approved    { background: #d1fae5; color: #065f46; }
+.status-pending     { background: #fef3c7; color: #92400e; }
+.status-rejected    { background: #fee2e2; color: #991b1b; }
+.status-cancelled   { background: #f1f5f9; color: #475569; }
+.status-a_confirmar { background: #fff7ed; color: #c2410c; }
+.status-finalizado  { background: #dbeafe; color: #1e40af; }
+
+.status-select {
+    display: inline-block; padding: 0.3rem 0.75rem; border-radius: 50px;
+    font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(0,0,0,0.06);
+    cursor: pointer; min-width: 130px; appearance: auto; font-family: inherit;
+}
+.status-select.status-approved    { background: #d1fae5; color: #065f46; }
+.status-select.status-pending     { background: #fef3c7; color: #92400e; }
+.status-select.status-rejected    { background: #fee2e2; color: #991b1b; }
+.status-select.status-cancelled   { background: #f1f5f9; color: #475569; }
+.status-select.status-a_confirmar { background: #fff7ed; color: #c2410c; }
+.status-select.status-finalizado  { background: #dbeafe; color: #1e40af; }
+.status-select:focus { outline: 2px solid var(--admin-primary); outline-offset: 1px; }
+
+/* ============================================
+ * SHARED: Tabs
+ * ============================================ */
+.tabs-container {
+    background: var(--admin-card); border-radius: var(--admin-radius);
+    margin-bottom: 1.5rem; border: 1px solid var(--admin-border); overflow: hidden;
+}
+.tabs-wrapper {
+    display: flex; background: var(--admin-bg); border-bottom: 1px solid var(--admin-border);
+    padding: 0; margin: 0; gap: 0;
+}
+.tab {
+    padding: 0.7rem 1.35rem; text-decoration: none; font-weight: 600;
+    color: var(--admin-muted); background: transparent; border: none;
+    border-bottom: 2px solid transparent; transition: all 0.2s;
+    display: inline-block; cursor: pointer; font-size: 0.88rem; font-family: inherit;
+}
+.tab:hover { color: var(--admin-text); background: rgba(99,102,241,0.04); }
+.tab.active {
+    color: var(--admin-primary); border-bottom-color: var(--admin-primary);
+    background: var(--admin-card);
+}
+.tabs-content { padding: 0 1.5rem; background: var(--admin-card); }
+@media (max-width: 768px) {
+    .tabs-wrapper { flex-wrap: wrap; }
+    .tab { flex: 1; min-width: 0; padding: 0.6rem 0.75rem; font-size: 0.82rem; text-align: center; }
+    .tabs-content { padding: 0 1rem; }
+}
+
+/* ============================================
+ * SHARED: Sort Grid
+ * ============================================ */
+.products-sortable-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-top: 1rem;
+}
+.product-sortable-card {
+    background: var(--admin-card); border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius); padding: 0.85rem;
+    cursor: move; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.product-sortable-card:hover { border-color: var(--admin-primary); box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.product-sortable-card.dragging { opacity: 0.5; border-color: var(--admin-primary); }
+.product-sortable-card.drag-over { border-color: var(--admin-primary); background: var(--admin-primary-light); }
+.product-sortable-card img {
+    width: 100%; height: 180px; object-fit: cover;
+    border-radius: 8px; display: block; margin-bottom: 0.6rem;
+}
+.product-placeholder {
+    width: 100%; height: 180px; background: var(--admin-bg);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    color: var(--admin-muted); margin-bottom: 0.6rem;
+}
+.product-sortable-name {
+    font-weight: 600; color: var(--admin-dark); text-align: center;
+    font-size: 0.85rem; line-height: 1.3; min-height: 2.2em;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.mobile-controls {
+    display: none; position: absolute; top: 50%; right: 0.5rem;
+    transform: translateY(-50%); z-index: 10; gap: 0.25rem; flex-direction: column;
+}
+.btn-move {
+    background: var(--admin-primary); color: white; border: none; border-radius: 50%;
+    width: 32px; height: 32px; font-size: 1.1rem; font-weight: bold;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.2s; padding: 0; line-height: 1;
+}
+.btn-move:hover:not(:disabled) { background: var(--admin-primary-hover); transform: scale(1.1); }
+.btn-move:disabled { background: rgba(200,200,200,0.5); color: rgba(255,255,255,0.5); cursor: not-allowed; box-shadow: none; }
+
+@media (max-width: 1200px) { .products-sortable-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) {
+    .products-sortable-grid { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    .product-sortable-card { padding: 0.65rem; cursor: default; }
+    .product-sortable-card img, .product-placeholder { height: 140px; }
+    .mobile-controls { display: flex; }
+    #btn-guardar-orden {
+        position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+        z-index: 900; width: auto; min-width: 200px; padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    #products-grid { padding-bottom: 5rem; }
+}
+@media (max-width: 480px) {
+    .products-sortable-grid { grid-template-columns: 1fr; }
+    .btn-move { width: 36px; height: 36px; font-size: 1.2rem; }
+}
+
+/* ============================================
+ * SHARED: Order Detail
+ * ============================================ */
+.orden-detail { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+.detail-section {
+    background: var(--admin-card); padding: 1.5rem; border-radius: var(--admin-radius);
+    border: 1px solid var(--admin-border); margin-bottom: 1.5rem;
+}
+.detail-section h3 { margin: 0 0 1rem 0; padding-bottom: 0.75rem; border-bottom: 1px solid var(--admin-border); font-size: 1rem; font-weight: 700; color: var(--admin-dark); }
+.detail-row { display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--admin-bg); }
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-weight: 600; color: var(--admin-muted); font-size: 0.88rem; }
+.detail-value { text-align: right; color: var(--admin-dark); font-size: 0.88rem; }
+.items-list { list-style: none; padding: 0; margin: 0; }
+.items-list li { display: flex; justify-content: space-between; padding: 0.65rem 0; border-bottom: 1px solid var(--admin-bg); font-size: 0.88rem; }
+.items-list li:last-child { border-bottom: none; }
+.total-row { font-weight: 700; font-size: 1.05rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 2px solid var(--admin-dark); }
+.btn-back {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: var(--admin-bg); color: var(--admin-text); border: 1px solid var(--admin-border);
+    padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none;
+    font-size: 0.88rem; font-weight: 600; transition: all 0.2s;
+}
+.btn-back:hover { border-color: var(--admin-primary); color: var(--admin-primary); }
+
+@media (max-width: 968px) { .orden-detail { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .detail-section { padding: 1.15rem; } }
+
+/* ============================================
+ * SHARED: Guide / Collapsible
+ * ============================================ */
+.guia-collapsible.collapsed { display: none; }
+.guia-collapsible { padding-top: 1rem; }
+.guia-collapsible p { margin-bottom: 0.75rem; color: var(--admin-text); line-height: 1.65; font-size: 0.9rem; }
+.guia-collapsible code { background: var(--admin-bg); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.85rem; color: var(--admin-dark); }
+.guia-collapsible a { color: var(--admin-primary); }
+.guia-collapsible .guia-paso { margin-bottom: 1.25rem; }
+.guia-collapsible .guia-paso h4 { margin: 0 0 0.5rem 0; color: var(--admin-dark); font-size: 0.95rem; }
+.guia-collapsible .guia-paso p { margin: 0.25rem 0; }
+
+/* ============================================
+ * SHARED: Password Toggle
+ * ============================================ */
+.password-input-wrapper { position: relative; display: flex; align-items: center; }
+.password-input-wrapper .password-input { width: 100%; padding-right: 45px; }
+.toggle-password {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; padding: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--admin-muted); transition: color 0.2s; z-index: 10;
+}
+.toggle-password:hover { color: var(--admin-dark); }
+.toggle-password:focus { outline: none; }
+.toggle-password .eye-icon { width: 20px; height: 20px; transition: opacity 0.2s; }
+.toggle-password .eye-icon.hidden { display: none; }
+
+/* ============================================
+ * SHARED: Ordenes table
+ * ============================================ */
+.ordenes-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem; margin-bottom: 1.5rem;
+}
+.ordenes-stats .stat-card { padding: 1rem; }
+.ordenes-stats .stat-card h3 {
+    margin: 0 0 0.25rem 0; color: var(--admin-muted);
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.ordenes-stats .stat-card .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--admin-dark); line-height: 1.2; }
+.ordenes-stats .stat-card.total .stat-value    { color: #4f46e5; }
+.ordenes-stats .stat-card.approved .stat-value  { color: #059669; }
+.ordenes-stats .stat-card.pending .stat-value   { color: #d97706; }
+.ordenes-stats .stat-card.a_confirmar .stat-value { color: #ea580c; }
+.ordenes-stats .stat-card.rejected .stat-value  { color: #dc2626; }
+.ordenes-stats .stat-card.finalizado .stat-value { color: #64748b; }
+
+.ordenes-table {
+    width: 100%; background: var(--admin-card); border-radius: var(--admin-radius);
+    overflow: hidden; border: 1px solid var(--admin-border);
+}
+.ordenes-table table { width: 100%; border-collapse: collapse; }
+.ordenes-table th {
+    background: #fafbfc; color: var(--admin-muted); padding: 0.75rem 1rem;
+    text-align: left; font-weight: 600; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 1px solid var(--admin-border);
+}
+.ordenes-table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--admin-bg); font-size: 0.88rem; display: table-cell; }
+.ordenes-table tbody td { display: table-cell; }
+.ordenes-table tbody td[data-label="ID"]:after,
+.ordenes-table tbody td[data-label="Cliente"]:after,
+.ordenes-table tbody td[data-label="Total"]:after { display: none !important; content: none; }
+.ordenes-table tbody td[data-label="Estado"] { display: table-cell; }
+.ordenes-table tr:hover { background: #fafbfc; }
+
+.btn-view {
+    background: var(--admin-primary); color: white; padding: 0.45rem 0.85rem;
+    border-radius: 8px; text-decoration: none; display: inline-flex;
+    align-items: center; gap: 0.3rem; font-size: 0.82rem; font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-view:hover { background: var(--admin-primary-hover); }
+
+.items-preview { max-width: 200px; font-size: 0.85rem; color: var(--admin-muted); }
+
+/* ============================================
+ * SHARED: Product List
+ * ============================================ */
+.product-thumb {
+    width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--admin-border);
+}
+.product-thumb-placeholder {
+    width: 56px; height: 56px; background: var(--admin-bg); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--admin-muted); font-size: 0.7rem; border: 1px solid var(--admin-border);
+}
+.text-muted { color: var(--admin-muted); font-size: 0.82rem; }
+.toggle-inline { cursor: pointer; display: inline-block; }
+.toggle-inline input[type="checkbox"] { display: none; }
+.badge-muted { background: var(--admin-bg); color: var(--admin-muted); border: 1px solid var(--admin-border); }
+.products-total { margin-top: 1.5rem; color: var(--admin-muted); font-size: 0.88rem; }
+.empty-state { text-align: center; padding: 3rem 1rem !important; color: var(--admin-muted); }
+
+.btn-edit-price {
+    background: none; border: none; cursor: pointer; padding: 0.25rem 0.4rem;
+    color: var(--admin-muted); font-size: 0.88rem; border-radius: 6px; transition: all 0.15s;
+}
+.btn-edit-price:hover { color: var(--admin-primary); background: var(--admin-primary-light); }
+
+.price-edit-form { display: none; align-items: center; gap: 0.25rem; }
+.editable-price-input {
+    width: 100px; padding: 0.3rem 0.5rem; border: 1px solid var(--admin-border);
+    border-radius: 6px; font-size: 0.88rem; font-family: inherit;
+    transition: border-color 0.15s;
+}
+.editable-price-input:focus { border-color: var(--admin-primary); outline: none; }
+.btn-save-price {
+    background: var(--admin-success); border: none; color: white; cursor: pointer;
+    padding: 0.3rem 0.5rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.15s;
+}
+.btn-save-price:hover { background: #059669; }
+.btn-cancel-price {
+    background: var(--admin-danger); border: none; color: white; cursor: pointer;
+    padding: 0.3rem 0.5rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+    transition: background 0.15s;
+}
+.btn-cancel-price:hover { background: #dc2626; }
+
+/* ============================================
+ * SHARED: Utility Classes
+ * ============================================ */
+.text-danger { color: var(--admin-danger); }
+hr {
+    margin: 2rem 0; border: none; border-top: 1px solid var(--admin-border);
+}
+
+/* Logo preview (tienda settings) */
+.logo-preview-wrap { margin-bottom: 1rem; }
+.logo-preview-label { margin-bottom: 0.5rem; font-weight: 600; font-size: 0.88rem; color: var(--admin-dark); }
+.logo-preview-box {
+    display: inline-block; background: var(--admin-bg); padding: 1rem;
+    border-radius: var(--admin-radius); border: 1px solid var(--admin-border);
+}
+.logo-preview-img { max-width: 200px; max-height: 100px; display: block; }

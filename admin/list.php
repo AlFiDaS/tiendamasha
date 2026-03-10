@@ -177,7 +177,7 @@ if (!empty($buscar)) {
         <tbody>
             <?php if (empty($products)): ?>
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                    <td colspan="8" class="empty-state">
                         <?php if (!empty($buscar)): ?>
                             No se encontraron productos con "<?= htmlspecialchars($buscar) ?>". 
                             <?php 
@@ -191,7 +191,7 @@ if (!empty($buscar)) {
                             ]);
                             $testCount = $testResult ? $testResult['total'] : 0;
                             if ($testCount > 0): ?>
-                                <br><small style="color: #999;">(Se encontraron <?= $testCount ?> productos con este texto, pero fueron filtrados por otros criterios)</small>
+                                <br><small class="text-muted">(Se encontraron <?= $testCount ?> productos con este texto, pero fueron filtrados por otros criterios)</small>
                             <?php endif; ?>
                         <?php else: ?>
                             No se encontraron productos.
@@ -214,17 +214,17 @@ if (!empty($buscar)) {
                                 ?>
                                 <img src="<?= $fullImageUrl ?>" 
                                      alt="<?= htmlspecialchars($product['name']) ?>" 
-                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"
+                                     class="product-thumb"
                                      onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'%3E%3Crect fill=\'%23f0f0f0\' width=\'60\' height=\'60\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\' font-size=\'10\'%3ESin img%3C/text%3E%3C/svg%3E';">
                             <?php else: ?>
-                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">
+                                <div class="product-thumb-placeholder">
                                     Sin img
                                 </div>
                             <?php endif; ?>
                         </td>
                         <td data-label="Nombre">
                             <strong><?= htmlspecialchars($product['name']) ?></strong><br class="desktop-only">
-                            <small style="color: #666;"><?= htmlspecialchars($product['slug']) ?></small>
+                            <small class="text-muted"><?= htmlspecialchars($product['slug']) ?></small>
                         </td>
                         <td data-label="Categoría">
                             <span class="badge badge-info"><?= htmlspecialchars($product['categoria']) ?></span>
@@ -232,25 +232,20 @@ if (!empty($buscar)) {
                         <td data-label="Precio">
                             <div class="price-editor" data-id="<?= htmlspecialchars($product['id']) ?>">
                                 <span class="price-display"><?= htmlspecialchars($product['price'] ?? 'N/A') ?></span>
-                                <button type="button" class="btn-edit-price" title="Editar precio" style="background: none; border: none; cursor: pointer; padding: 0.25rem 0.5rem; color: #666; font-size: 0.9rem;">
+                                <button type="button" class="btn-edit-price" title="Editar precio">
                                     <?= icon('edit', 16) ?>
                                 </button>
                                 <div class="price-edit-form" style="display: none;">
                                     <input type="text" 
                                            class="editable-price-input" 
-                                           value="<?= htmlspecialchars($product['price'] ?? '') ?>"
-                                           style="width: 100px; padding: 0.25rem 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; margin-right: 0.25rem;">
-                                    <button type="button" class="btn-save-price" title="Guardar" style="background: #28a745; border: none; color: white; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem; margin-right: 0.25rem;">
-                                        ✓
-                                    </button>
-                                    <button type="button" class="btn-cancel-price" title="Cancelar" style="background: #dc3545; border: none; color: white; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">
-                                        ✕
-                                    </button>
+                                           value="<?= htmlspecialchars($product['price'] ?? '') ?>">
+                                    <button type="button" class="btn-save-price" title="Guardar">✓</button>
+                                    <button type="button" class="btn-cancel-price" title="Cancelar">✕</button>
                                 </div>
                             </div>
                         </td>
                         <td data-label="Estado-Stock-Destacado" class="mobile-info">
-                            <label class="toggle-visible" style="cursor: pointer; display: inline-block;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-visible" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -262,7 +257,7 @@ if (!empty($buscar)) {
                                     <span class="badge badge-warning">○ Oculta</span>
                                 <?php endif; ?>
                             </label>
-                            <label class="toggle-stock" style="cursor: pointer; display: inline-block; margin-right: 0.3rem;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-stock" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -276,7 +271,7 @@ if (!empty($buscar)) {
                                     <span class="badge badge-danger">Sin Stock</span>
                                 <?php endif; ?>
                             </label>
-                            <label class="toggle-destacado" style="cursor: pointer; display: inline-block;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-destacado" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -285,12 +280,12 @@ if (!empty($buscar)) {
                                 <?php if ($product['destacado']): ?>
                                     <span class="badge badge-warning"><?= icon('star', 14) ?> Destacado</span>
                                 <?php else: ?>
-                                    <span class="badge" style="background: #e0e0e0; color: #666;"><?= icon('star', 14) ?> Destacado</span>
+                                    <span class="badge badge-muted"><?= icon('star', 14) ?> Destacado</span>
                                 <?php endif; ?>
                             </label>
                         </td>
                         <td data-label="Estado" class="desktop-only">
-                            <label class="toggle-visible" style="cursor: pointer; display: inline-block;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-visible" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -304,7 +299,7 @@ if (!empty($buscar)) {
                             </label>
                         </td>
                         <td data-label="Stock" class="desktop-only">
-                            <label class="toggle-stock" style="cursor: pointer; display: inline-block;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-stock" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -320,7 +315,7 @@ if (!empty($buscar)) {
                             </label>
                         </td>
                         <td data-label="Destacado" class="desktop-only">
-                            <label class="toggle-destacado" style="cursor: pointer; display: inline-block;">
+                            <label class="toggle-inline">
                                 <input type="checkbox" 
                                        class="editable-destacado" 
                                        data-id="<?= htmlspecialchars($product['id']) ?>"
@@ -329,7 +324,7 @@ if (!empty($buscar)) {
                                 <?php if ($product['destacado']): ?>
                                     <span class="badge badge-warning"><?= icon('star', 14) ?> Destacado</span>
                                 <?php else: ?>
-                                    <span class="badge" style="background: #e0e0e0; color: #666;"><?= icon('star', 14) ?> Destacado</span>
+                                    <span class="badge badge-muted"><?= icon('star', 14) ?> Destacado</span>
                                 <?php endif; ?>
                             </label>
                         </td>
@@ -347,7 +342,7 @@ if (!empty($buscar)) {
         </tbody>
     </table>
     
-    <div style="margin-top: 2rem; color: #666;">
+    <div class="products-total">
         Total: <?= is_array($products) ? count($products) : 0 ?> producto(s)
     </div>
 </div>
@@ -565,8 +560,7 @@ if (!empty($buscar)) {
                         badge.removeAttribute('style');
                     } else {
                         // Desactivar destacado: badge gris
-                        badge.className = 'badge';
-                        badge.style.cssText = 'background: #e0e0e0; color: #666;';
+                        badge.className = 'badge badge-muted';
                         badge.innerHTML = '<svg class="icon icon-star" width="14" height="14" style="vertical-align:middle;margin-right:2px"><use href="#icon-star"></use></svg> Destacado';
                     }
                 } else {

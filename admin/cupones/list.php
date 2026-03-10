@@ -119,46 +119,7 @@ $coupons = getAllCoupons(false);
 </div>
 
 <style>
-    .badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-    
-    .badge-info {
-        background: #e3f2fd;
-        color: #1976d2;
-    }
-    
-    .badge-success {
-        background: #e8f5e9;
-        color: #388e3c;
-    }
-    
-    .badge-secondary {
-        background: #f5f5f5;
-        color: #666;
-    }
-    
-    .text-muted {
-        color: #999;
-    }
-    
-    .text-danger {
-        color: #d32f2f;
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-    
-    .btn-sm {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-    }
+/* Styles in admin.css */
 </style>
 
 <?php require_once '../_inc/footer.php'; ?>

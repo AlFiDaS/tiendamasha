@@ -187,10 +187,11 @@ if (!empty($settings['shop_logo'])) {
 <style>
 /* Mini navbar preview: réplica del navbar real de la web */
 .galeria-admin-navbar-preview .navbar-preview-fake {
-    background: #fff;
+    background: var(--admin-card);
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border-radius: 8px;
+    border-radius: var(--admin-radius);
     overflow: hidden;
+    border: 1px solid var(--admin-border);
 }
 .galeria-admin-navbar-preview .nav-container-fake {
     display: flex;
@@ -204,7 +205,7 @@ if (!empty($settings['shop_logo'])) {
 .galeria-admin-navbar-preview .logo-fallback {
     font-weight: 700;
     font-size: 1.1rem;
-    color: #333;
+    color: var(--admin-dark);
 }
 .galeria-admin-navbar-preview .logo-preview-wrap {
     display: flex;
@@ -227,23 +228,23 @@ if (!empty($settings['shop_logo'])) {
     gap: 2rem;
 }
 .galeria-admin-navbar-preview .nav-item-fake {
-    color: #333;
+    color: var(--admin-dark);
     text-decoration: none;
     font-weight: 500;
 }
 .galeria-admin-navbar-preview .nav-item-fake.disabled {
-    color: #999;
+    color: var(--admin-muted);
     cursor: default;
 }
 .galeria-admin-navbar-preview .nav-item-fake.active {
-    color: #333;
+    color: var(--admin-dark);
 }
 .galeria-admin-navbar-preview .nav-item-fake.active:hover {
     color: var(--primary-color);
 }
 .galeria-admin-navbar-preview .nav-icons-fake {
     font-size: 1.4rem;
-    color: #333;
+    color: var(--admin-dark);
 }
 .galeria-admin-navbar-preview .editable-nav-link {
     position: relative;
@@ -356,18 +357,18 @@ if (!empty($settings['shop_logo'])) {
 }
 .galeria-admin-navbar-preview .btn-edit-ok,
 .galeria-admin-preview .btn-edit-ok {
-    background: #22c55e;
+    background: var(--admin-success);
     color: white;
 }
 .galeria-admin-navbar-preview .btn-edit-ok:hover,
-.galeria-admin-preview .btn-edit-ok:hover { background: #16a34a; }
+.galeria-admin-preview .btn-edit-ok:hover { background: #059669; }
 .galeria-admin-navbar-preview .btn-edit-cancel,
 .galeria-admin-preview .btn-edit-cancel {
-    background: #dc3545;
+    background: var(--admin-danger);
     color: white;
 }
 .galeria-admin-navbar-preview .btn-edit-cancel:hover,
-.galeria-admin-preview .btn-edit-cancel:hover { background: #c82333; }
+.galeria-admin-preview .btn-edit-cancel:hover { background: #dc2626; }
 
 /* Estilos idénticos a la Galería de ideas (public) */
 .galeria-admin-preview.galeria {
@@ -386,7 +387,7 @@ if (!empty($settings['shop_logo'])) {
 }
 .galeria-admin-preview .sub {
     text-align: center;
-    color: #666;
+    color: var(--admin-muted);
     margin-bottom: 1.25rem;
     font-size: 0.95rem;
 }
@@ -409,14 +410,16 @@ if (!empty($settings['shop_logo'])) {
     margin: 0;
     position: relative;
     overflow: hidden;
-    border-radius: 14px;
-    background: #f4f4f4;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-radius: var(--admin-radius);
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border);
     cursor: move;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 .galeria-admin-preview .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border-color: var(--admin-primary);
+    transform: translateY(-2px);
 }
 .galeria-admin-preview .card-image-wrap {
     position: relative;
@@ -461,7 +464,7 @@ if (!empty($settings['shop_logo'])) {
     padding: 0.25rem 0.5rem;
 }
 .galeria-admin-preview .btn-edit-link { color: var(--primary-color); }
-.galeria-admin-preview .btn-delete-link { color: #dc3545; }
+.galeria-admin-preview .btn-delete-link { color: var(--admin-danger); }
 
 /* Drag and drop */
 .galeria-admin-preview .galeria-sortable-card.dragging {
@@ -469,8 +472,8 @@ if (!empty($settings['shop_logo'])) {
     box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 .galeria-admin-preview .galeria-sortable-card.drag-over {
-    border: 2px dashed var(--primary-color);
-    background: #f8f9fa;
+    border: 2px dashed var(--admin-primary);
+    background: var(--admin-primary-light);
 }
 
 /* Controles móvil para ordenar */

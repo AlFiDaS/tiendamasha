@@ -79,12 +79,14 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
 ?>
 
 <div class="admin-content">
-    <div style="margin-bottom: 1.5rem;">
-        <a href="<?= ADMIN_URL ?>/index.php" class="btn btn-secondary">← Volver al Dashboard</a>
-    </div>
-    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-        <h2 style="margin: 0;"><?= icon('bar-chart', 24) ?> Reportes Mensuales</h2>
-        <a href="<?= ADMIN_URL ?>/reports/view-test.php" class="btn btn-secondary">Ver reporte de ejemplo</a>
+    <div class="page-header">
+        <div>
+            <a href="<?= ADMIN_URL ?>/index.php" class="btn-back"><?= icon('arrow-left', 16) ?> Volver al Dashboard</a>
+            <h1 class="page-title" style="margin-top: 0.75rem;"><?= icon('bar-chart', 24) ?> Reportes Mensuales</h1>
+        </div>
+        <div class="page-header-actions">
+            <a href="<?= ADMIN_URL ?>/reports/view-test.php" class="btn btn-secondary">Ver reporte de ejemplo</a>
+        </div>
     </div>
     
     <?php if (isset($success)): ?>
@@ -96,16 +98,16 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
     <?php endif; ?>
     
     <!-- Generar reporte manualmente -->
-    <div class="card" style="margin-bottom: 2rem;">
+    <div class="card">
         <h3>Generar Reporte Manualmente</h3>
-        <p style="color: #666; margin-bottom: 1rem;">
+        <p class="page-desc" style="margin-bottom: 1rem;">
             Solo podés generar reportes de meses completos. El mes actual recién está disponible a partir del día 1 del mes siguiente.
             Los meses disponibles van desde tu primera venta hasta el mes pasado.
         </p>
         <?php if (!empty($availableMonths)): ?>
-        <form method="POST" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <form method="POST" class="filters-form" style="max-width: 500px;">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(generateCSRFToken()) ?>">
-            <div class="form-group" style="margin: 0; min-width: 200px;">
+            <div class="form-group">
                 <label for="month_year">Mes / Año</label>
                 <select name="month_year" id="month_year" required>
                     <option value="">Seleccionar mes...</option>
@@ -117,7 +119,7 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
             <button type="submit" name="generate_report" class="btn btn-primary">Generar Reporte</button>
         </form>
         <?php else: ?>
-        <p style="color: #999;">Aún no hay ventas registradas. Los meses estarán disponibles después de tu primera venta aprobada.</p>
+        <p class="text-muted">Aún no hay ventas registradas. Los meses estarán disponibles después de tu primera venta aprobada.</p>
         <?php endif; ?>
     </div>
     
@@ -125,7 +127,7 @@ if (isset($_GET['delete']) && isset($_GET['csrf_token'])) {
     <div class="card">
         <h3>Reportes Guardados</h3>
         <?php if (empty($reports)): ?>
-            <p style="color: #666; padding: 2rem; text-align: center;">
+            <p class="empty-state">
                 No hay reportes guardados aún. Los reportes se generan automáticamente el último día de cada mes.
             </p>
         <?php else: ?>

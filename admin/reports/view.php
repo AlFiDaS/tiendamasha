@@ -32,16 +32,17 @@ require_once '../_inc/header.php';
 ?>
 
 <div class="admin-content">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2>📊 Reporte: <?= ucfirst($report['month_name']) ?> <?= $report['year'] ?></h2>
+    <div class="page-header">
         <div>
-            <a href="<?= ADMIN_URL ?>/reports/list.php" class="btn-secondary">← Volver</a>
-            <a href="<?= ADMIN_URL ?>/reports/download.php?file=<?= urlencode($filename) ?>" class="btn-primary">Descargar JSON</a>
+            <a href="<?= ADMIN_URL ?>/reports/list.php" class="btn-back"><?= icon('arrow-left', 16) ?> Volver a reportes</a>
+            <h1 class="page-title" style="margin-top: 0.75rem;"><?= icon('bar-chart', 20) ?> Reporte: <?= ucfirst($report['month_name']) ?> <?= $report['year'] ?></h1>
+        </div>
+        <div class="page-header-actions">
+            <a href="<?= ADMIN_URL ?>/reports/download.php?file=<?= urlencode($filename) ?>" class="btn btn-primary"><?= icon('download', 16) ?> Descargar JSON</a>
         </div>
     </div>
     
-    <!-- Resumen -->
-    <div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-number"><?= number_format($report['total_orders']) ?></div>
             <div class="stat-label">Total Pedidos</div>
@@ -62,7 +63,7 @@ require_once '../_inc/header.php';
     
     <!-- Productos más vendidos -->
     <?php if (!empty($report['top_products'])): ?>
-        <div class="card" style="margin-bottom: 2rem;">
+        <div class="card">
             <h3>Productos Más Vendidos</h3>
             <table class="data-table">
                 <thead>

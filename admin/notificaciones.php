@@ -138,7 +138,7 @@ require_once '_inc/header.php';
         <h3 id="guia-telegram-header" class="section-title" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
             <span id="guia-telegram-icon">▼</span> Guía paso a paso para configurar Telegram
         </h3>
-        <div id="guia-telegram" class="guia-telegram collapsed">
+        <div id="guia-telegram" class="guia-collapsible guia-telegram collapsed">
             <div class="guia-paso">
                 <h4>1. Crear tu bot</h4>
                 <p>Abri Telegram y buscá <strong>@BotFather</strong>. Enviá el comando <code>/newbot</code>.</p>
@@ -172,12 +172,7 @@ require_once '_inc/header.php';
 </div>
 
 <style>
-.guia-telegram.collapsed { display: none; }
-.guia-telegram { padding-top: 1rem; }
-.guia-telegram .guia-paso { margin-bottom: 1.25rem; }
-.guia-telegram .guia-paso h4 { margin: 0 0 0.5rem 0; color: #333; }
-.guia-telegram .guia-paso p { margin: 0.25rem 0; color: #444; line-height: 1.6; }
-.guia-telegram code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9rem; }
+/* Styles in admin.css */
 </style>
 <script>
 document.getElementById('guia-telegram-header').addEventListener('click', function() {
