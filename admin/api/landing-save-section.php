@@ -65,7 +65,14 @@ try {
                         } elseif ($linkType === 'ideas' && !empty($linkValue)) {
                             $link = '/galeria';
                         }
-                        $carouselData[] = ['image' => $imagePath, 'link' => $link];
+                        $posDesktop = $_POST['carousel_position_desktop'][$index] ?? '50% 50%';
+                        $posMobile = $_POST['carousel_position_mobile'][$index] ?? '50% 50%';
+                        $carouselData[] = [
+                            'image' => $imagePath,
+                            'link' => $link,
+                            'position_desktop' => $posDesktop,
+                            'position_mobile' => $posMobile
+                        ];
                     }
                 }
             }
@@ -129,7 +136,14 @@ try {
                                     $cat = getCategoryBySlug($linkValue);
                                     $link = $cat ? '/' . $linkValue : '';
                                 } elseif ($linkType === 'ideas' && !empty($linkValue)) { $link = '/galeria'; }
-                                $carouselData[] = ['image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename, 'link' => $link];
+                                $newPosDesktop = $_POST['new_carousel_position_desktop'][$index] ?? '50% 50%';
+                                $newPosMobile = $_POST['new_carousel_position_mobile'][$index] ?? '50% 50%';
+                                $carouselData[] = [
+                                    'image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename,
+                                    'link' => $link,
+                                    'position_desktop' => $newPosDesktop,
+                                    'position_mobile' => $newPosMobile
+                                ];
                             }
                         }
                     }

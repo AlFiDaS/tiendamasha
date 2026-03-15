@@ -78,10 +78,12 @@ body {
   color: var(--text-primary);
   font-size: 1rem; /* Usar rem en lugar de px fijo */
   line-height: 1.7;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Imágenes: estilos por defecto */
 img {
   max-width: 100%;
   height: auto;
@@ -89,27 +91,44 @@ img {
   transition: all var(--transition-normal);
 }
 
-/* 🎠 CARRUSEL SPLIDE - Estilos específicos para el hero slider */
-.splide__slide img {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 500px !important;
-  object-fit: cover !important;
-  vertical-align: bottom !important;
-  display: block !important;
+/* 🎠 CARRUSEL HERO - Estilos globales para elementos inyectados por JS (sin data-astro-cid) */
+.hero-carousel__track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
 }
-
-/* Responsive para carrusel en mobile */
-@media (max-width: 768px) {
-  .splide__slide img {
-    min-height: 300px !important;
-  }
+.hero-carousel__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
 }
-
-@media (max-width: 480px) {
-  .splide__slide img {
-    min-height: 250px !important;
-  }
+.hero-carousel__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+.hero-carousel__slide-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+.hero-carousel__slide-link {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  text-decoration: none;
 }
 
 

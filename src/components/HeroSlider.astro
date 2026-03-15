@@ -1,168 +1,265 @@
-<div class="splide" id="hero-slider">
-  <!-- Imágenes del slider -->
-  <div class="splide__track">
-    <ul class="splide__list" id="carousel-list">
-      <!-- Las imágenes se cargarán dinámicamente desde la API -->
-    </ul>
+---
+/**
+ * Carrusel Hero - Implementación propia sin dependencias externas.
+ * Cada slide es un div con background-image y background-position inline.
+ * La posición se aplica directamente al crear el HTML = coincide exactamente con el editor del admin.
+ */
+---
+<div class="hero-carousel" id="hero-carousel">
+  <div class="hero-carousel__track" id="hero-carousel-track">
+    <!-- Los slides se inyectan por JS desde la API -->
   </div>
+  <button type="button" class="hero-carousel__arrow hero-carousel__arrow--prev" id="hero-prev" aria-label="Anterior">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button type="button" class="hero-carousel__arrow hero-carousel__arrow--next" id="hero-next" aria-label="Siguiente">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+  <div class="hero-carousel__pagination" id="hero-pagination"></div>
 </div>
 
-<!-- CSS y scripts -->
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/css/splide.min.css"
-/>
-<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js" is:inline></script>
-
 <style>
-  .splide {
+  /* Carrusel: mismas proporciones que el editor del admin (pos-preview-wrap)
+   * Desktop: 16/7 | Mobile: 9/10 → la posición se ve idéntica al editor */
+  .hero-carousel {
     position: relative;
     width: 100%;
-    height: 70vh;
+    min-width: 100%;
+    aspect-ratio: 16 / 7;
     overflow: hidden;
     margin-bottom: var(--space-xl);
+    background: #e9ecef;
   }
 
-  .splide__slide {
+  .hero-carousel__track {
     position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
   }
 
-  .splide__slide::before {
-    content: '';
+  /* Cada slide: posición absoluta, apilados. Solo el activo es visible */
+  .hero-carousel__slide {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.1) 50%,
-      rgba(0, 0, 0, 0.4) 100%
-    );
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+
+  .hero-carousel__slide.is-active {
+    opacity: 1;
+    pointer-events: auto;
     z-index: 1;
   }
 
-  .splide__slide img {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 500px !important;
-    object-fit: cover !important;
-    vertical-align: bottom !important;
-    transition: transform var(--transition-normal);
-    display: block !important;
+  /* El fondo de cada slide: cubre todo el espacio, detrás del overlay */
+  .hero-carousel__slide-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
   }
 
-  .splide__slide:hover img {
-    transform: scale(1.02);
-  }
-
-  .splide__slide a {
+  .hero-carousel__slide-link {
     display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     text-decoration: none;
+    z-index: 2;
   }
 
-  /* Ajustar flechas y paginación */
-  .splide__arrow {
-    background: rgba(255, 255, 255, 0.8);
+  /* Overlay oscuro sutil - encima de la imagen */
+  .hero-carousel__slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+  }
+
+  /* Flechas */
+  .hero-carousel__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
     border: none;
-    opacity: 0.8;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: opacity 0.2s;
   }
 
-  .splide__arrow:hover {
-    opacity: 1;
+  .hero-carousel__arrow:hover {
+    opacity: 0.9;
   }
 
-  .splide__pagination {
+  .hero-carousel__arrow--prev { left: 1rem; }
+  .hero-carousel__arrow--next { right: 1rem; }
+
+  /* Paginación */
+  .hero-carousel__pagination {
+    position: absolute;
     bottom: 1.25rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 10;
   }
 
-  .splide__pagination__page {
-    background: rgba(255, 255, 255, 0.5);
+  .hero-carousel__pagination-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: background 0.2s;
   }
 
-  .splide__pagination__page.is-active {
-    background: rgba(255, 255, 255, 1);
+  .hero-carousel__pagination-dot.is-active {
+    background: #fff;
   }
 
-  /* 💡 Responsive: móviles */
   @media (max-width: 768px) {
-    .splide {
-      height: 40vh;
-      min-height: 300px;
-      max-height: 500px;
+    .hero-carousel {
+      aspect-ratio: 9 / 10;
       margin-bottom: var(--space-md);
     }
-
-    .splide__slide {
-      height: 100%;
+    .hero-carousel__arrow {
+      width: 36px;
+      height: 36px;
     }
-
-    .splide__slide img {
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 300px !important;
-      object-fit: cover !important;
-      vertical-align: bottom !important;
-      display: block !important;
-    }
-
-    /* Ajustar tamaño de flechas en mobile */
-    .splide__arrow {
-      width: 32px;
-      height: 32px;
-    }
-
-    .splide__arrow svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    /* Ajustar paginación en mobile */
-    .splide__pagination {
-      bottom: 1rem;
-    }
-
-    .splide__pagination__page {
-      width: 8px;
-      height: 8px;
-      margin: 0 4px;
-    }
+    .hero-carousel__arrow--prev { left: 0.5rem; }
+    .hero-carousel__arrow--next { right: 0.5rem; }
   }
 
   @media (max-width: 480px) {
-    .splide {
-      height: 35vh;
-      min-height: 250px;
-      max-height: 400px;
-      margin-bottom: var(--space-sm);
-    }
-
-    .splide__slide {
-      height: 100%;
-    }
-
-    .splide__slide img {
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 250px !important;
-      object-fit: cover !important;
-      vertical-align: bottom !important;
-      display: block !important;
-    }
-
-    /* Flechas más pequeñas en mobile pequeño */
-    .splide__arrow {
-      width: 28px;
-      height: 28px;
-    }
-
-    .splide__arrow svg {
-      width: 12px;
-      height: 12px;
+    .hero-carousel {
+      aspect-ratio: 9 / 10;
     }
   }
 </style>
-  
+
+<script is:inline>
+(function() {
+  var track = document.getElementById('hero-carousel-track');
+  var prevBtn = document.getElementById('hero-prev');
+  var nextBtn = document.getElementById('hero-next');
+  var paginationEl = document.getElementById('hero-pagination');
+  if (!track) return;
+
+  var storeBase = (typeof window !== 'undefined' && window.__STORE_BASE) ? window.__STORE_BASE : '';
+  if (!storeBase && typeof window !== 'undefined' && window.location && window.location.pathname) {
+    var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+    storeBase = m ? '/' + m[1] : '';
+  }
+
+  var slides = [];
+  var currentIndex = 0;
+  var autoplayTimer = null;
+  var AUTOPLAY_MS = 4000;
+
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function buildSlideHTML(item, idx) {
+    var link = item.link ? (storeBase + item.link) : '';
+    var rawImg = (item.image || '').trim();
+    var imgUrl = '';
+    if (rawImg) {
+      imgUrl = (rawImg.indexOf('http') === 0) ? rawImg : ((storeBase || '') + (rawImg.charAt(0) === '/' ? rawImg : '/' + rawImg));
+    }
+    var posD = item.position_desktop || '50% 50%';
+    var posM = item.position_mobile || '50% 50%';
+    var pos = isMobile() ? posM : posD;
+    var bgStyle = imgUrl ? 'background-image:url(\'' + imgUrl.replace(/'/g, '%27') + '\');background-size:cover;background-position:' + pos + ';' : '';
+    var slideContent = '<div class="hero-carousel__slide-bg" style="' + bgStyle + '"></div>';
+    if (link) {
+      slideContent = '<a href="' + link + '" class="hero-carousel__slide-link"></a>' + slideContent;
+    }
+    return '<div class="hero-carousel__slide' + (idx === 0 ? ' is-active' : '') + '" data-index="' + idx + '" data-pos-d="' + posD + '" data-pos-m="' + posM + '">' + slideContent + '</div>';
+  }
+
+  function applyPositions() {
+    var mobile = isMobile();
+    track.querySelectorAll('.hero-carousel__slide').forEach(function(slide) {
+      var bg = slide.querySelector('.hero-carousel__slide-bg');
+      if (!bg) return;
+      var pos = mobile ? (slide.getAttribute('data-pos-m') || '50% 50%') : (slide.getAttribute('data-pos-d') || '50% 50%');
+      bg.style.backgroundPosition = pos;
+    });
+  }
+
+  function goTo(idx) {
+    if (slides.length === 0) return;
+    currentIndex = ((idx % slides.length) + slides.length) % slides.length;
+    track.querySelectorAll('.hero-carousel__slide').forEach(function(s, i) {
+      s.classList.toggle('is-active', i === currentIndex);
+    });
+    if (paginationEl) {
+      paginationEl.querySelectorAll('.hero-carousel__pagination-dot').forEach(function(d, i) {
+        d.classList.toggle('is-active', i === currentIndex);
+      });
+    }
+    resetAutoplay();
+  }
+
+  function next() { goTo(currentIndex + 1); }
+  function prev() { goTo(currentIndex - 1); }
+
+  function resetAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    autoplayTimer = setInterval(next, AUTOPLAY_MS);
+  }
+
+  function initCarousel(data) {
+    slides = data;
+    if (slides.length === 0) return;
+    track.innerHTML = slides.map(function(item, idx) { return buildSlideHTML(item, idx); }).join('');
+    if (paginationEl) {
+      paginationEl.innerHTML = slides.map(function(_, i) {
+        return '<button type="button" class="hero-carousel__pagination-dot' + (i === 0 ? ' is-active' : '') + '" data-index="' + i + '" aria-label="Slide ' + (i + 1) + '"></button>';
+      }).join('');
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function() { prev(); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { next(); });
+    if (paginationEl) {
+      paginationEl.addEventListener('click', function(e) {
+        var btn = e.target.closest('.hero-carousel__pagination-dot');
+        if (btn) goTo(parseInt(btn.getAttribute('data-index'), 10));
+      });
+    }
+
+    window.addEventListener('resize', applyPositions);
+    resetAutoplay();
+  }
+
+  window.__initHeroCarousel = function(data) {
+    if (data && data.length > 0) initCarousel(data);
+  };
+})();
+</script>

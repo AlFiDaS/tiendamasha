@@ -4,7 +4,9 @@ import HeroSlider from '../components/HeroSlider.astro';
 ---
 
 <Layout>
-  <HeroSlider />
+  <div class="hero-wrapper">
+    <HeroSlider />
+  </div>
 
   <!-- Productos más vendidos (título, descripción y botón editables desde landing page) -->
   <section class="productos">
@@ -124,6 +126,14 @@ import HeroSlider from '../components/HeroSlider.astro';
 
   <style>
     /* 🏠 INDEX PAGE STYLES */
+    
+    /* Carrusel: ancho completo del viewport */
+    .hero-wrapper {
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      overflow: hidden;
+    }
     
     /* 📦 PRODUCTOS SECTION */
     .productos {
@@ -950,58 +960,31 @@ import HeroSlider from '../components/HeroSlider.astro';
   </style>
 
 <script>
-      // Cargar datos de la landing page desde la API
+      // @ts-nocheck - Script con APIs del DOM; los tipos se resuelven en runtime
+      // Cargar datos de la landing page desde la API (usa __STORE_BASE para multi-tienda)
       async function loadLandingPageData() {
         try {
-          const response = await fetch('/api/landing-page.php');
-          const data = await response.json();
+          var storeBase = (typeof window !== 'undefined' && window.__STORE_BASE) ? window.__STORE_BASE : '';
+          if (!storeBase && typeof window !== 'undefined' && window.location && window.location.pathname) {
+            var pathMatch = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
+            storeBase = pathMatch ? '/' + pathMatch[1] : '';
+          }
+          var apiUrl = storeBase + '/api/landing-page.php';
+          var response = await fetch(apiUrl);
+          var data = await response.json();
           
-          // Cargar carrusel
-          if (data.carousel && data.carousel.length > 0) {
-            const carouselList = document.getElementById('carousel-list');
-            if (carouselList) {
-              carouselList.innerHTML = data.carousel.map(item => {
-                const link = item.link ? `href="${item.link}"` : '';
-                const linkTag = item.link ? '<a ' + link + '>' : '';
-                const linkClose = item.link ? '</a>' : '';
-                return `
-                  <li class="splide__slide">
-                    ${linkTag}
-                      <img src="${item.image}" alt="Carrusel" width="1920" height="1080" loading="lazy" decoding="async" />
-                    ${linkClose}
-                  </li>
-                `;
-              }).join('');
-              
-              // Reinicializar el slider después de un pequeño delay para asegurar que las imágenes se cargaron
-              setTimeout(() => {
-                if (typeof Splide !== 'undefined') {
-                  // Destruir slider existente si hay uno
-                  const existingSlider = document.getElementById('hero-slider');
-                  if (existingSlider && existingSlider.splide) {
-                    existingSlider.splide.destroy();
-                  }
-                  
-                  new Splide('#hero-slider', {
-                    type: 'fade',
-                    autoplay: true,
-                    interval: 4000,
-                    rewind: true,
-                    arrows: true,
-                    pagination: true
-                  }).mount();
-                }
-              }, 100);
-            }
+          // Cargar carrusel (implementación propia con background-position)
+          if (data.carousel && data.carousel.length > 0 && typeof window.__initHeroCarousel === 'function') {
+            window.__initHeroCarousel(data.carousel);
           }
           
           // Cargar sección Productos (título, descripción, botón)
           if (data.productos) {
-            const p = data.productos;
+            var p = data.productos;
             if (document.getElementById('productos-title')) document.getElementById('productos-title').textContent = p.title;
             if (document.getElementById('productos-description')) document.getElementById('productos-description').textContent = p.description;
-            const btnLink = document.getElementById('productos-button-link');
-            if (btnLink && p.button_link) btnLink.href = p.button_link;
+            var btnLink = document.getElementById('productos-button-link');
+            if (btnLink && p.button_link) btnLink.setAttribute('href', storeBase + p.button_link);
             if (document.getElementById('productos-button-text')) document.getElementById('productos-button-text').textContent = p.button_text || 'Ver todos los productos';
           }
           
@@ -1011,9 +994,8 @@ import HeroSlider from '../components/HeroSlider.astro';
             if (document.getElementById('sobre-title')) document.getElementById('sobre-title').textContent = sobre.title;
             if (document.getElementById('sobre-text-1')) document.getElementById('sobre-text-1').textContent = sobre.text_1;
             if (document.getElementById('sobre-text-2')) document.getElementById('sobre-text-2').textContent = sobre.text_2;
-            if (document.getElementById('sobre-image') && sobre.image) {
-              document.getElementById('sobre-image').src = sobre.image;
-            }
+            var sobreImg = document.getElementById('sobre-image');
+            if (sobreImg && sobre.image) sobreImg.setAttribute('src', sobre.image);
             if (sobre.stats && sobre.stats.length > 0) {
               // Filtrar estadísticas válidas (que tengan número y label)
               const validStats = sobre.stats.filter(stat => 
@@ -1100,15 +1082,12 @@ import HeroSlider from '../components/HeroSlider.astro';
               if (document.getElementById('galeria-badge')) document.getElementById('galeria-badge').textContent = galeria.badge || '✨ Inspiración';
               if (document.getElementById('galeria-title')) document.getElementById('galeria-title').textContent = galeria.title;
               if (document.getElementById('galeria-description')) document.getElementById('galeria-description').textContent = galeria.description;
-              if (document.getElementById('galeria-image') && galeria.image) {
-                document.getElementById('galeria-image').src = galeria.image;
-              }
-              if (document.getElementById('galeria-link') && galeria.link) {
-                document.getElementById('galeria-link').href = galeria.link;
-              }
-              if (document.getElementById('galeria-button-link') && galeria.link) {
-                document.getElementById('galeria-button-link').href = galeria.link;
-              }
+              var galeriaImg = document.getElementById('galeria-image');
+              if (galeriaImg && galeria.image) galeriaImg.setAttribute('src', galeria.image);
+              var galeriaLinkEl = document.getElementById('galeria-link');
+              if (galeriaLinkEl && galeria.link) galeriaLinkEl.setAttribute('href', storeBase + galeria.link);
+              var galeriaBtnLink = document.getElementById('galeria-button-link');
+              if (galeriaBtnLink && galeria.link) galeriaBtnLink.setAttribute('href', storeBase + galeria.link);
               if (document.getElementById('galeria-button-text')) {
                 document.getElementById('galeria-button-text').textContent = galeria.button_text || 'Galeria de ideas';
               }

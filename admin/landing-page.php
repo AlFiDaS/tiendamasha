@@ -55,7 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } elseif ($linkType === 'ideas' && !empty($linkValue)) {
                         $link = '/galeria';
                     }
-                    $carouselData[] = ['image' => $imagePath, 'link' => $link];
+                    $posDesktop = $_POST['carousel_position_desktop'][$index] ?? '50% 50%';
+                    $posMobile = $_POST['carousel_position_mobile'][$index] ?? '50% 50%';
+                    $carouselData[] = ['image' => $imagePath, 'link' => $link, 'position_desktop' => $posDesktop, 'position_mobile' => $posMobile];
                 }
             }
         }
@@ -123,7 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $category = getCategoryBySlug($linkValue);
                                 $link = $category ? '/' . $linkValue : '';
                             } elseif ($linkType === 'ideas' && !empty($linkValue)) { $link = '/galeria'; }
-                            $carouselData[] = ['image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename, 'link' => $link];
+                            $posDesktop = $_POST['new_carousel_position_desktop'][$index] ?? '50% 50%';
+                            $posMobile = $_POST['new_carousel_position_mobile'][$index] ?? '50% 50%';
+                            $carouselData[] = ['image' => '/images/tiendas/' . $storeSlug . '/hero/' . $newFilename, 'link' => $link, 'position_desktop' => $posDesktop, 'position_mobile' => $posMobile];
                         }
                     }
                 }
@@ -649,6 +653,95 @@ body.landing-editor-page .admin-main-wrapper {
 @keyframes ceSlideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .ce-save-text { font-size: 0.85rem; font-weight: 500; opacity: 0.8; }
 .ce-save-bar .btn { padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 8px; }
+
+/* Position editor modal */
+.pos-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.pos-overlay.open { display: flex; }
+.pos-modal {
+  background: var(--admin-card, #fff); border-radius: 16px;
+  width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.pos-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--admin-border, #e2e8f0);
+}
+.pos-header h3 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+.pos-close {
+  width: 36px; height: 36px; border-radius: 10px; border: none;
+  background: var(--admin-bg, #f1f5f9); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; color: var(--admin-muted, #94a3b8); transition: all 0.15s;
+}
+.pos-close:hover { background: #fee2e2; color: #ef4444; }
+.pos-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--admin-border, #e2e8f0);
+  padding: 0 1.5rem;
+}
+.pos-tab {
+  padding: 0.75rem 1.25rem; border: none; background: none; cursor: pointer;
+  font-size: 0.88rem; font-weight: 600; color: var(--admin-muted, #94a3b8);
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.pos-tab.active { color: var(--admin-primary, #6366f1); border-bottom-color: var(--admin-primary, #6366f1); }
+.pos-tab:hover:not(.active) { color: var(--admin-text, #334155); }
+.pos-tab svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 0.35rem; }
+.pos-body { padding: 1.5rem; }
+.pos-hint {
+  text-align: center; font-size: 0.82rem; color: var(--admin-muted, #94a3b8);
+  margin-bottom: 1rem; font-weight: 500;
+}
+.pos-hint svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 0.25rem; opacity: 0.6; }
+.pos-preview-wrap {
+  position: relative; margin: 0 auto; border-radius: 12px; overflow: hidden;
+  border: 2px solid var(--admin-border, #e2e8f0); cursor: grab;
+  user-select: none; -webkit-user-select: none;
+  background: #0f172a;
+}
+.pos-preview-wrap:active { cursor: grabbing; }
+.pos-preview-wrap.is-desktop { aspect-ratio: 16/7; max-width: 100%; }
+.pos-preview-wrap.is-mobile { aspect-ratio: 9/10; max-width: 320px; }
+.pos-preview-wrap img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  pointer-events: none; transition: object-position 0.05s ease-out;
+}
+.pos-preview-label {
+  position: absolute; top: 0.5rem; left: 0.5rem;
+  background: rgba(0,0,0,0.6); color: #fff; border-radius: 6px;
+  font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem;
+  pointer-events: none; z-index: 2;
+}
+.pos-coords {
+  text-align: center; margin-top: 0.75rem; font-size: 0.78rem;
+  color: var(--admin-muted, #94a3b8); font-family: 'JetBrains Mono', monospace;
+}
+.pos-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem;
+  padding: 1rem 1.5rem; border-top: 1px solid var(--admin-border, #e2e8f0);
+}
+.pos-footer .btn { padding: 0.55rem 1.25rem; font-size: 0.88rem; border-radius: 10px; }
+.pos-btn-reset {
+  background: var(--admin-bg, #f1f5f9); color: var(--admin-text, #334155);
+  border: 1px solid var(--admin-border, #e2e8f0); cursor: pointer;
+  padding: 0.55rem 1.25rem; font-size: 0.88rem; border-radius: 10px;
+  font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.pos-btn-reset:hover { background: #e2e8f0; }
+.pos-btn-save {
+  background: var(--admin-primary, #6366f1); color: #fff; border: none; cursor: pointer;
+  padding: 0.55rem 1.5rem; font-size: 0.88rem; border-radius: 10px;
+  font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.15s;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+}
+.pos-btn-save:hover { background: var(--admin-primary-hover, #4f46e5); }
+
+.ce-btn-position { background: rgba(34,197,94,0.7); }
+.ce-btn-position:hover { background: rgba(34,197,94,0.9); }
 
 @media (max-width: 640px) {
   .ce-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
@@ -1542,6 +1635,9 @@ body.landing-editor-page .admin-main-wrapper {
                             <button type="button" class="ce-btn ce-btn-link" data-idx="<?= $index ?>" title="Configurar link">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                             </button>
+                            <button type="button" class="ce-btn ce-btn-position" data-idx="<?= $index ?>" title="Ajustar posición">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+                            </button>
                             <button type="button" class="ce-btn ce-btn-delete" data-idx="<?= $index ?>" title="Eliminar imagen">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
@@ -1566,6 +1662,8 @@ body.landing-editor-page .admin-main-wrapper {
                         <input type="hidden" name="carousel_image[]" value="<?= htmlspecialchars($item['image'] ?? '') ?>">
                         <input type="hidden" name="carousel_link_type[]" value="<?= htmlspecialchars($linkType) ?>">
                         <input type="hidden" name="carousel_link_value[]" value="<?= htmlspecialchars($linkVal) ?>">
+                        <input type="hidden" name="carousel_position_desktop[]" value="<?= htmlspecialchars($item['position_desktop'] ?? '50% 50%') ?>">
+                        <input type="hidden" name="carousel_position_mobile[]" value="<?= htmlspecialchars($item['position_mobile'] ?? '50% 50%') ?>">
                         <input type="file" name="carousel_change_image_<?= $index ?>" accept="image/jpeg,image/png,image/webp" class="ce-file-input" data-idx="<?= $index ?>" style="display:none;">
                         <input type="hidden" name="carousel_change_image_index[]" value="<?= $index ?>">
                     </div>
@@ -1578,6 +1676,41 @@ body.landing-editor-page .admin-main-wrapper {
                 </div>
 
                 <input type="file" id="ce-new-input" name="new_carousel_images[]" accept="image/jpeg,image/png,image/webp" multiple style="display:none;">
+
+                <!-- Position editor modal -->
+                <div class="pos-overlay" id="pos-overlay">
+                    <div class="pos-modal">
+                        <div class="pos-header">
+                            <h3>Ajustar posición de imagen</h3>
+                            <button type="button" class="pos-close" id="pos-close">&times;</button>
+                        </div>
+                        <div class="pos-tabs">
+                            <button type="button" class="pos-tab active" data-view="desktop">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                Desktop
+                            </button>
+                            <button type="button" class="pos-tab" data-view="mobile">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+                                Mobile
+                            </button>
+                        </div>
+                        <div class="pos-body">
+                            <div class="pos-hint">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+                                Arrastrá la imagen para ajustar qué parte se muestra
+                            </div>
+                            <div class="pos-preview-wrap is-desktop" id="pos-preview">
+                                <img id="pos-img" src="" alt="Preview" draggable="false" />
+                                <div class="pos-preview-label" id="pos-label">Desktop</div>
+                            </div>
+                            <div class="pos-coords" id="pos-coords">50% 50%</div>
+                        </div>
+                        <div class="pos-footer">
+                            <button type="button" class="pos-btn-reset" id="pos-reset">Centrar</button>
+                            <button type="button" class="pos-btn-save" id="pos-save">Guardar posición</button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Sticky save bar -->
                 <div class="ce-save-bar" id="ce-save-bar" style="display:none;">
@@ -2079,6 +2212,10 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.onload = function(ev) { img.src = ev.target.result; };
         reader.readAsDataURL(e.target.files[0]);
       }
+      var pdIn = card && card.querySelector('input[name="carousel_position_desktop[]"]');
+      var pmIn = card && card.querySelector('input[name="carousel_position_mobile[]"]');
+      if (pdIn) pdIn.value = '50% 50%';
+      if (pmIn) pmIn.value = '50% 50%';
       ceShowSave();
     }
   });
@@ -2146,7 +2283,13 @@ document.addEventListener('DOMContentLoaded', function() {
           ceUpdateUI();
           ceShowSave();
         });
+        var btnPos = document.createElement('button');
+        btnPos.type = 'button'; btnPos.className = 'ce-btn ce-btn-position';
+        btnPos.setAttribute('data-idx', 'new-' + fileIndex);
+        btnPos.title = 'Ajustar posición';
+        btnPos.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>';
         overlay.appendChild(btnLink);
+        overlay.appendChild(btnPos);
         overlay.appendChild(btnDel);
         card.appendChild(overlay);
 
@@ -2171,6 +2314,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var valH = document.createElement('input');
         valH.type = 'hidden'; valH.name = 'new_carousel_link_value[]'; valH.value = '';
         card.appendChild(valH);
+        var posDH = document.createElement('input');
+        posDH.type = 'hidden'; posDH.name = 'new_carousel_position_desktop[]'; posDH.value = '50% 50%';
+        card.appendChild(posDH);
+        var posMH = document.createElement('input');
+        posMH.type = 'hidden'; posMH.name = 'new_carousel_position_mobile[]'; posMH.value = '50% 50%';
+        card.appendChild(posMH);
 
         btnLink.addEventListener('click', function(ev) {
           ev.preventDefault();
@@ -2192,6 +2341,172 @@ document.addEventListener('DOMContentLoaded', function() {
       ceCloseAllPopovers();
     }
   });
+
+  // ===== POSITION EDITOR =====
+  (function() {
+    var overlay = document.getElementById('pos-overlay');
+    var closeBtn = document.getElementById('pos-close');
+    var preview = document.getElementById('pos-preview');
+    var img = document.getElementById('pos-img');
+    var label = document.getElementById('pos-label');
+    var coords = document.getElementById('pos-coords');
+    var resetBtn = document.getElementById('pos-reset');
+    var saveBtn = document.getElementById('pos-save');
+    var tabs = overlay ? overlay.querySelectorAll('.pos-tab') : [];
+    if (!overlay || !img || !preview) return;
+
+    var currentCard = null;
+    var currentView = 'desktop';
+    var posDesktop = { x: 50, y: 50 };
+    var posMobile = { x: 50, y: 50 };
+    var dragging = false;
+    var startMouse = { x: 0, y: 0 };
+    var startPos = { x: 50, y: 50 };
+
+    function getPos() { return currentView === 'desktop' ? posDesktop : posMobile; }
+    function setPos(x, y) {
+      x = Math.max(0, Math.min(100, x));
+      y = Math.max(0, Math.min(100, y));
+      if (currentView === 'desktop') { posDesktop.x = x; posDesktop.y = y; }
+      else { posMobile.x = x; posMobile.y = y; }
+    }
+
+    function applyPos() {
+      var p = getPos();
+      img.style.objectPosition = p.x.toFixed(1) + '% ' + p.y.toFixed(1) + '%';
+      if (coords) coords.textContent = Math.round(p.x) + '% ' + Math.round(p.y) + '%';
+    }
+
+    function calcOverflow() {
+      var cw = preview.clientWidth, ch = preview.clientHeight;
+      var iw = img.naturalWidth, ih = img.naturalHeight;
+      if (!iw || !ih || !cw || !ch) return { ox: 0, oy: 0 };
+      var ca = cw / ch, ia = iw / ih;
+      if (ia > ca) {
+        var dw = iw * (ch / ih);
+        return { ox: dw - cw, oy: 0 };
+      } else {
+        var dh = ih * (cw / iw);
+        return { ox: 0, oy: dh - ch };
+      }
+    }
+
+    function switchView(view) {
+      currentView = view;
+      tabs.forEach(function(t) { t.classList.toggle('active', t.getAttribute('data-view') === view); });
+      preview.className = 'pos-preview-wrap ' + (view === 'desktop' ? 'is-desktop' : 'is-mobile');
+      if (label) label.textContent = view === 'desktop' ? 'Desktop' : 'Mobile';
+      applyPos();
+    }
+
+    function openEditor(card) {
+      currentCard = card;
+      var imgEl = card.querySelector('img');
+      if (!imgEl) return;
+      var isNew = card.classList.contains('ce-card-new');
+      var pdInput = card.querySelector('input[name="' + (isNew ? 'new_carousel_position_desktop[]' : 'carousel_position_desktop[]') + '"]');
+      var pmInput = card.querySelector('input[name="' + (isNew ? 'new_carousel_position_mobile[]' : 'carousel_position_mobile[]') + '"]');
+      var pdVal = pdInput ? pdInput.value : '50% 50%';
+      var pmVal = pmInput ? pmInput.value : '50% 50%';
+      var pdParts = pdVal.split(/\s+/);
+      var pmParts = pmVal.split(/\s+/);
+      posDesktop = { x: parseFloat(pdParts[0]) || 50, y: parseFloat(pdParts[1]) || 50 };
+      posMobile = { x: parseFloat(pmParts[0]) || 50, y: parseFloat(pmParts[1]) || 50 };
+      img.src = imgEl.src;
+      currentView = 'desktop';
+      switchView('desktop');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditor() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      currentCard = null;
+    }
+
+    function savePositions() {
+      if (!currentCard) return;
+      var isNew = currentCard.classList.contains('ce-card-new');
+      var pdInput = currentCard.querySelector('input[name="' + (isNew ? 'new_carousel_position_desktop[]' : 'carousel_position_desktop[]') + '"]');
+      var pmInput = currentCard.querySelector('input[name="' + (isNew ? 'new_carousel_position_mobile[]' : 'carousel_position_mobile[]') + '"]');
+      var dVal = Math.round(posDesktop.x) + '% ' + Math.round(posDesktop.y) + '%';
+      var mVal = Math.round(posMobile.x) + '% ' + Math.round(posMobile.y) + '%';
+      if (pdInput) pdInput.value = dVal;
+      if (pmInput) pmInput.value = mVal;
+      closeEditor();
+      ceShowSave();
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeEditor);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeEditor(); });
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        switchView(this.getAttribute('data-view'));
+      });
+    });
+    if (resetBtn) resetBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      setPos(50, 50);
+      applyPos();
+    });
+    if (saveBtn) saveBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      savePositions();
+    });
+
+    preview.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      dragging = true;
+      startMouse = { x: e.clientX, y: e.clientY };
+      var p = getPos();
+      startPos = { x: p.x, y: p.y };
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var dx = e.clientX - startMouse.x;
+      var dy = e.clientY - startMouse.y;
+      var over = calcOverflow();
+      var nx = startPos.x, ny = startPos.y;
+      if (over.ox > 0) nx = startPos.x - (dx / over.ox) * 100;
+      if (over.oy > 0) ny = startPos.y - (dy / over.oy) * 100;
+      setPos(nx, ny);
+      applyPos();
+    });
+    document.addEventListener('mouseup', function() { dragging = false; });
+
+    preview.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      e.preventDefault();
+      dragging = true;
+      startMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      var p = getPos();
+      startPos = { x: p.x, y: p.y };
+    }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+      if (!dragging || e.touches.length !== 1) return;
+      e.preventDefault();
+      var dx = e.touches[0].clientX - startMouse.x;
+      var dy = e.touches[0].clientY - startMouse.y;
+      var over = calcOverflow();
+      var nx = startPos.x, ny = startPos.y;
+      if (over.ox > 0) nx = startPos.x - (dx / over.ox) * 100;
+      if (over.oy > 0) ny = startPos.y - (dy / over.oy) * 100;
+      setPos(nx, ny);
+      applyPos();
+    }, { passive: false });
+    document.addEventListener('touchend', function() { dragging = false; });
+
+    if (ceGrid) ceGrid.addEventListener('click', function(e) {
+      var btn = e.target.closest('.ce-btn-position');
+      if (!btn) return;
+      e.preventDefault();
+      var card = btn.closest('.ce-card');
+      if (card) openEditor(card);
+    });
+  })();
 
   // Cambiar imagen: sobre
   var triggerSobre = document.getElementById('trigger-sobre-image');
