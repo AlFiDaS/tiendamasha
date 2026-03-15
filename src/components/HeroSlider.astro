@@ -19,13 +19,12 @@
 </div>
 
 <style>
-  /* Carrusel: mismas proporciones que el editor del admin (pos-preview-wrap)
-   * Desktop: 16/7 | Mobile: 9/10 → la posición se ve idéntica al editor */
+  /* Carrusel: alto fijo ~600px desktop, proporciones del editor en mobile */
   .hero-carousel {
     position: relative;
     width: 100%;
     min-width: 100%;
-    aspect-ratio: 16 / 7;
+    height: 600px;
     overflow: hidden;
     margin-bottom: var(--space-xl);
     background: #e9ecef;
@@ -146,7 +145,7 @@
 
   @media (max-width: 768px) {
     .hero-carousel {
-      aspect-ratio: 9 / 10;
+      height: 400px;
       margin-bottom: var(--space-md);
     }
     .hero-carousel__arrow {
@@ -159,7 +158,7 @@
 
   @media (max-width: 480px) {
     .hero-carousel {
-      aspect-ratio: 9 / 10;
+      height: 350px;
     }
   }
 </style>

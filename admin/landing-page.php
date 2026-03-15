@@ -663,7 +663,7 @@ body.landing-editor-page .admin-main-wrapper {
 .pos-overlay.open { display: flex; }
 .pos-modal {
   background: var(--admin-card, #fff); border-radius: 16px;
-  width: 100%; max-width: 720px; max-height: 90vh; overflow-y: auto;
+  width: 100%; max-width: 960px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 .pos-header {
@@ -704,8 +704,9 @@ body.landing-editor-page .admin-main-wrapper {
   background: #0f172a;
 }
 .pos-preview-wrap:active { cursor: grabbing; }
-.pos-preview-wrap.is-desktop { aspect-ratio: 16/7; max-width: 100%; }
-.pos-preview-wrap.is-mobile { aspect-ratio: 9/10; max-width: 320px; }
+/* Mismas proporciones que el carrusel del inicio: ~2000x600 desktop (10/3), 350px alto mobile */
+.pos-preview-wrap.is-desktop { aspect-ratio: 10/3; max-width: 100%; }
+.pos-preview-wrap.is-mobile { aspect-ratio: 15/14; max-width: 360px; }
 .pos-preview-wrap img {
   width: 100%; height: 100%; object-fit: cover; display: block;
   pointer-events: none; transition: object-position 0.05s ease-out;
@@ -716,22 +717,34 @@ body.landing-editor-page .admin-main-wrapper {
   font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem;
   pointer-events: none; z-index: 2;
 }
-.pos-coords {
-  text-align: center; margin-top: 0.75rem; font-size: 0.78rem;
-  color: var(--admin-muted, #94a3b8); font-family: 'JetBrains Mono', monospace;
+.pos-coords-row {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  margin-top: 0.75rem; flex-wrap: wrap;
 }
+.pos-coords {
+  font-size: 0.78rem; color: var(--admin-muted, #94a3b8);
+  font-family: 'JetBrains Mono', monospace;
+}
+.pos-btn-reset {
+  background: none; color: var(--admin-primary, #6366f1); border: none;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+  font-family: 'Inter', sans-serif; padding: 0.25rem 0;
+  transition: color 0.15s;
+}
+.pos-btn-reset:hover { color: var(--admin-primary-hover, #4f46e5); }
 .pos-footer {
   display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem;
   padding: 1rem 1.5rem; border-top: 1px solid var(--admin-border, #e2e8f0);
 }
 .pos-footer .btn { padding: 0.55rem 1.25rem; font-size: 0.88rem; border-radius: 10px; }
-.pos-btn-reset {
+.pos-btn-cancel {
   background: var(--admin-bg, #f1f5f9); color: var(--admin-text, #334155);
   border: 1px solid var(--admin-border, #e2e8f0); cursor: pointer;
   padding: 0.55rem 1.25rem; font-size: 0.88rem; border-radius: 10px;
   font-weight: 600; font-family: 'Inter', sans-serif; transition: all 0.15s;
 }
-.pos-btn-reset:hover { background: #e2e8f0; }
+.pos-btn-cancel:hover { background: #e2e8f0; border-color: #cbd5e1; }
 .pos-btn-save {
   background: var(--admin-primary, #6366f1); color: #fff; border: none; cursor: pointer;
   padding: 0.55rem 1.5rem; font-size: 0.88rem; border-radius: 10px;
@@ -1703,10 +1716,13 @@ body.landing-editor-page .admin-main-wrapper {
                                 <img id="pos-img" src="" alt="Preview" draggable="false" />
                                 <div class="pos-preview-label" id="pos-label">Desktop</div>
                             </div>
-                            <div class="pos-coords" id="pos-coords">50% 50%</div>
+                            <div class="pos-coords-row">
+                                <span class="pos-coords" id="pos-coords">50% 50%</span>
+                                <button type="button" class="pos-btn-reset" id="pos-reset">Centrar imagen</button>
+                            </div>
                         </div>
                         <div class="pos-footer">
-                            <button type="button" class="pos-btn-reset" id="pos-reset">Centrar</button>
+                            <button type="button" class="pos-btn-cancel" id="pos-cancel">Cancelar</button>
                             <button type="button" class="pos-btn-save" id="pos-save">Guardar posición</button>
                         </div>
                     </div>
@@ -2438,8 +2454,9 @@ document.addEventListener('DOMContentLoaded', function() {
       ceShowSave();
     }
 
+    var cancelBtn = document.getElementById('pos-cancel');
     if (closeBtn) closeBtn.addEventListener('click', closeEditor);
-    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeEditor(); });
+    if (cancelBtn) cancelBtn.addEventListener('click', function(e) { e.preventDefault(); closeEditor(); });
     tabs.forEach(function(tab) {
       tab.addEventListener('click', function(e) {
         e.preventDefault();
