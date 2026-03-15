@@ -25,8 +25,8 @@ import HeroSlider from '../components/HeroSlider.astro';
 
 
 
-  <!-- Sobre Lume -->
-  <section class="sobre" id="sobre-section">
+  <!-- Sobre (oculta por defecto; se muestra solo si sobre.visible en la API) -->
+  <section class="sobre" id="sobre-section" style="display: none;">
     <div class="container">
       <div class="sobre-content">
         <div class="sobre-text">
@@ -969,7 +969,7 @@ import HeroSlider from '../components/HeroSlider.astro';
             var pathMatch = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
             storeBase = pathMatch ? '/' + pathMatch[1] : '';
           }
-          var apiUrl = storeBase + '/api/landing-page.php';
+          var apiUrl = storeBase + '/api/landing-page.php?_=' + Date.now();
           var response = await fetch(apiUrl);
           var data = await response.json();
           
@@ -988,9 +988,14 @@ import HeroSlider from '../components/HeroSlider.astro';
             if (document.getElementById('productos-button-text')) document.getElementById('productos-button-text').textContent = p.button_text || 'Ver todos los productos';
           }
           
-          // Cargar sección Sobre
+          // Cargar sección Sobre (mismo patrón que testimonials/galeria: oculta por defecto, mostrar solo si visible)
           if (data.sobre) {
             const sobre = data.sobre;
+            const sobreSection = document.getElementById('sobre-section');
+            if (sobreSection) {
+              const mostrar = sobre.visible === true || sobre.visible === 1 || sobre.visible === '1';
+              sobreSection.style.display = mostrar ? 'block' : 'none';
+            }
             if (document.getElementById('sobre-title')) document.getElementById('sobre-title').textContent = sobre.title;
             if (document.getElementById('sobre-text-1')) document.getElementById('sobre-text-1').textContent = sobre.text_1;
             if (document.getElementById('sobre-text-2')) document.getElementById('sobre-text-2').textContent = sobre.text_2;

@@ -294,6 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'sobre_stat_2_label' => $sobreData['stat_2_label'],
             'sobre_stat_3_number' => $sobreData['stat_3_number'],
             'sobre_stat_3_label' => $sobreData['stat_3_label'],
+            'sobre_visible' => isset($_POST['sobre_visible']) ? 1 : 0,
             'testimonials' => json_encode($testimonialsData),
             'testimonials_visible' => isset($_POST['testimonials_visible']) ? 1 : 0,
             'galeria_title' => $galeriaData['title'],
@@ -1804,6 +1805,12 @@ body.landing-editor-page .admin-main-wrapper {
             <div class="landing-section" data-section="sobre">
             <section class="sobre" id="sobre-section">
                 <div class="container">
+                    <div class="section-header" style="display: flex; align-items: center; justify-content: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;" title="Solo afecta a la página principal (index). En el editor la sección siempre está visible.">
+                            <input type="checkbox" name="sobre_visible" value="1" <?= ($settings['sobre_visible'] ?? 1) ? 'checked' : '' ?>>
+                            <span>Mostrar esta sección en la página principal (index)</span>
+                        </label>
+                    </div>
                     <div class="sobre-content">
                         <div class="sobre-text">
                             <div class="editable-text" data-input="sobre_title">
@@ -2711,7 +2718,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (el.type === 'file' && el.files && el.files.length > 0) {
           for (var i = 0; i < el.files.length; i++) fd.append(el.name, el.files[i]);
         } else if (el.type === 'checkbox') {
-          if (el.checked) fd.append(el.name, '1');
+          fd.append(el.name, el.checked ? '1' : '0');
         } else if (el.name && el.value !== undefined) {
           fd.append(el.name, el.value);
         }

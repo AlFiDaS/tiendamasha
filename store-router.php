@@ -132,6 +132,7 @@ if ($htmlFile && file_exists($htmlFile)) {
     $html = file_get_contents($htmlFile);
     $html = injectStoreContext($html, $storeSlug);
     $html = injectShopLogo($html, $storeSlug, (int) $store['id']);
+    $html = injectLandingVisibility($html, (int) $store['id']);
 
     header('Content-Type: text/html; charset=utf-8');
     echo $html;

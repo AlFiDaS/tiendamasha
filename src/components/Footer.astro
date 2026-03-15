@@ -36,9 +36,13 @@
     
     <div class="footer-bottom">
       <p id="footer-copyright"></p>
-      <p>Desarrollado por <strong>WeMashaDev</strong></p>
-      <a href="https://wa.me/3795343171?text=Hola WeMashaDev! Quiero una web!" target="_blank" aria-label="WhatsApp" class="dev-link">
-        ¿Quieres una web? Contáctanos
+      <p class="footer-consumer">
+        Defensa de las y los consumidores. Para reclamos ingrese <a href="https://autogestion.produccion.gob.ar/consumidores" target="_blank" rel="noopener noreferrer">aquí</a>.
+      </p>
+      <div class="footer-divider footer-divider--small"></div>
+      <a href="https://www.somostiendi.com/" target="_blank" rel="noopener noreferrer" class="footer-platform-badge" aria-label="Somos Tiendi - Creá tu tienda online">
+        <span class="footer-platform-text">Tienda creada con</span>
+        <span class="footer-platform-brand">Somos Tiendi</span>
       </a>
     </div>
   </div>
@@ -64,7 +68,8 @@
     if (d && s.footer_description) d.textContent = s.footer_description;
     if (c) {
       var yr = s.creation_year || new Date().getFullYear();
-      c.innerHTML = '© ' + yr + ' <strong>' + (s.shop_name || '') + '</strong>. Todos los derechos reservados.';
+      var name = s.shop_name || 'Tienda';
+      c.textContent = '© ' + name + ' - ' + yr;
     }
     if (s.instagram) {
       var ig = document.getElementById('footer-instagram-link');
@@ -103,13 +108,12 @@
         if (footerDescEl) footerDescEl.textContent = shop.footer_description;
       }
       
-      // Actualizar copyright dinámicamente: © AÑO NOMBRE_DE_TIENDA. Todos los derechos reservados.
+      // Actualizar copyright: © Nombre de tienda - Año de creación
       const copyrightEl = document.getElementById('footer-copyright');
       if (copyrightEl) {
-        const shopName = shop.shop_name || 'LUME';
+        const shopName = shop.shop_name || 'Tienda';
         const creationYear = shop.creation_year || new Date().getFullYear();
-        const copyrightText = `© ${creationYear} <strong>${shopName}</strong>. Todos los derechos reservados.`;
-        copyrightEl.innerHTML = copyrightText;
+        copyrightEl.textContent = `© ${shopName} - ${creationYear}`;
       }
       
       // Actualizar enlaces sociales
@@ -227,12 +231,16 @@
     margin: var(--space-lg) 0;
   }
 
+  .footer-divider--small {
+    margin: var(--space-md) 0;
+  }
+
   .footer-bottom {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-md);
+    text-align: center;
+    gap: var(--space-sm);
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
@@ -241,20 +249,47 @@
     margin: 0;
   }
 
-  .dev-link {
+  .footer-consumer a {
     color: var(--primary);
-    text-decoration: none;
-    padding: var(--space-xs) var(--space-sm);
-    background: transparent;
-    border: 1px solid var(--primary);
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-normal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
-  .dev-link:hover {
-    background: var(--primary);
-    color: white;
+  .footer-consumer a:hover {
+    opacity: 0.85;
+  }
+
+  /* Badge estilo Somos Tiendi (platform index) */
+  .footer-platform-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+  }
+
+  .footer-platform-badge:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.4);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  }
+
+  .footer-platform-brand {
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+
+  .footer-platform-badge:hover .footer-platform-brand {
+    color: var(--primary);
   }
 
   /* 📱 RESPONSIVE DESIGN */

@@ -8,12 +8,21 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
 
 require_once '../config.php';
 
 // Asegurar que LUME_ADMIN está definido
 if (!defined('LUME_ADMIN')) {
     define('LUME_ADMIN', true);
+}
+
+// Asegurar que la columna sobre_visible existe (auto-migración)
+$col = fetchOne("SHOW COLUMNS FROM landing_page_settings LIKE 'sobre_visible'");
+if (empty($col)) {
+    $err = null;
+    executeRaw("ALTER TABLE landing_page_settings ADD COLUMN sobre_visible TINYINT(1) DEFAULT 1 COMMENT 'Mostrar u ocultar sección Sobre'", [], $err);
 }
 
 // Obtener configuración de landing page
@@ -37,6 +46,7 @@ if (!$settings) {
         'sobre_stat_2_label' => 'Diseños únicos',
         'sobre_stat_3_number' => '2',
         'sobre_stat_3_label' => 'Años de experiencia',
+        'sobre_visible' => 1,
         'testimonials' => json_encode([
             ['text' => 'Hermosas velas, ahora mi oficina tiene aroma a café, me encanta.', 'client_name' => 'María G.', 'stars' => '⭐⭐⭐⭐⭐'],
             ['text' => 'Compré una velita de mi perrito que falleció, me largué a llorar, lo hicieron igual.', 'client_name' => 'Carlos L.', 'stars' => '⭐⭐⭐⭐⭐'],
@@ -67,6 +77,7 @@ $response = [
         'button_link' => $settings['productos_button_link'] ?? '/productos'
     ],
     'sobre' => [
+        'visible' => (bool)($settings['sobre_visible'] ?? 1),
         'title' => $settings['sobre_title'] ?? 'Sobre LUME',
         'text_1' => $settings['sobre_text_1'] ?? '',
         'text_2' => $settings['sobre_text_2'] ?? '',

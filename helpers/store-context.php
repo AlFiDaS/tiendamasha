@@ -215,3 +215,47 @@ function injectShopLogo($html, $storeSlug = '', $storeId = 0) {
         1
     );
 }
+
+/**
+ * Inyecta visibilidad de secciones de landing (Sobre, etc.) en el HTML al servir.
+ * Lee desde BD. Si está oculta, ELIMINA la sección del HTML (no puede mostrarse).
+ * @param string $html HTML a modificar
+ * @param int $storeId ID de la tienda
+ */
+function injectLandingVisibility($html, $storeId = 0) {
+    if (!defined('STORE_CONTEXT_LOADED') || $storeId < 1) {
+        return $html;
+    }
+    $sobreVisible = 1;
+    try {
+        if (!function_exists('fetchOne')) {
+            require_once dirname(__FILE__) . '/../config.php';
+            require_once dirname(__FILE__) . '/../helpers/db.php';
+        }
+        $col = fetchOne("SHOW COLUMNS FROM landing_page_settings LIKE 'sobre_visible'");
+        if (!empty($col)) {
+            $row = fetchOne("SELECT sobre_visible FROM landing_page_settings WHERE id = 1 LIMIT 1");
+            $sobreVisible = isset($row['sobre_visible']) ? (int) $row['sobre_visible'] : 1;
+        }
+    } catch (Throwable $e) {
+        error_log('[injectLandingVisibility] ' . $e->getMessage());
+    }
+    if ($sobreVisible === 0) {
+        // Eliminar la sección Sobre por completo del HTML (no puede mostrarse por JS ni CSS)
+        $html = preg_replace(
+            '/<section[^>]*id="sobre-section"[^>]*>.*?<\/section>\s*/s',
+            '',
+            $html,
+            1
+        );
+    } else {
+        // Si está visible, quitar display:none para que se muestre
+        $html = preg_replace(
+            '/<section\s+class="sobre"\s+id="sobre-section"\s+style="display:\s*none[^"]*"\s*([^>]*)>/',
+            '<section class="sobre" id="sobre-section" $1>',
+            $html,
+            1
+        );
+    }
+    return $html;
+}

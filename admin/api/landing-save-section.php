@@ -229,6 +229,7 @@ try {
             $updateData['sobre_stat_2_label'] = $sobreData['stat_2_label'];
             $updateData['sobre_stat_3_number'] = $sobreData['stat_3_number'];
             $updateData['sobre_stat_3_label'] = $sobreData['stat_3_label'];
+            $updateData['sobre_visible'] = (isset($_POST['sobre_visible']) && ($_POST['sobre_visible'] === '1' || $_POST['sobre_visible'] === 1)) ? 1 : 0;
             break;
 
         case 'testimonials':
@@ -258,7 +259,7 @@ try {
                 }
             }
             $updateData['testimonials'] = json_encode($testimonialsData);
-            $updateData['testimonials_visible'] = isset($_POST['testimonials_visible']) ? 1 : 0;
+            $updateData['testimonials_visible'] = (isset($_POST['testimonials_visible']) && ($_POST['testimonials_visible'] === '1' || $_POST['testimonials_visible'] === 1)) ? 1 : 0;
             break;
 
         case 'galeria':
@@ -289,7 +290,7 @@ try {
                 'title' => sanitize($_POST['galeria_title'] ?? ''),
                 'description' => sanitize($_POST['galeria_description'] ?? ''),
                 'link' => '/galeria',
-                'visible' => isset($_POST['galeria_visible']) ? 1 : 0,
+                'visible' => (isset($_POST['galeria_visible']) && ($_POST['galeria_visible'] === '1' || $_POST['galeria_visible'] === 1)) ? 1 : 0,
                 'badge' => sanitize($_POST['galeria_badge'] ?? '✨ Inspiración'),
                 'features' => $featuresData,
                 'button_text' => sanitize($_POST['galeria_button_text'] ?? 'Galeria de ideas')
@@ -350,6 +351,15 @@ try {
         if (empty($col)) {
             echo json_encode(['success' => false, 'message' => 'La tabla no tiene columnas de productos. Ejecuta la migración.']);
             exit;
+        }
+    }
+
+    // Si se guarda sobre_visible pero la columna no existe, agregarla
+    if (isset($updateData['sobre_visible'])) {
+        $col = fetchOne("SHOW COLUMNS FROM landing_page_settings LIKE 'sobre_visible'");
+        if (empty($col)) {
+            $err = null;
+            executeRaw("ALTER TABLE landing_page_settings ADD COLUMN sobre_visible TINYINT(1) DEFAULT 1 COMMENT 'Mostrar u ocultar sección Sobre' AFTER sobre_stat_3_label", [], $err);
         }
     }
 
