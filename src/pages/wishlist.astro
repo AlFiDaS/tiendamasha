@@ -141,15 +141,15 @@ import Icon from '../components/Icon.astro';
               }
             }
             
-            const priceHtml = product.price && cardPriceFormatted ? `
+            const priceHtml = product.price && transferPriceFormatted ? `
               <div class="price-container">
-                <p class="price">${escapeHtml(cardPriceFormatted)}</p>
-                <p class="price-card-text">hasta en 3 cuotas</p>
-                ${transferPriceFormatted ? `
+                <p class="price">${escapeHtml(transferPriceFormatted)}</p>
+                ${cardPriceFormatted ? `
                   <p class="price-card">
-                    <span class="price-label">Transferencia (-${getTransferDiscountPercent()}%):</span> ${escapeHtml(transferPriceFormatted)}
+                    <span class="price-label">Mercado Pago / Tarjeta:</span> ${escapeHtml(cardPriceFormatted)}
                   </p>
                 ` : ''}
+                <p class="price-card-text">hasta en 3 cuotas</p>
               </div>
             ` : product.price ? `<p class="price">${escapeHtml(product.price)}</p>` : '<p class="price">N/A</p>';
             
