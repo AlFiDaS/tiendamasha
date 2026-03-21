@@ -100,6 +100,22 @@ try {
     $couponCode = $formData['coupon_code'] ?? null;
     $discountAmount = isset($formData['discount_amount']) ? floatval($formData['discount_amount']) : 0;
     
+    // Construir shipping_address completo con todos los campos
+    $shippingType = (is_array($formData['shipping']) ? ($formData['shipping']['type'] ?? '') : '');
+    $shippingAddress = '';
+    if (is_array($formData['shipping'])) {
+        $sh = $formData['shipping'];
+        $parts = array_filter([
+            isset($sh['province']) ? 'Provincia: ' . $sh['province'] : '',
+            isset($sh['locality']) ? 'Localidad: ' . $sh['locality'] : '',
+            isset($sh['address']) ? 'Dirección: ' . $sh['address'] : '',
+            isset($sh['postal_code']) ? 'CP: ' . $sh['postal_code'] : '',
+            isset($sh['sucursal']) ? 'Sucursal: ' . $sh['sucursal'] : '',
+            isset($sh['observations']) ? 'Observaciones: ' . $sh['observations'] : ''
+        ]);
+        $shippingAddress = implode("\n", $parts);
+    }
+    
     // Preparar datos de la orden (primero sin proof_image)
     $orderData = [
         'preference_id' => null,
@@ -114,8 +130,8 @@ try {
         'total_amount' => $totalAmount,
         'payment_method' => 'transferencia_directa',
         'payment_type' => null,
-        'shipping_type' => (is_array($formData['shipping']) ? ($formData['shipping']['type'] ?? '') : ''),
-        'shipping_address' => (is_array($formData['shipping']) ? ($formData['shipping']['address'] ?? '') : ''),
+        'shipping_type' => $shippingType,
+        'shipping_address' => $shippingAddress,
         'notes' => $formData['notes'] ?? '',
         'coupon_code' => $couponCode,
         'discount_amount' => $discountAmount,

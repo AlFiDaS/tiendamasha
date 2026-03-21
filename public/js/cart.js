@@ -4,15 +4,11 @@
 (function() {
   'use strict';
   
-  // Prefijo por tienda: evita cruce de carrito entre wemasha, test1, etc.
-  // Fallback: si __STORE_BASE no está inyectado (ej. cache), derivar de la URL
+  // Prefijo por tienda: __STORE_BASE se inyecta por store-context.php (ej: /wemasha)
+  // Si no está definido, usar ''. La migración recupera datos de claves alternativas.
   function storeKey(key) {
-    var base = window.__STORE_BASE;
-    if (!base && typeof window.location !== 'undefined') {
-      var m = window.location.pathname.match(/^\/([a-z0-9\-]+)(?:\/|$)/);
-      base = m ? '/' + m[1] : '';
-    }
-    return key + (base || '');
+    var base = (typeof window !== 'undefined' && window.__STORE_BASE) ? window.__STORE_BASE : '';
+    return key + base;
   }
   
   // Cache de categorías con min_quantity
@@ -22,7 +18,37 @@
 
   // Funciones del carrito
   function getCarrito() {
-    return JSON.parse(localStorage.getItem(storeKey("carrito"))) || [];
+    var key = storeKey("carrito");
+    var raw = localStorage.getItem(key);
+    var carrito = [];
+    try {
+      if (raw) carrito = JSON.parse(raw);
+      if (!Array.isArray(carrito)) carrito = [];
+    } catch (e) { carrito = []; }
+    // Migración: solo en modo single-store (sin __STORE_BASE). En multitienda no migrar para no mezclar carritos entre tiendas.
+    var base = (typeof window !== 'undefined' && window.__STORE_BASE) ? window.__STORE_BASE : '';
+    if (carrito.length === 0 && !base && typeof localStorage !== 'undefined') {
+      var found = false;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('carrito') === 0 && k !== key) {
+          try {
+            var parsed = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              carrito = parsed;
+              localStorage.setItem(key, JSON.stringify(carrito));
+              found = true;
+              break;
+            }
+          } catch (err) {}
+        }
+      }
+      if (found) {
+        var total = carrito.reduce(function(acc, p) { return acc + (p.cantidad || 1); }, 0);
+        localStorage.setItem(storeKey('cart_count'), total.toString());
+      }
+    }
+    return carrito;
   }
 
   function saveCarrito(carrito) {

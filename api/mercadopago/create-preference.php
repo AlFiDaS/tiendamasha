@@ -168,13 +168,16 @@ try {
     $shippingType = $data['shipping']['type'] ?? '';
     $shippingAddress = '';
     if (!empty($data['shipping'])) {
-        $addressParts = array_filter([
-            $data['shipping']['address'] ?? '',
-            $data['shipping']['locality'] ?? '',
-            $data['shipping']['province'] ?? '',
-            $data['shipping']['postal_code'] ?? ''
+        $sh = $data['shipping'];
+        $parts = array_filter([
+            isset($sh['address']) ? 'Dirección: ' . $sh['address'] : '',
+            isset($sh['province']) ? 'Provincia: ' . $sh['province'] : '',
+            isset($sh['locality']) ? 'Localidad: ' . $sh['locality'] : '',
+            isset($sh['postal_code']) ? 'CP: ' . $sh['postal_code'] : '',
+            isset($sh['sucursal']) ? 'Sucursal: ' . $sh['sucursal'] : '',
+            isset($sh['observations']) ? 'Observaciones: ' . $sh['observations'] : ''
         ]);
-        $shippingAddress = implode(', ', $addressParts);
+        $shippingAddress = implode("\n", $parts);
     }
     
     // Guardar orden en BD antes de crear la preferencia (opcional, puede fallar si la tabla no existe aún)
