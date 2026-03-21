@@ -519,6 +519,7 @@ import Icon from '../components/Icon.astro';
       const getCarrito = window.getCarrito;
       const saveCarrito = window.saveCarrito;
       const updateCartCount = window.updateCartCount || (() => {});
+      let hayMediosPago = false;
 
       // Cargar datos de transferencia desde la API (siempre fresco para reflejar cambios en Configurar pagos)
       async function cargarDatosTransferencia() {
@@ -541,7 +542,7 @@ import Icon from '../components/Icon.astro';
             const titularEl = document.getElementById('transfer-titular');
             const transferOk = !!(shop.transfer_alias && shop.transfer_cbu && shop.transfer_titular);
             const mpOk = !!shop.mercadopago_configured;
-            const hayMediosPago = transferOk || mpOk;
+            hayMediosPago = transferOk || mpOk;
 
             const noPagosMsg = document.getElementById('no-pagos-mensaje');
             const formasPagoWrap = document.getElementById('formas-pago-wrap');
@@ -798,7 +799,7 @@ import Icon from '../components/Icon.astro';
       }
 
       const formasPagoWrap = document.getElementById('formas-pago-wrap');
-      if (formasPagoWrap) formasPagoWrap.style.display = 'block';
+      if (formasPagoWrap) formasPagoWrap.style.display = hayMediosPago ? 'block' : 'none';
       if (vaciarBtn) vaciarBtn.style.display = "inline-block";
 
       carrito.forEach((item) => {
