@@ -1454,10 +1454,20 @@ img {
 
 .envio-option-text {
   flex: 1;
-  font-size: 0.9375rem;
+  font-size: 0.8rem;
   color: #2c2c2c;
   line-height: 1.5;
   font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .envio-option-text {
+    flex: 1;
+    font-size: 0.65rem;
+    color: #2c2c2c;
+    line-height: 1;
+    font-weight: 500;
+  }
 }
 
 .envio-option:has(input[type="radio"]:checked) .envio-option-text {

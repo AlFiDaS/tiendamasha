@@ -94,6 +94,7 @@ import Icon from '../components/Icon.astro';
     <div id="modal-paso2" class="checkout-modal" style="display: none;">
       <div class="checkout-modal-overlay"></div>
       <div class="checkout-modal-content">
+        <button type="button" class="checkout-modal-close" aria-label="Cerrar">×</button>
         <h2>Datos del comprador</h2>
         <form id="form-datos-personales">
           <div class="form-group">
@@ -121,12 +122,13 @@ import Icon from '../components/Icon.astro';
       </div>
     </div>
 
-    <!-- Modal Paso 3: Datos de envío -->
+    <!-- Modal Paso 3: Solo tipo de envío -->
     <div id="modal-paso3" class="checkout-modal" style="display: none;">
       <div class="checkout-modal-overlay"></div>
       <div class="checkout-modal-content">
-        <h2>Datos de envío</h2>
-        <form id="form-datos-envio">
+        <button type="button" class="checkout-modal-close" aria-label="Cerrar">×</button>
+        <h2>Tipo de envío</h2>
+        <form id="form-tipo-envio">
           <div class="form-group">
             <label>Tipo de envío *</label>
             <div class="envio-options">
@@ -159,12 +161,27 @@ import Icon from '../components/Icon.astro';
               </label>
             </div>
           </div>
+          <div class="checkout-modal-actions">
+            <button type="button" class="btn-modal-back" id="btn-back-paso3">Volver</button>
+            <button type="button" class="btn-continuar" id="btn-continuar-paso3">Continuar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Paso 3b: Datos de dirección (según tipo elegido) -->
+    <div id="modal-paso3b" class="checkout-modal" style="display: none;">
+      <div class="checkout-modal-overlay"></div>
+      <div class="checkout-modal-content">
+        <button type="button" class="checkout-modal-close" aria-label="Cerrar">×</button>
+        <h2>Dirección de envío</h2>
+        <form id="form-datos-envio">
           <div class="form-group" id="label-provincia" style="display: none;">
             <label for="provincia">Provincia *</label>
             <input type="text" id="provincia" />
           </div>
           <div class="form-group" id="label-sucursal" style="display: none;">
-            <label for="sucursal">Sucursal de destino</label>
+            <label for="sucursal">Sucursal de destino *</label>
             <input type="text" id="sucursal" />
           </div>
           <div class="form-group" id="label-localidad" style="display: none;">
@@ -173,7 +190,7 @@ import Icon from '../components/Icon.astro';
           </div>
           <div class="form-group" id="label-direccion" style="display: none;">
             <label for="direccion">Dirección *</label>
-            <input type="text" id="direccion" />
+            <input type="text" id="direccion" placeholder="Ej: Av. 3 de Abril 1234" />
           </div>
           <div class="form-group" id="label-cp" style="display: none;">
             <label for="cp">Código Postal *</label>
@@ -181,11 +198,11 @@ import Icon from '../components/Icon.astro';
           </div>
           <div class="form-group" id="label-observaciones" style="display: none;">
             <label for="observaciones">Observaciones</label>
-            <textarea id="observaciones" rows="2"></textarea>
+            <textarea id="observaciones" rows="3" placeholder="Ej: Portón negro, mandar moto de 16 a 19hs"></textarea>
           </div>
           <div class="checkout-modal-actions">
-            <button type="button" class="btn-modal-back" id="btn-back-paso3">Volver</button>
-            <button type="button" class="btn-continuar" id="btn-continuar-paso3">Continuar</button>
+            <button type="button" class="btn-modal-back" id="btn-back-paso3b">Volver</button>
+            <button type="button" class="btn-continuar" id="btn-continuar-paso3b">Continuar</button>
           </div>
         </form>
       </div>
@@ -195,6 +212,7 @@ import Icon from '../components/Icon.astro';
     <div id="modal-resumen" class="checkout-modal" style="display: none;">
       <div class="checkout-modal-overlay"></div>
       <div class="checkout-modal-content checkout-resumen-content">
+        <button type="button" class="checkout-modal-close" aria-label="Cerrar">×</button>
         <h2>Resumen del pedido</h2>
         <div id="resumen-contenido" class="resumen-pedido"></div>
         <div class="resumen-total">
@@ -217,6 +235,7 @@ import Icon from '../components/Icon.astro';
     <div id="modal-transferencia" class="checkout-modal" style="display: none;">
       <div class="checkout-modal-overlay"></div>
       <div class="checkout-modal-content">
+        <button type="button" class="checkout-modal-close" aria-label="Cerrar">×</button>
         <h2>Datos para transferencia</h2>
         <div class="datos-bancarios">
           <div class="datos-transferencia">
@@ -244,10 +263,6 @@ import Icon from '../components/Icon.astro';
         </div>
       </div>
     </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </div>
 
   <style is:global>
@@ -287,18 +302,46 @@ import Icon from '../components/Icon.astro';
       position: absolute;
       inset: 0;
       background: rgba(0,0,0,0.5);
+      pointer-events: none;
+    }
+    .checkout-modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 2rem;
+      height: 2rem;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-size: 1.5rem;
+      line-height: 1;
       cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s, background 0.2s;
+    }
+    .checkout-modal-close:hover {
+      color: #334155;
+      background: #f1f5f9;
     }
     .checkout-modal-content {
       position: relative;
-      background: white;
+      background: #fff;
       border-radius: 12px;
-      padding: 2rem;
-      max-width: 500px;
+      padding: 1rem;
+      max-width: 600px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 40px #0003;
+    }
+    @media (min-width: 769px) {
+      .checkout-modal-content {
+        padding: 2rem;
+      }
     }
     .checkout-modal-content h2 {
       margin: 0 0 1.5rem 0;
@@ -306,35 +349,90 @@ import Icon from '../components/Icon.astro';
     }
     .checkout-modal-actions {
       display: flex;
-      gap: 1rem;
       margin-top: 1.5rem;
-      justify-content: flex-end;
+      justify-content: space-between;
+      width: 100%;
+      flex-wrap: wrap;
+      align-items: stretch;
     }
-    .btn-continuar {
+    .checkout-modal-actions .btn-modal-back {
+      order: 1;
+      width: auto;
+      height: auto;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .checkout-modal-actions .btn-continuar,
+    .checkout-modal-actions .btn-finalizar,
+    .checkout-modal-actions .btn-finalizar-directa {
+      order: 2;
+      margin-left: auto;
+      margin-top: 0;
+      width: auto;
+      min-width: 140px;
+      min-height: 44px;
+    }
+    /* Coherencia botones carrito: Vaciar, Aplicar, Continuar con la compra */
+    .pagina-carrito .btn-vaciar,
+    .pagina-carrito #btn-continuar-paso1 {
       padding: 0.75rem 1.5rem;
-      background: var(--primary-gradient);
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    .pagina-carrito .btn-aplicar-cupon {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    .pagina-carrito #formas-pago-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .pagina-carrito #btn-continuar-paso1 {
+      width: 100%;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    /* Botón principal "Continuar con la compra" y Continuar en modales: verde */
+    .pagina-carrito #btn-continuar-paso1,
+    .checkout-modal .btn-continuar {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
     }
-    .btn-continuar:hover {
+    .pagina-carrito #btn-continuar-paso1:hover,
+    .checkout-modal .btn-continuar:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #16a34a, #15803d);
     }
     .btn-modal-back {
-      padding: 0.75rem 1.5rem;
-      background: #f0f0f0;
-      color: #333;
-      border: none;
-      border-radius: 6px;
+      padding: 0.875rem 1.5rem;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
     }
     .btn-modal-back:hover {
-      background: #e0e0e0;
+      background: #e2e8f0;
+      color: #334155;
+      border-color: #cbd5e1;
     }
     .resumen-pedido {
       margin-bottom: 1rem;
@@ -352,6 +450,58 @@ import Icon from '../components/Icon.astro';
       border-top: 2px solid var(--primary);
       font-size: 1.2rem;
       font-weight: 700;
+    }
+    /* Botones finalizar en modales: verde, estética consistente */
+    .checkout-modal .btn-finalizar,
+    .checkout-modal .btn-finalizar-directa {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .checkout-modal .btn-finalizar:hover,
+    .checkout-modal .btn-finalizar-directa:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+    .checkout-modal .btn-subir-comprobante {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    }
+    .checkout-modal .btn-subir-comprobante:hover {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    }
+    @media (max-width: 380px) {
+      .checkout-modal .btn-modal-back,
+      .checkout-modal .btn-continuar,
+      .checkout-modal .btn-finalizar,
+      .checkout-modal .btn-finalizar-directa,
+      .checkout-modal .btn-subir-comprobante {
+        font-size: 0.8rem;
+      }
+      .checkout-modal .btn-finalizar svg,
+      .checkout-modal .btn-finalizar-directa svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
     }
   </style>
 
@@ -444,6 +594,7 @@ import Icon from '../components/Icon.astro';
 
       if (tipoEnvio === 'Corrientes Envio a Domicilio') {
         mostrar('label-direccion');
+        mostrar('label-observaciones');
       } else if (tipoEnvio === 'Correo Argentino - Sucursal') {
         mostrar('label-provincia');
         mostrar('label-sucursal');
@@ -1155,7 +1306,7 @@ Gracias!`);
     
     // Prevenir submit de formularios en modales
     document.getElementById('form-datos-personales')?.addEventListener('submit', (e) => { e.preventDefault(); validarPaso2() && (hideAllModals(), openModalPaso3()); });
-    document.getElementById('form-datos-envio')?.addEventListener('submit', (e) => { e.preventDefault(); validarPaso3() && (hideAllModals(), openModalResumen()); });
+    document.getElementById('form-datos-envio')?.addEventListener('submit', (e) => { e.preventDefault(); validarPaso3b() && (hideAllModals(), openModalResumen()); });
 
     // Obtener stock disponible de un producto (desde item o API)
     async function obtenerStockDisponible(item) {
@@ -1446,19 +1597,24 @@ Gracias!`);
 
     // === FLUJO DE CHECKOUT POR PASOS ===
     function showModal(id) {
+      document.body.style.overflow = 'hidden';
       document.querySelectorAll('.checkout-modal').forEach(m => m.style.display = 'none');
       const modal = document.getElementById(id);
       if (modal) modal.style.display = 'flex';
     }
     function hideAllModals() {
+      document.body.style.overflow = '';
       document.querySelectorAll('.checkout-modal').forEach(m => m.style.display = 'none');
     }
     function openModalPaso2() {
       showModal('modal-paso2');
     }
     function openModalPaso3() {
-      actualizarFormularioEnvio();
       showModal('modal-paso3');
+    }
+    function openModalPaso3b() {
+      actualizarFormularioEnvio();
+      showModal('modal-paso3b');
     }
     function openModalResumen() {
       const pago = document.getElementById('pago')?.value || '';
@@ -1515,10 +1671,14 @@ Gracias!`);
       const pago = document.getElementById('pago')?.value || '';
       const totalFinal = calcularTotalFinal();
       let envioDetalle = '';
-      if (envio === 'Corrientes Envio a Domicilio') envioDetalle = get('direccion');
-      else if (envio === 'Correo Argentino - Sucursal') envioDetalle = `Provincia: ${get('provincia')}, Sucursal: ${get('sucursal')}`;
-      else if (envio === 'Correo Argentino - Domicilio') envioDetalle = `${get('provincia')}, ${get('localidad')}, ${get('direccion')}, CP ${get('cp')}`;
-      else if (envio === 'Corrientes Retiro en Sucursal') envioDetalle = 'Retiro en sucursal';
+      if (envio === 'Corrientes Envio a Domicilio') {
+        envioDetalle = get('direccion');
+        if (get('observaciones')) envioDetalle += `. Obs: ${get('observaciones')}`;
+      } else if (envio === 'Correo Argentino - Sucursal') envioDetalle = `Provincia: ${get('provincia')}, Sucursal: ${get('sucursal')}`;
+      else if (envio === 'Correo Argentino - Domicilio') {
+        envioDetalle = `${get('provincia')}, ${get('localidad')}, ${get('direccion')}, CP ${get('cp')}`;
+        if (get('observaciones')) envioDetalle += `. Obs: ${get('observaciones')}`;
+      } else if (envio === 'Corrientes Retiro en Sucursal') envioDetalle = 'Retiro en sucursal';
       const carrito = getCarrito();
       cont.innerHTML = `
         <div class="resumen-seccion"><strong>Datos:</strong> ${nombre} | ${telefono} | ${email}</div>
@@ -1537,7 +1697,7 @@ Gracias!`);
       if (!email) { alert('Por favor, completa tu email'); return false; }
       return true;
     }
-    function validarPaso3() {
+    function validarPaso3b() {
       const envioRadio = document.querySelector('input[name="envio"]:checked');
       const envio = envioRadio ? envioRadio.value : '';
       if (envio === 'Correo Argentino - Domicilio') {
@@ -1553,7 +1713,7 @@ Gracias!`);
         const provincia = document.getElementById('provincia')?.value?.trim();
         const sucursal = document.getElementById('sucursal')?.value?.trim();
         if (!provincia || !sucursal) {
-          alert('Por favor, completa Provincia y Sucursal');
+          alert('Por favor, completa Provincia y Sucursal de destino');
           return false;
         }
       } else if (envio === 'Corrientes Envio a Domicilio') {
@@ -1570,7 +1730,17 @@ Gracias!`);
     });
     document.getElementById('btn-back-paso2')?.addEventListener('click', () => hideAllModals());
     document.getElementById('btn-continuar-paso3')?.addEventListener('click', () => {
-      if (!validarPaso3()) return;
+      const envioRadio = document.querySelector('input[name="envio"]:checked');
+      const envio = envioRadio ? envioRadio.value : '';
+      hideAllModals();
+      if (envio === 'Corrientes Retiro en Sucursal') {
+        openModalResumen();
+      } else {
+        openModalPaso3b();
+      }
+    });
+    document.getElementById('btn-continuar-paso3b')?.addEventListener('click', () => {
+      if (!validarPaso3b()) return;
       hideAllModals();
       openModalResumen();
     });
@@ -1578,16 +1748,26 @@ Gracias!`);
       hideAllModals();
       openModalPaso2();
     });
-    document.getElementById('btn-back-resumen')?.addEventListener('click', () => {
+    document.getElementById('btn-back-paso3b')?.addEventListener('click', () => {
       hideAllModals();
       openModalPaso3();
+    });
+    document.getElementById('btn-back-resumen')?.addEventListener('click', () => {
+      hideAllModals();
+      const envioRadio = document.querySelector('input[name="envio"]:checked');
+      const envio = envioRadio ? envioRadio.value : '';
+      if (envio === 'Corrientes Retiro en Sucursal') {
+        openModalPaso3();
+      } else {
+        openModalPaso3b();
+      }
     });
     document.getElementById('btn-back-transferencia')?.addEventListener('click', () => {
       hideAllModals();
       openModalResumen();
     });
-    document.querySelectorAll('.checkout-modal-overlay').forEach(ov => {
-      ov.addEventListener('click', () => hideAllModals());
+    document.querySelectorAll('.checkout-modal-close').forEach(btn => {
+      btn.addEventListener('click', () => hideAllModals());
     });
     document.getElementById('btn-finalizar-directa')?.addEventListener('click', (e) => {
       e.preventDefault();
